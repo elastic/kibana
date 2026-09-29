@@ -170,9 +170,8 @@ describe('assertPrivilegesInSpaces', () => {
 
     expect(apiGetSpy).toHaveBeenCalledWith('integrations-all');
     expect(apiGetSpy).toHaveBeenCalledWith('fleet-agent-policies-all');
-    expect(mockFns.atSpaces).toHaveBeenCalledWith(
-      ['default'],
-      { kibana: ['api:integrations-all', 'api:fleet-agent-policies-all'] }
-    );
+    expect(mockFns.atSpaces).toHaveBeenCalledWith(['default'], {
+      kibana: ['api:integrations-all', 'api:fleet-agent-policies-all'],
+    });
   });
 });

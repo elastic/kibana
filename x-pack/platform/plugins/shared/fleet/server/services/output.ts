@@ -1100,10 +1100,7 @@ class OutputService {
           `Unable to verify delete authorization for output ${id}: too many agent policies to enumerate`
         );
       }
-      const allSpaceIds = new Set([
-        ...agentPolicySpaces.spaceIds,
-        ...packagePolicySpaces.spaceIds,
-      ]);
+      const allSpaceIds = new Set([...agentPolicySpaces.spaceIds, ...packagePolicySpaces.spaceIds]);
       const apiPrivileges =
         packagePolicySpaces.spaceIds.size > 0
           ? ['integrations-all', 'fleet-agent-policies-all']

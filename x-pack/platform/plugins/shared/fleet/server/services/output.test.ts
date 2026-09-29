@@ -4296,7 +4296,9 @@ describe('Output Service', () => {
         mockSecurity(true);
         getMockedSoClient();
 
-        await expect(outputService.delete('output-test', { request: mockRequest })).resolves.not.toThrow();
+        await expect(
+          outputService.delete('output-test', { request: mockRequest })
+        ).resolves.not.toThrow();
         expect(mockAtSpaces).toHaveBeenCalled();
         expect(mockedAgentPolicyService.removeOutputFromAll).toHaveBeenCalled();
       });
