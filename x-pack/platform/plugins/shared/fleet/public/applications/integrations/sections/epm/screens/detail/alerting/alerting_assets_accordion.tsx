@@ -32,12 +32,12 @@ const ALERTING_ENGINE_V2_BADGE = i18n.translate(
 
 const ALERTING_ENGINE_CLASSIC_ARIA_LABEL = i18n.translate(
   'xpack.fleet.epm.assets.alertingEngineClassicBadgeAriaLabel',
-  { defaultMessage: 'Classic Alerting' }
+  { defaultMessage: 'Standard Rules' }
 );
 
 const ALERTING_ENGINE_V2_ARIA_LABEL = i18n.translate(
   'xpack.fleet.epm.assets.alertingEngineV2BadgeAriaLabel',
-  { defaultMessage: 'Alerting v2' }
+  { defaultMessage: 'ES|QL Rules' }
 );
 
 const getAlertingEngineBadge = (engine?: AlertingEngine): { label: string; ariaLabel: string } => {
