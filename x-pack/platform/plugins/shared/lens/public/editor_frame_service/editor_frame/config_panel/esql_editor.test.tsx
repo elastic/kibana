@@ -266,7 +266,47 @@ describe('ESQLEditor', () => {
       );
     });
 
-    await waitFor(() => expect(within(results).getByText('Loading')).toBeInTheDocument());
+    await waitFor(() =>
+      expect(within(results).getAllByRole('progressbar').length).toBeGreaterThan(0)
+    );
+    expect(within(results).queryByTestId('ESQLQueryResultsRefreshing')).not.toBeInTheDocument();
+  });
+
+  it('does not show the refreshing bar when rows arrive for a grid that was not on screen', async () => {
+    renderEditor({ isESQLResultsAccordionOpen: true, onESQLResultsAccordionToggle: jest.fn() });
+    await waitFor(() => expect(capturedOnSubmit).toBeDefined());
+
+    getSuggestionsMock.mockImplementationOnce(async (...args: unknown[]) => {
+      const setErrors = args[7] as ((errors: Error[]) => void) | undefined;
+      setErrors?.([new Error('Unknown index [index1]')]);
+      return undefined;
+    });
+    await act(() =>
+      capturedOnSubmit!({ esql: 'FROM index1 | STATS maxB = MAX(bytes)' }, new AbortController())
+    );
+    const results = screen.getByTestId('ESQLQueryResults');
+    expect(within(results).getByTestId('ESQLQueryResultsEmpty')).toBeInTheDocument();
+
+    const preview = {
+      rows: [{ a: 1 }, { a: 2 }],
+      columns: [],
+      dataView: {},
+    } as unknown as ESQLDataGridAttrs;
+    getSuggestionsMock.mockImplementationOnce((...args: unknown[]) => {
+      const setDataGridAttrs = args[9] as ((attrs: ESQLDataGridAttrs) => void) | undefined;
+      setDataGridAttrs?.(preview);
+      return new Promise(() => {});
+    });
+    mockESQLDataGrid.mockClear();
+    act(() => {
+      void capturedOnSubmit!(
+        { esql: 'FROM index1 | STATS minB = MIN(bytes)' },
+        new AbortController()
+      );
+    });
+
+    await waitFor(() => expect(mockESQLDataGrid).toHaveBeenCalled());
+    expect(results).toHaveTextContent('2');
     expect(within(results).queryByTestId('ESQLQueryResultsRefreshing')).not.toBeInTheDocument();
   });
 
@@ -330,7 +370,7 @@ describe('ESQLEditor', () => {
     expect(await screen.findByRole('tooltip')).toHaveTextContent('Query error');
   });
 
-  it('shows the loading state instead of the stale error while a failed preview reloads', async () => {
+  it('keeps the error panel and swaps the error icon for a spinner while a failed preview reloads', async () => {
     renderEditor();
     await waitFor(() => expect(capturedOnSubmit).toBeDefined());
 
@@ -355,10 +395,12 @@ describe('ESQLEditor', () => {
       );
     });
 
-    await waitFor(() => expect(within(results).getByText('Loading')).toBeInTheDocument());
-    expect(within(results).queryByTestId('ESQLQueryResultsRefreshing')).not.toBeInTheDocument();
-    expect(within(results).queryByTestId('ESQLQueryResultsEmpty')).not.toBeInTheDocument();
+    await waitFor(() => expect(within(results).getByRole('progressbar')).toBeInTheDocument());
     expect(within(results).queryByTestId('ESQLQueryResultsErrorIcon')).not.toBeInTheDocument();
+    expect(within(results).queryByTestId('ESQLQueryResultsRefreshing')).not.toBeInTheDocument();
+    expect(within(results).getByTestId('ESQLQueryResultsEmpty')).toHaveTextContent(
+      'The query returned an error. See the errors in the query editor above.'
+    );
   });
 
   it('does not show the error icon when the first preview returns nothing without an error', async () => {

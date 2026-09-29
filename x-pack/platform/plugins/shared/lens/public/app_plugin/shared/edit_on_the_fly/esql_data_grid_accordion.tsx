@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import {
@@ -19,11 +19,26 @@ import {
   EuiProgress,
   EuiText,
   type UseEuiTheme,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { AggregateQuery } from '@kbn/es-query';
 import { ESQLDataGrid } from '@kbn/esql-datagrid/public';
 import type { ESQLDataGridAttrs } from './helpers';
+
+// Turns on only after the flag has stayed true for the delay, and off immediately.
+const useDelayedFlag = (flag: boolean, delay: number): boolean => {
+  const [isDelayedOn, setIsDelayedOn] = useState(false);
+  useEffect(() => {
+    if (!flag) {
+      setIsDelayedOn(false);
+      return;
+    }
+    const timeoutId = window.setTimeout(() => setIsDelayedOn(true), delay);
+    return () => window.clearTimeout(timeoutId);
+  }, [flag, delay]);
+  return flag && isDelayedOn;
+};
 
 interface ESQLDataGridAccordionProps {
   isAccordionOpen: boolean;
@@ -53,8 +68,23 @@ export const ESQLDataGridAccordion = ({
   });
 
   const hasRows = Boolean(dataGridAttrs?.rows.length);
-  const isAccordionLoading = isLoading && !hasRows;
-  const showQueryError = hasQueryError && !dataGridAttrs && !isLoading;
+  const showQueryError = hasQueryError && !dataGridAttrs;
+
+  // A grid mounted by this load shows its own loader, so the refreshing bar is
+  // reserved for reloads of rows that were already on screen.
+  const [prevIsLoading, setPrevIsLoading] = useState(isLoading);
+  const [prevHasRows, setPrevHasRows] = useState(hasRows);
+  const [hadRowsWhenLoadingStarted, setHadRowsWhenLoadingStarted] = useState(isLoading && hasRows);
+  if (isLoading !== prevIsLoading || hasRows !== prevHasRows) {
+    if (isLoading !== prevIsLoading) {
+      setHadRowsWhenLoadingStarted(isLoading && prevHasRows);
+    }
+    setPrevIsLoading(isLoading);
+    setPrevHasRows(hasRows);
+  }
+  const showRefreshingBar = isLoading && hasRows && hadRowsWhenLoadingStarted;
+
+  const showLoadingState = useDelayedFlag(isLoading, 500);
 
   return (
     <EuiFlexItem
@@ -62,8 +92,8 @@ export const ESQLDataGridAccordion = ({
       data-test-subj="ESQLQueryResults"
       css={[
         styles.wrapper,
-        isAccordionLoading && styles.loading,
-        fillsAvailableSpace ? styles.expanded : styles.collapsed,
+        showLoadingState && !hasRows && styles.loading,
+        isAccordionOpen ? styles.expanded : styles.collapsed,
       ]}
     >
       <EuiAccordion
@@ -99,10 +129,10 @@ export const ESQLDataGridAccordion = ({
             />
           ) : undefined
         }
-        isLoading={isAccordionLoading}
-        isLoadingMessage
+        isLoading={showLoadingState}
+        isLoadingMessage={false}
       >
-        {showQueryError && (
+        {showQueryError ? (
           <EuiPanel
             color="subdued"
             paddingSize="m"
@@ -118,30 +148,33 @@ export const ESQLDataGridAccordion = ({
               </p>
             </EuiText>
           </EuiPanel>
-        )}
-        {dataGridAttrs && (
-          <div css={styles.gridContainer}>
-            {isLoading && hasRows && (
-              <EuiProgress
-                size="xs"
-                color="accent"
-                position="absolute"
-                data-test-subj="ESQLQueryResultsRefreshing"
+        ) : showLoadingState && !hasRows ? (
+          <EuiLoadingSpinner />
+        ) : (
+          dataGridAttrs && (
+            <div css={styles.gridContainer}>
+              {showRefreshingBar && (
+                <EuiProgress
+                  size="xs"
+                  color="accent"
+                  position="absolute"
+                  data-test-subj="ESQLQueryResultsRefreshing"
+                />
+              )}
+              <ESQLDataGrid
+                rows={dataGridAttrs.rows}
+                columns={dataGridAttrs.columns}
+                dataView={dataGridAttrs.dataView}
+                query={query}
+                flyoutType="overlay"
+                isTableView={isTableView}
+                isApproximate={isApproximate}
+                initialRowHeight={0}
+                controlColumnIds={['openDetails']}
               />
-            )}
-            <ESQLDataGrid
-              rows={dataGridAttrs.rows}
-              columns={dataGridAttrs.columns}
-              dataView={dataGridAttrs.dataView}
-              query={query}
-              flyoutType="overlay"
-              isTableView={isTableView}
-              isApproximate={isApproximate}
-              initialRowHeight={0}
-              controlColumnIds={['openDetails']}
-            />
-            <EuiSpacer />
-          </div>
+              <EuiSpacer />
+            </div>
+          )
         )}
       </EuiAccordion>
     </EuiFlexItem>
@@ -156,17 +189,14 @@ const componentStyles = {
     }),
   // EuiAccordion exposes no API for a content area that grows with its container,
   // so the internal class name is the only way to hand it the remaining space.
-  expanded: css({
-    '.euiAccordion__childWrapper': { flex: 1 },
-  }),
-  collapsed: css({
-    '.euiAccordion__childWrapper': { flex: 'none' },
-  }),
+  expanded: css({ '.euiAccordion__childWrapper': { flex: 1 } }),
+  collapsed: css({ '.euiAccordion__childWrapper': { flex: 'none' } }),
   // EuiAccordion's paddingSize also pads the top, which pushes the loading message
   // away from the header, so the loading content is padded through its class instead.
   loading: ({ euiTheme }: UseEuiTheme) =>
     css({
       '.euiAccordion__children': {
+        justifyContent: 'center',
         padding: `0 ${euiTheme.size.base} ${euiTheme.size.base}`,
       },
     }),
@@ -188,5 +218,8 @@ const componentStyles = {
     minBlockSize: 0,
   }),
   title: ({ euiTheme }: UseEuiTheme) => css({ padding: euiTheme.size.xxs }),
-  emptyMessage: ({ euiTheme }: UseEuiTheme) => css({ marginBlockEnd: euiTheme.size.m }),
+  emptyMessage: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      marginBlockEnd: euiTheme.size.m,
+    }),
 };
