@@ -27,6 +27,7 @@ describe('getKiIdentificationStatusToolHandler', () => {
 
     const result = await getKiIdentificationStatusToolHandler({
       streamName: 'logs.nginx',
+      sourceSlug: 'logs-nginx',
       request: httpServerMock.createKibanaRequest(),
       streamsKIsOnboardingClient,
     });

@@ -49,6 +49,7 @@ describe('startKiIdentificationToolHandler', () => {
 
     const result = await startKiIdentificationToolHandler({
       streamName: 'logs.nginx',
+      sourceSlug: 'logs-nginx',
       steps: [KIsOnboardingStep.FeaturesIdentification, KIsOnboardingStep.QueriesGeneration],
       streamsKIsOnboardingClient,
       maintenanceService,
@@ -80,6 +81,7 @@ describe('startKiIdentificationToolHandler', () => {
     await expect(
       startKiIdentificationToolHandler({
         streamName: 'logs.nginx',
+        sourceSlug: 'logs-nginx',
         steps: [KIsOnboardingStep.FeaturesIdentification],
         streamsKIsOnboardingClient,
         maintenanceService,
@@ -97,6 +99,7 @@ describe('startKiIdentificationToolHandler', () => {
     await expect(
       startKiIdentificationToolHandler({
         streamName: 'logs.nginx',
+        sourceSlug: 'logs-nginx',
         steps: [KIsOnboardingStep.FeaturesIdentification],
         streamsKIsOnboardingClient,
         maintenanceService,

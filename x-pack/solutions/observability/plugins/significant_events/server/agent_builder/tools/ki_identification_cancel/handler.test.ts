@@ -33,6 +33,7 @@ describe('cancelKiIdentificationToolHandler', () => {
 
     const result = await cancelKiIdentificationToolHandler({
       streamName: 'logs.nginx',
+      sourceSlug: 'logs-nginx',
       streamsKIsOnboardingClient,
       request,
     });
@@ -63,6 +64,7 @@ describe('cancelKiIdentificationToolHandler', () => {
 
     const result = await cancelKiIdentificationToolHandler({
       streamName: 'logs.nginx',
+      sourceSlug: 'logs-nginx',
       streamsKIsOnboardingClient,
       request,
     });

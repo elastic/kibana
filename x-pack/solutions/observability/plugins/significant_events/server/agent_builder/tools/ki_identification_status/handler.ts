@@ -10,17 +10,20 @@ import type { SignificantEventsKIsOnboardingClient } from '../../../lib/workflow
 
 interface GetKiIdentificationStatusHandlerParams {
   streamName: string;
+  sourceSlug: string;
   request: KibanaRequest;
   streamsKIsOnboardingClient: SignificantEventsKIsOnboardingClient;
 }
 
 export async function getKiIdentificationStatusToolHandler({
   streamName,
+  sourceSlug,
   request,
   streamsKIsOnboardingClient,
 }: GetKiIdentificationStatusHandlerParams) {
   const { executionId, ...statusResult } = await streamsKIsOnboardingClient.getStatus({
     streamName,
+    sourceSlug,
     request,
   });
 

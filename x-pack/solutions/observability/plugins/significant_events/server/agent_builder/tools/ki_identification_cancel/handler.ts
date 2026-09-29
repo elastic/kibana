@@ -11,6 +11,7 @@ import type { SignificantEventsKIsOnboardingClient } from '../../../lib/workflow
 
 interface CancelKiIdentificationHandlerParams {
   streamName: string;
+  sourceSlug: string;
   streamsKIsOnboardingClient: SignificantEventsKIsOnboardingClient;
   request: KibanaRequest;
 }
@@ -22,10 +23,15 @@ interface CancelKiIdentificationHandlerResult {
 
 export async function cancelKiIdentificationToolHandler({
   streamName,
+  sourceSlug,
   streamsKIsOnboardingClient,
   request,
 }: CancelKiIdentificationHandlerParams): Promise<CancelKiIdentificationHandlerResult> {
-  const executionId = await streamsKIsOnboardingClient.cancel({ streamName, request });
+  const executionId = await streamsKIsOnboardingClient.cancel({
+    streamName,
+    sourceSlug,
+    request,
+  });
 
   return {
     execution_id: executionId,

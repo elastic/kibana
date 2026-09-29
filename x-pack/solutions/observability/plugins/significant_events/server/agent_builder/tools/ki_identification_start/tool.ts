@@ -85,6 +85,7 @@ export const createKiIdentificationStartTool = ({
 
       const data = await startKiIdentificationToolHandler({
         streamName: source.id,
+        sourceSlug: source.slug,
         steps,
         connectors,
         streamsKIsOnboardingClient,
