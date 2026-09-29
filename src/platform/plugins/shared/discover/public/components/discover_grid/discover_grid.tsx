@@ -148,7 +148,6 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
               disableCellActions: true,
               disableColumnActions: true,
               isColumnSelectorEnabled: false,
-              enableInTableSearch: false,
               showKeyboardShortcuts: false,
               showDisplaySelector: false,
               rowsPerPageOptions: [],
@@ -156,6 +155,7 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
               isResizable: false,
             }
           : {
+              enableInTableSearch: true,
               canDragAndDropColumns: true,
               visibleCellActions: 3, // this allows to show up to 3 actions on cell hover if available (filter in, filter out, and copy)
             })}
