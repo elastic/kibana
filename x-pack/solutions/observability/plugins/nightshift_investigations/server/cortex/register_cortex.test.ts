@@ -120,7 +120,10 @@ describe('runCortexOptimize', () => {
 
   const run = (
     agentId?: string,
-    { calls = toolCalls, connectorId }: { calls?: InvestigationToolCall[]; connectorId?: string } = {}
+    {
+      calls = toolCalls,
+      connectorId,
+    }: { calls?: InvestigationToolCall[]; connectorId?: string } = {}
   ) =>
     runCortexOptimize({
       request,

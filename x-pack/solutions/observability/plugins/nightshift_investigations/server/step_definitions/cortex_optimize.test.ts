@@ -124,7 +124,11 @@ describe('cortexOptimizeStepDefinition', () => {
     });
 
     await definition.handler(
-      createContext({ prompt: 'hi', response: 'hello', agent_id: NIGHTSHIFT_INVESTIGATION_AGENT_ID })
+      createContext({
+        prompt: 'hi',
+        response: 'hello',
+        agent_id: NIGHTSHIFT_INVESTIGATION_AGENT_ID,
+      })
     );
 
     expect(runCortexOptimize).toHaveBeenLastCalledWith(expect.objectContaining({ toolCalls: [] }));
