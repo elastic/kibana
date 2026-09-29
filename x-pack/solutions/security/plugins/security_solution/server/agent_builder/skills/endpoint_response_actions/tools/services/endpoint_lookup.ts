@@ -225,10 +225,12 @@ export function createEndpointLookupService(
     status: string;
     packages?: string[];
     /**
-     * Most-recent-activity timestamp used for the recency tiebreak:
-     * `enrolled_at` for Fleet candidates, `last_checkin` for metadata ones.
+     * ISO timestamp for the newest-first tiebreak. The source differs by
+     * candidate origin: `enrolled_at` for Fleet agents, `last_checkin` for
+     * Defend metadata entries, so it is only an ordering key, not a
+     * last-seen or enrollment time.
      */
-    recencyAt?: string;
+    sortKey?: string;
   }
 
   interface RawFleetAgent {
@@ -328,7 +330,7 @@ export function createEndpointLookupService(
         ),
         status: candidate.status ?? 'unknown',
         packages: candidate.packages,
-        recencyAt: candidate.enrolled_at,
+        sortKey: candidate.enrolled_at,
       }));
 
     // `truncated` is safe to keep: it says only "there were more pages", which
@@ -402,7 +404,7 @@ export function createEndpointLookupService(
             entry.host_status as HostStatus
           ),
           status: entry.host_status as string,
-          recencyAt: entry.last_checkin,
+          sortKey: entry.last_checkin,
         },
       ];
     });
@@ -443,7 +445,7 @@ export function createEndpointLookupService(
         const aLive = a.isLive ? 1 : 0;
         const bLive = b.isLive ? 1 : 0;
         if (aLive !== bLive) return bLive - aLive;
-        return (b.recencyAt ?? '').localeCompare(a.recencyAt ?? '');
+        return (b.sortKey ?? '').localeCompare(a.sortKey ?? '');
       });
 
       // More than one agent matching the hostname is normal Fleet bookkeeping
