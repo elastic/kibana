@@ -221,8 +221,13 @@ const RULE_BULK_SIZE = 100;
 const deleteV2Rules = async (
   rulesClient: RulesClientApi,
   ids: string[]
-): Promise<{ deleted: number; failures: SignificantEventsMaintenanceFailure[] }> => {
+): Promise<{
+  deleted: number;
+  failedIds: string[];
+  failures: SignificantEventsMaintenanceFailure[];
+}> => {
   let deleted = 0;
+  const failedIds: string[] = [];
   const failures: SignificantEventsMaintenanceFailure[] = [];
   for (let offset = 0; offset < ids.length; offset += RULE_BULK_SIZE) {
     const chunk = ids.slice(offset, offset + RULE_BULK_SIZE);
@@ -231,15 +236,17 @@ const deleteV2Rules = async (
       deleted += result.affected_count;
       for (const error of result.errors) {
         if (error.error.code !== ALERTING_ERROR_CODES.RULE_NOT_FOUND) {
+          failedIds.push(error.id);
           failures.push({ target: `rule:${error.id}`, error: error.error.message });
         }
       }
     } catch (error) {
       const message = toMessage(error);
+      failedIds.push(...chunk);
       failures.push(...chunk.map((id) => ({ target: `rule:${id}`, error: message })));
     }
   }
-  return { deleted, failures };
+  return { deleted, failedIds, failures };
 };
 
 export const createSignificantEventsMaintenanceService = ({
@@ -864,6 +871,8 @@ export const createSignificantEventsMaintenanceService = ({
    * Reset step: snapshot every knowledge indicator / stored query, union their
    * backing rules with the rules pause had disabled and any tag-owned orphans,
    * and delete them all. Best-effort; every failure is recorded, never thrown.
+   * `remainingRuleIds` are pause-disabled rules that were not deleted; they stay
+   * in the inventory so Resume can re-enable them or a later Reset retry them.
    */
   const deleteOwnedRules = async ({
     request,
@@ -873,9 +882,18 @@ export const createSignificantEventsMaintenanceService = ({
     request: KibanaRequest;
     previousRuleIds: string[];
     failures: SignificantEventsMaintenanceFailure[];
-  }): Promise<{ knowledgeIndicators: number; storedQueries: number; rules: number }> => {
+  }): Promise<{
+    knowledgeIndicators: number;
+    storedQueries: number;
+    rules: number;
+    remainingRuleIds: string[];
+  }> => {
     const counts = { knowledgeIndicators: 0, storedQueries: 0, rules: 0 };
     const ruleIds = new Set(previousRuleIds);
+    const notDeleted = (failedIds: string[]) => {
+      const failed = new Set(failedIds);
+      return previousRuleIds.filter((id) => failed.has(id));
+    };
 
     let scopedClients: Awaited<ReturnType<GetScopedClients>> | undefined;
     try {
@@ -894,25 +912,26 @@ export const createSignificantEventsMaintenanceService = ({
     }
 
     if (ruleIds.size === 0) {
-      return counts;
+      return { ...counts, remainingRuleIds: [] };
     }
     if (!scopedClients) {
       failures.push({ target: 'rules', error: 'Scoped clients are not available' });
-      return counts;
+      return { ...counts, remainingRuleIds: previousRuleIds };
     }
     try {
       const { alertingV2RulesClient } = await scopedClients.getSignificantEventsAlertingContext();
       if (!alertingV2RulesClient) {
         failures.push({ target: 'rules', error: 'Alerting v2 rules client is not available' });
-        return counts;
+        return { ...counts, remainingRuleIds: previousRuleIds };
       }
       const ruleResult = await deleteV2Rules(alertingV2RulesClient, [...ruleIds]);
       counts.rules = ruleResult.deleted;
       failures.push(...ruleResult.failures);
+      return { ...counts, remainingRuleIds: notDeleted(ruleResult.failedIds) };
     } catch (error) {
       failures.push({ target: 'rules', error: toMessage(error) });
+      return { ...counts, remainingRuleIds: previousRuleIds };
     }
-    return counts;
   };
 
   /** Reset step: delete every investigation across spaces; returns how many were deleted. */
@@ -1154,11 +1173,12 @@ export const createSignificantEventsMaintenanceService = ({
         }
         await featureSettings.reassertFeatureSettingsOff({ request, spaceIds, failures });
 
-        const { knowledgeIndicators, storedQueries, rules } = await deleteOwnedRules({
-          request,
-          previousRuleIds: existing?.disabledRuleIds ?? [],
-          failures,
-        });
+        const { knowledgeIndicators, storedQueries, rules, remainingRuleIds } =
+          await deleteOwnedRules({
+            request,
+            previousRuleIds: existing?.disabledRuleIds ?? [],
+            failures,
+          });
         const investigations = await deleteInvestigations(failures);
         const wipedDataStreams = await resetDataStreams({
           esClient: server.core.elasticsearch.client.asScoped(request).asCurrentUser,
@@ -1181,7 +1201,7 @@ export const createSignificantEventsMaintenanceService = ({
           state: 'enabled',
           executionsCancelled: 0,
           workflowsDisabled: remainingWorkflows.length,
-          rulesDisabled: 0,
+          rulesDisabled: remainingRuleIds.length,
           deleted: {
             knowledgeIndicators: indicatorsWiped ? knowledgeIndicators : 0,
             storedQueries: indicatorsWiped ? storedQueries : 0,
@@ -1198,7 +1218,7 @@ export const createSignificantEventsMaintenanceService = ({
             updatedAt: new Date().toISOString(),
             updatedBy,
             disabledWorkflows: remainingWorkflows,
-            disabledRuleIds: [],
+            disabledRuleIds: remainingRuleIds,
             lastSummary: summary,
           });
         } catch (writeError) {

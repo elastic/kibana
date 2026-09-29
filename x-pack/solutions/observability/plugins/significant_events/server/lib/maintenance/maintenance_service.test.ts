@@ -1139,6 +1139,40 @@ describe('SignificantEventsMaintenanceService', () => {
       );
     });
 
+    it('keeps pause-disabled rules whose deletion failed as retry inventory', async () => {
+      const { api } = makeManagementApi();
+      const v2RulesClient = makeV2RulesClient({
+        deleteErrors: [
+          {
+            id: 'paused-rule',
+            error: { code: ALERTING_ERROR_CODES.INTERNAL_SERVER_ERROR, message: 'delete failed' },
+          },
+          {
+            id: 'new-rule',
+            error: { code: ALERTING_ERROR_CODES.INTERNAL_SERVER_ERROR, message: 'delete failed' },
+          },
+        ],
+      });
+      const { service, soClient } = makeService({
+        management: api,
+        v2RulesClient,
+        ruleBackedRuleIds: ['paused-rule'],
+        ownedRuleStreams: ['logs.rules'],
+        ownedRuleIdsByStream: { 'logs.rules': ['new-rule'] },
+      });
+      await service.pause({ request: REQUEST });
+
+      const summary = await service.reset({ request: REQUEST });
+
+      // Only rules pause disabled belong in the inventory; `new-rule` was never toggled.
+      expect(summary.rulesDisabled).toBe(1);
+      expect(soClient.create).toHaveBeenLastCalledWith(
+        SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE,
+        expect.objectContaining({ state: 'enabled', disabledRuleIds: ['paused-rule'] }),
+        expect.anything()
+      );
+    });
+
     it('is cleanly repeatable and reports zero deleted data streams on the second reset', async () => {
       const { api } = makeManagementApi();
       const { service } = makeService({
