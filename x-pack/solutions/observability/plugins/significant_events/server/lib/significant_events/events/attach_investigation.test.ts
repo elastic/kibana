@@ -298,11 +298,11 @@ describe('attachInvestigationToEvent', () => {
     expect(written.previous_event_uuid).toBe('event-1');
   });
 
-  it('falls back to canonical eventClient when eventSearchClient.findByEventId rejects (read-store outage)', async () => {
+  it('falls back to canonical eventClient when eventSearchClient.findLatestByEventId rejects (read-store outage)', async () => {
     const existing = createEvent({ event_uuid: 'event-1' });
     // eventSearchClient simulates a read-store outage
     const rejectingSearchClient = {
-      findByEventId: jest.fn().mockRejectedValue(new Error('read-store outage')),
+      findLatestByEventId: jest.fn().mockRejectedValue(new Error('read-store outage')),
     };
     // eventClient is the authoritative legacy store: has the event
     const { client: canonicalClient, dataStreamClient } = createEventClient([existing]);

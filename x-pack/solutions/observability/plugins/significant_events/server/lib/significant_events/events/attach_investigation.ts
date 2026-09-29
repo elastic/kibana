@@ -61,8 +61,8 @@ export const attachInvestigationToEvent = async ({
   const usedLegacyFallback =
     (latestByEventId === undefined || readStoreThrew) && eventSearchClient !== undefined;
   const latest = usedLegacyFallback
-    ? latestByEventId
-    : await eventClient.findLatestByEventId(eventId);
+    ? await eventClient.findLatestByEventId(eventId)
+    : latestByEventId;
 
   if (!latest) {
     return { event_uuid: eventId, updated: 0, ignored: 1 };
