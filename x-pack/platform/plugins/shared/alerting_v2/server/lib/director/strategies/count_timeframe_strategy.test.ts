@@ -552,9 +552,10 @@ describe('CountTimeframeStrategy', () => {
       });
     });
   });
+
   describe('evaluations spent in a phase before it resolves', () => {
     const minute = (n: number) =>
-      new Date(Date.parse('2025-01-01T00:00:00.000Z') + n * 60_000).toISOString();
+      new Date(Date.parse('2026-01-01T00:00:00.000Z') + n * 60_000).toISOString();
 
     const evaluationThatResolves = ({
       stateTransition,

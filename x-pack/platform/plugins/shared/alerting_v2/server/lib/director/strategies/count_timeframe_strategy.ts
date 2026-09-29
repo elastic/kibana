@@ -282,8 +282,6 @@ export class CountTimeframeStrategy extends BasicTransitionStrategy {
   }): StateTransitionResult {
     const config: ThresholdConfig = { operator, count, timeframeMs };
 
-    // The count is the number of evaluations to spend in the phase, so compare the
-    // evaluations already spent rather than including the current one.
     if (isThresholdMet(currentStatusCount, elapsedMs, config)) {
       return { status: successStatus };
     }
