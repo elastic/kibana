@@ -26,6 +26,7 @@ import {
   createCase,
   createComment,
   deleteAllCaseItems,
+  deleteComment,
   getAllComments,
   updateAttachmentV2,
 } from '../../../../common/lib/api';
@@ -209,11 +210,11 @@ export default ({ getService }: FtrProviderContext): void => {
         [ATTACK_B_ID]: [SHARED_ALERT_ID, ATTACK_B_ONLY_ALERT_ID],
       };
 
-      const buildAttackAttachment = (attachmentId: string, alertIds: string[]) => ({
+      const buildAttackAttachment = (attachmentId: string, alertIds: string[], index: string) => ({
         type: SECURITY_ATTACK_ATTACHMENT_TYPE,
         owner: OWNER,
         attachmentId,
-        metadata: { ...attackMetadata, alertCount: alertIds.length },
+        metadata: { ...attackMetadata, alertCount: alertIds.length, index },
       });
 
       const buildAlertAttachment = (alertId: string) => ({
@@ -267,15 +268,15 @@ export default ({ getService }: FtrProviderContext): void => {
           .map(({ id }) => id);
       };
 
-      const seedCaseWithTwoAttacks = async () => {
+      const seedCaseWithTwoAttacks = async (attackIndex = ATTACK_INDEX) => {
         const postedCase = await createCase(supertest, getPostCaseRequest({ owner: OWNER }));
 
         const updatedCase = await bulkCreateAttachments({
           supertest,
           caseId: postedCase.id,
           params: [
-            buildAttackAttachment(ATTACK_A_ID, attackAlertIds[ATTACK_A_ID]),
-            buildAttackAttachment(ATTACK_B_ID, attackAlertIds[ATTACK_B_ID]),
+            buildAttackAttachment(ATTACK_A_ID, attackAlertIds[ATTACK_A_ID], attackIndex),
+            buildAttackAttachment(ATTACK_B_ID, attackAlertIds[ATTACK_B_ID], attackIndex),
             buildAlertAttachment(SHARED_ALERT_ID),
             buildAlertAttachment(ATTACK_A_ONLY_ALERT_ID),
             buildAlertAttachment(ATTACK_B_ONLY_ALERT_ID),
@@ -309,6 +310,7 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest,
           caseId,
           attachmentIds: [attackAttachmentId(ATTACK_A_ID)],
+          includeRelated: false,
         });
 
         const remaining = await readAttachments(caseId);
@@ -386,6 +388,75 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         expect((await readAttachments(caseId)).length).to.be(attachments.length);
+      });
+
+      describe('onDelete', () => {
+        // A dedicated index keeps the seeded attacks away from the alerts-as-data resources.
+        const READABLE_ATTACK_INDEX = 'cases-attack-on-delete-test';
+
+        before(async () => {
+          await es.bulk({
+            refresh: true,
+            operations: Object.entries(attackAlertIds).flatMap(([id, alertIds]) => [
+              { index: { _index: READABLE_ATTACK_INDEX, _id: id } },
+              { 'kibana.alert.attack_discovery.alert_ids': alertIds },
+            ]),
+          });
+        });
+
+        after(async () => {
+          await es.indices.delete({ index: READABLE_ATTACK_INDEX, ignore_unavailable: true });
+        });
+
+        const attackIdsOf = (attachments: Attachment[]): Array<string | string[] | undefined> =>
+          attachments
+            .filter(({ type }) => type === SECURITY_ATTACK_ATTACHMENT_TYPE)
+            .map(({ attachmentId }) => attachmentId);
+
+        it('takes the alerts only the removed attack claims when it is bulk deleted', async () => {
+          const { caseId, attackAttachmentId } = await seedCaseWithTwoAttacks(
+            READABLE_ATTACK_INDEX
+          );
+
+          await bulkDeleteAttachments({
+            supertest,
+            caseId,
+            attachmentIds: [attackAttachmentId(ATTACK_A_ID)],
+          });
+
+          const remaining = await readAttachments(caseId);
+          expect(attackIdsOf(remaining)).to.eql([ATTACK_B_ID]);
+          expect(alertIdsOf(remaining)).to.eql([SHARED_ALERT_ID, ATTACK_B_ONLY_ALERT_ID].sort());
+        });
+
+        it('takes the alerts with the attack when it is deleted through the public delete API', async () => {
+          const { caseId, attackAttachmentId } = await seedCaseWithTwoAttacks(
+            READABLE_ATTACK_INDEX
+          );
+
+          await deleteComment({ supertest, caseId, commentId: attackAttachmentId(ATTACK_A_ID) });
+
+          const remaining = await readAttachments(caseId);
+          expect(attackIdsOf(remaining)).to.eql([ATTACK_B_ID]);
+          expect(alertIdsOf(remaining)).to.eql([SHARED_ALERT_ID, ATTACK_B_ONLY_ALERT_ID].sort());
+        });
+
+        it('keeps every alert when related attachments are excluded', async () => {
+          const { caseId, attackAttachmentId } = await seedCaseWithTwoAttacks(
+            READABLE_ATTACK_INDEX
+          );
+
+          await bulkDeleteAttachments({
+            supertest,
+            caseId,
+            attachmentIds: [attackAttachmentId(ATTACK_A_ID)],
+            includeRelated: false,
+          });
+
+          expect(alertIdsOf(await readAttachments(caseId))).to.eql(
+            [SHARED_ALERT_ID, ATTACK_A_ONLY_ALERT_ID, ATTACK_B_ONLY_ALERT_ID].sort()
+          );
+        });
       });
     });
 

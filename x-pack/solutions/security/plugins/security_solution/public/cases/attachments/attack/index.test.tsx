@@ -138,19 +138,32 @@ describe('Attack attachment', () => {
     expect(await screen.findByText('Credential harvesting on host-1')).toBeInTheDocument();
   });
 
-  it('exposes the show attack button as a primary custom action', () => {
+  it('exposes the show attack and remove buttons as primary custom actions', () => {
     const attackType = getAttackAttachment();
     const actions = attackType.getCreationActivity(baseProps).getActions?.(baseProps) ?? [];
 
+    expect(actions).toHaveLength(2);
     expect(actions).toEqual([
+      expect.objectContaining({ type: AttachmentActionType.CUSTOM, isPrimary: true }),
       expect.objectContaining({ type: AttachmentActionType.CUSTOM, isPrimary: true }),
     ]);
   });
 
-  it("keeps the framework's own delete action", () => {
+  it("replaces the framework's own delete action rather than adding to it", () => {
     const attackType = getAttackAttachment();
 
-    expect(attackType.getCreationActivity(baseProps).hideDefaultActions).toBeUndefined();
+    expect(attackType.getCreationActivity(baseProps).hideDefaultActions).toBe(true);
+  });
+
+  it('omits the remove action when the user cannot delete attachments', () => {
+    const attackType = getAttackAttachment();
+    const readOnlyProps = {
+      ...baseProps,
+      permissions: { ...allPermissions, all: false, delete: false },
+    } as unknown as Props;
+    const actions = attackType.getCreationActivity(readOnlyProps).getActions?.(readOnlyProps) ?? [];
+
+    expect(actions).toHaveLength(1);
   });
 
   it('returns no actions when the metadata is missing', () => {

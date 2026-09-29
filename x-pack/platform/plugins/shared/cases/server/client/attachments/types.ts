@@ -80,6 +80,11 @@ export interface BulkDeleteArgs {
    * attachment points at (alert ids, event ids, ...), which this endpoint may accept later on.
    */
   savedObjectIds: string[];
+  /**
+   * Whether to also delete the attachments the deleted types' `onDelete` hooks return.
+   * Defaults to true.
+   */
+  includeRelated?: boolean;
 }
 
 /**

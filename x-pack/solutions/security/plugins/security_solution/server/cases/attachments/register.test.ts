@@ -13,6 +13,7 @@ import {
   SECURITY_TIMELINE_ATTACHMENT_TYPE,
   SECURITY_ATTACK_ATTACHMENT_TYPE,
 } from '@kbn/cases-plugin/common';
+import { loggerMock } from '@kbn/logging-mocks';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
 
 import { registerCaseAttachments } from './register';
@@ -39,6 +40,8 @@ describe('registerCaseAttachments', () => {
     attackAttachmentsEnabled: false,
   } as ExperimentalFeatures;
 
+  const deps = { getStartServices: jest.fn(), logger: loggerMock.create() };
+
   const buildFramework = () => ({
     registerAttachment: jest.fn(),
   });
@@ -46,7 +49,7 @@ describe('registerCaseAttachments', () => {
   it('registers the unified security.endpoint attachment with the zod payload schema', () => {
     const framework = buildFramework();
 
-    registerCaseAttachments(framework, experimentalFeatures);
+    registerCaseAttachments(framework, experimentalFeatures, deps);
 
     expect(framework.registerAttachment).toHaveBeenCalledWith({
       id: SECURITY_ENDPOINT_ATTACHMENT_TYPE,
@@ -57,7 +60,7 @@ describe('registerCaseAttachments', () => {
   it('registers the unified security.event attachment with the zod payload schema', () => {
     const framework = buildFramework();
 
-    registerCaseAttachments(framework, experimentalFeatures);
+    registerCaseAttachments(framework, experimentalFeatures, deps);
 
     expect(framework.registerAttachment).toHaveBeenCalledWith({
       id: SECURITY_EVENT_ATTACHMENT_TYPE,
@@ -69,7 +72,7 @@ describe('registerCaseAttachments', () => {
   it('registers the unified security.indicator attachment type with the zod schema', () => {
     const framework = buildFramework();
 
-    registerCaseAttachments(framework, experimentalFeatures);
+    registerCaseAttachments(framework, experimentalFeatures, deps);
 
     expect(framework.registerAttachment).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -82,7 +85,7 @@ describe('registerCaseAttachments', () => {
   it('registers the unified security.timeline attachment with the zod payload schema', () => {
     const framework = buildFramework();
 
-    registerCaseAttachments(framework, experimentalFeatures);
+    registerCaseAttachments(framework, experimentalFeatures, deps);
 
     expect(framework.registerAttachment).toHaveBeenCalledWith({
       id: SECURITY_TIMELINE_ATTACHMENT_TYPE,
@@ -93,10 +96,14 @@ describe('registerCaseAttachments', () => {
   it('registers the unified security.entity attachment with the zod payload schema when enabled', () => {
     const framework = buildFramework();
 
-    registerCaseAttachments(framework, {
-      ...experimentalFeatures,
-      entityAttachmentsEnabled: true,
-    } as ExperimentalFeatures);
+    registerCaseAttachments(
+      framework,
+      {
+        ...experimentalFeatures,
+        entityAttachmentsEnabled: true,
+      } as ExperimentalFeatures,
+      deps
+    );
 
     expect(framework.registerAttachment).toHaveBeenCalledWith({
       id: SECURITY_ENTITY_ATTACHMENT_TYPE,
@@ -107,7 +114,7 @@ describe('registerCaseAttachments', () => {
   it('does not register the unified security.entity attachment when disabled', () => {
     const framework = buildFramework();
 
-    registerCaseAttachments(framework, experimentalFeatures);
+    registerCaseAttachments(framework, experimentalFeatures, deps);
 
     expect(framework.registerAttachment).not.toHaveBeenCalledWith(
       expect.objectContaining({
@@ -119,21 +126,26 @@ describe('registerCaseAttachments', () => {
   it('registers the unified security.attack attachment with the zod payload schema when enabled', () => {
     const framework = buildFramework();
 
-    registerCaseAttachments(framework, {
-      ...experimentalFeatures,
-      attackAttachmentsEnabled: true,
-    } as ExperimentalFeatures);
+    registerCaseAttachments(
+      framework,
+      {
+        ...experimentalFeatures,
+        attackAttachmentsEnabled: true,
+      } as ExperimentalFeatures,
+      deps
+    );
 
     expect(framework.registerAttachment).toHaveBeenCalledWith({
       id: SECURITY_ATTACK_ATTACHMENT_TYPE,
       schema: AttackAttachmentPayloadSchema,
+      onDelete: expect.any(Function),
     });
   });
 
   it('does not register the unified security.attack attachment when disabled', () => {
     const framework = buildFramework();
 
-    registerCaseAttachments(framework, experimentalFeatures);
+    registerCaseAttachments(framework, experimentalFeatures, deps);
 
     expect(framework.registerAttachment).not.toHaveBeenCalledWith(
       expect.objectContaining({

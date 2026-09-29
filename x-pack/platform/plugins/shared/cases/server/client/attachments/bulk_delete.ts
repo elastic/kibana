@@ -30,6 +30,7 @@ import { CaseFileMetadataForDeletionRt } from '../../../common/files';
 import type { CasesClient } from '../client';
 import { createFileEntities, deleteFiles } from '../files';
 import { handleAlerts, updateCaseAttachmentStats } from './delete';
+import { getRelatedAttachmentsToDelete } from './related_deletions';
 import { isAssociatedToCase } from '../../common/partitioning';
 import type { AttachmentSavedObjectType } from '../../services/user_actions/types';
 
@@ -57,7 +58,7 @@ const doNotExistOnCaseMessage = (ids: string[], caseId: string): string =>
  * never end up with a partially applied deletion they did not ask for.
  */
 export const bulkDeleteAttachments = async (
-  { caseId, savedObjectIds }: BulkDeleteArgs,
+  { caseId, savedObjectIds, includeRelated = true }: BulkDeleteArgs,
   clientArgs: CasesClientArgs
 ): Promise<void> => {
   const {
@@ -131,8 +132,24 @@ export const bulkDeleteAttachments = async (
       operation: Operations.deleteComment,
     });
 
+    const relatedAttachments = includeRelated
+      ? await getRelatedAttachmentsToDelete({ caseId, attachments: attachmentsInCase, clientArgs })
+      : [];
+
+    if (relatedAttachments.length > 0) {
+      await authorization.ensureAuthorized({
+        entities: relatedAttachments.map((attachment) => ({
+          id: attachment.id,
+          owner: attachment.attributes.owner,
+        })),
+        operation: Operations.deleteComment,
+      });
+    }
+
+    const attachmentsToDelete = [...attachmentsInCase, ...relatedAttachments];
+
     const failedIds = await attachmentService.bulkDelete({
-      savedObjectIds: uniqueIds,
+      savedObjectIds: attachmentsToDelete.map((attachment) => attachment.id),
       refresh: true,
     });
 
@@ -151,7 +168,7 @@ export const bulkDeleteAttachments = async (
 
     await userActionService.creator.bulkCreateAttachmentDeletion({
       caseId,
-      attachments: attachmentsInCase.map((attachment) => ({
+      attachments: attachmentsToDelete.map((attachment) => ({
         id: attachment.id,
         owner: attachment.attributes.owner,
         // strip the non request fields (created_at etc.) the same way the single delete does
@@ -163,7 +180,7 @@ export const bulkDeleteAttachments = async (
 
     await handleAlerts({
       alertsService,
-      attachments: attachmentsInCase.map((attachment) => attachment.attributes),
+      attachments: attachmentsToDelete.map((attachment) => attachment.attributes),
       caseId,
     });
   } catch (error) {
