@@ -47,9 +47,11 @@ const createConfig = (parts: Partial<IHttpConfig>): IHttpConfig => ({
 });
 
 describe('getServerTLSOptions', () => {
-  beforeEach(async () =>
-    (await vi.importMock('fs')).readFileSync.mockImplementation((path: string) => `content-${path}`)
-  );
+  beforeEach(async () => {
+    (await vi.importMock('fs')).readFileSync.mockImplementation(
+      (path: string) => `content-${path}`
+    );
+  });
 
   afterEach(() => {
     vi.clearAllMocks();

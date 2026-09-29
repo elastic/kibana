@@ -7,10 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const mockGetRetryAfter = jest.fn(() => 0);
-export const mockIsRateLimiterError = jest.fn();
+import { vi } from 'vitest';
 
-jest.mock('./utils', () => ({
-  getRetryAfter: mockGetRetryAfter,
-  isRateLimiterError: mockIsRateLimiterError,
-}));
+export const mockGetRetryAfter = vi.fn(() => 0);
+export const mockIsRateLimiterError = vi.fn();
+
+vi.mock('./utils', () => {
+  const mocked = {
+    getRetryAfter: mockGetRetryAfter,
+    isRateLimiterError: mockIsRateLimiterError,
+  };
+  return { ...mocked, default: mocked };
+});

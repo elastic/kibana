@@ -193,6 +193,33 @@ const requireSourcesAsImports = (sourceFile, report) => {
   }
 };
 
+const HOOKS = new Set(['beforeEach', 'beforeAll', 'afterEach', 'afterAll']);
+
+/**
+ * `beforeEach(() => fn.mockReset())` returns the mock function; Vitest runs a function returned
+ * from a hook as its teardown, i.e. calls the mock after the test. Use a block body instead.
+ */
+const blockBodyForMockReturningHooks = (sourceFile) => {
+  const arrows = sourceFile.getDescendantsOfKind(SyntaxKind.ArrowFunction).reverse();
+  for (const arrow of arrows) {
+    if (arrow.wasForgotten()) {
+      continue;
+    }
+    const call = arrow.getParentIfKind(SyntaxKind.CallExpression);
+    const body = arrow.getBody();
+    if (!call || !HOOKS.has(call.getExpression().getText()) || !Node.isCallExpression(body)) {
+      continue;
+    }
+    const callee = body.getExpression();
+    const returnsMock =
+      Node.isPropertyAccessExpression(callee) &&
+      (/^mock/.test(callee.getName()) || /^vi\.(fn|spyOn)$/.test(callee.getText()));
+    if (returnsMock) {
+      body.replaceWithText(`{\n${body.getText()};\n}`);
+    }
+  }
+};
+
 const transformFile = (sourceFile) => {
   const report = [];
   const vitestTypes = new Set();
@@ -279,6 +306,7 @@ const transformFile = (sourceFile) => {
 
   addDefaultToMockFactories(sourceFile);
   requireSourcesAsImports(sourceFile, report);
+  blockBodyForMockReturningHooks(sourceFile);
   awaitAsyncAssertions(sourceFile, report);
 
   const testCallbacks = sourceFile

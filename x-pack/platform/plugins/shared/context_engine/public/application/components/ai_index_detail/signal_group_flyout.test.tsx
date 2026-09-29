@@ -79,7 +79,9 @@ const renderFlyout = ({ chatOpener }: { chatOpener?: ChatOpener } = {}) => {
 };
 
 describe('SignalGroupFlyout', () => {
-  beforeEach(() => mockUseSignals.mockReturnValue(signalsResult()));
+  beforeEach(() => {
+    mockUseSignals.mockReturnValue(signalsResult());
+  });
   afterEach(() => vi.clearAllMocks());
 
   it('renders the loading skeleton while signals load', () => {

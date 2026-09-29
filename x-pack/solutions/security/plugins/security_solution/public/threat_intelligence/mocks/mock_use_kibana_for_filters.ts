@@ -5,23 +5,26 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { Filter } from '@kbn/es-query';
 import { BehaviorSubject } from 'rxjs';
 import * as hook from '../../common/lib/kibana';
 
-jest.mock('../../common/lib/kibana');
+vi.mock('../../common/lib/kibana');
 
 interface MockConfig {
   $filterUpdates?: BehaviorSubject<void>;
-  getFilters?: jest.Mock<Filter[]>;
+  getFilters?: Mock<Filter[]>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  setFilters?: jest.Mock<any, Filter[]>;
+  setFilters?: Mock<any, Filter[]>;
 }
 
 const defaultConfig = {
   $filterUpdates: new BehaviorSubject<void>(undefined),
-  getFilters: jest.fn().mockReturnValue([]),
-  setFilters: jest.fn(),
+  getFilters: vi.fn().mockReturnValue([]),
+  setFilters: vi.fn(),
 };
 
 export const mockUseKibanaForFilters = ({
@@ -29,9 +32,9 @@ export const mockUseKibanaForFilters = ({
   getFilters = defaultConfig.getFilters,
   setFilters = defaultConfig.setFilters,
 }: MockConfig = defaultConfig) => {
-  const getFieldsForWildcard = jest.fn();
+  const getFieldsForWildcard = vi.fn();
 
-  (hook as jest.Mocked<typeof hook>).useKibana.mockReturnValue({
+  (hook as Mocked<typeof hook>).useKibana.mockReturnValue({
     services: {
       data: {
         query: {

@@ -18,6 +18,7 @@ import clearImmediate from 'core-js/stable/clear-immediate';
 import { configure } from '@testing-library/react';
 import { matchers } from '@emotion/jest';
 import { createRequire } from 'module';
+import { TextDecoder as NodeTextDecoder, TextEncoder as NodeTextEncoder } from 'util';
 import { i18n } from '@kbn/i18n';
 
 // Shared Kibana mock factories (coreMock, elasticsearchServiceMock, ...) are also used by the Jest
@@ -27,6 +28,10 @@ import { i18n } from '@kbn/i18n';
 // calling file. vi.mock() never intercepts Node's require, so the module comes back unmocked as in
 // Jest; Kibana TS sources load through @kbn/swc-register as a separate module instance.
 const nodeRequire = createRequire(import.meta.url);
+// Kibana sources still `require()` TypeScript modules lazily (e.g. @kbn/workflows specs, plugin
+// config loaders). Vitest leaves require() to Node, so compile TS through @kbn/swc-register like
+// `node scripts/*` do. Those modules are separate instances that vi.mock() does not intercept.
+nodeRequire('@kbn/swc-register').install();
 
 const getCallerFile = () => {
   const [, , callerFrame = ''] = new Error().stack.split('\n').slice(1);
@@ -34,14 +39,7 @@ const getCallerFile = () => {
   return file ?? import.meta.url;
 };
 
-const requireActual = (id) => {
-  if (id.startsWith('.') || id.startsWith('@kbn/')) {
-    // no-op after the first call
-    nodeRequire('@kbn/swc-register').install();
-  }
-  return createRequire(getCallerFile())(id);
-};
-
+const requireActual = (id) => createRequire(getCallerFile())(id);
 global.jest = new Proxy(vi, {
   get: (target, key) => (key === 'requireActual' ? requireActual : Reflect.get(target, key)),
 });
@@ -66,6 +64,13 @@ if (typeof window !== 'undefined' && typeof window.matchMedia !== 'function') {
       dispatchEvent: () => {},
     }),
   });
+}
+
+// Vitest's jsdom environment exposes jsdom's TextEncoder, whose output is not an instance of the
+// (Node realm) global Uint8Array; libraries like openpgp reject it. Jest's sandbox had one realm.
+if (typeof window !== 'undefined') {
+  global.TextEncoder = NodeTextEncoder;
+  global.TextDecoder = NodeTextDecoder;
 }
 
 configure({ testIdAttribute: 'data-test-subj', asyncUtilTimeout: 4500 });

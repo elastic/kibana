@@ -38,7 +38,9 @@ describe('AttachmentSummaryRow', () => {
   describe('with onClick', () => {
     const onClick = vi.fn();
 
-    beforeEach(() => onClick.mockClear());
+    beforeEach(() => {
+      onClick.mockClear();
+    });
 
     it('names the row by its kind and label, since the kind is otherwise only visual', () => {
       render(<AttachmentSummaryRow label="3 alerts" typeName="Alert" onClick={onClick} />);

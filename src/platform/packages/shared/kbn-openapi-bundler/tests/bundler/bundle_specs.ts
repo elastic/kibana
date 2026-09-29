@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { join } from 'path';
 import {
   existsSync,
@@ -25,7 +27,7 @@ import { bundle } from '../../src/openapi_bundler';
 const ROOT_PATH = join(__dirname, '..');
 
 // Suppress bundler logging via mocking the logger
-jest.mock('../../src/logger');
+vi.mock('../../src/logger');
 
 export async function bundleSpecs(
   oasSpecs: Record<string, OpenAPIV3.Document>,

@@ -7,53 +7,71 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { monaco } from '@kbn/code-editor';
 import type { YamlValidationResult } from '@kbn/workflows-yaml';
 
-jest.mock('../../../common/schema', () => {
+vi.mock('../../../common/schema', () => {
   const mockWorkflowZodSchema = {};
 
   return {
-    getWorkflowZodSchema: jest.fn(() => mockWorkflowZodSchema),
+    getWorkflowZodSchema: vi.fn(() => mockWorkflowZodSchema),
   };
 });
 
-jest.mock('../../trigger_schemas', () => ({
-  triggerSchemas: {
-    getRegisteredIds: jest.fn(() => []),
-    getRegisteredTriggersForSchema: jest.fn(() => []),
-  },
-}));
+vi.mock('../../trigger_schemas', () => {
+  const mocked = {
+    triggerSchemas: {
+      getRegisteredIds: vi.fn(() => []),
+      getRegisteredTriggersForSchema: vi.fn(() => []),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
-jest.mock('../../shared/ui/yaml_editor/yaml_language_service', () => ({
-  yamlLanguageService: {
-    update: jest.fn(() => Promise.resolve()),
-  },
-}));
+vi.mock('../../shared/ui/yaml_editor/yaml_language_service', () => {
+  const mocked = {
+    yamlLanguageService: {
+      update: vi.fn(() => Promise.resolve()),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
-jest.mock('./apply_workflow_yaml_validation_to_editor', () => ({
-  applyWorkflowYamlValidationToEditor: jest.fn(() =>
-    Promise.resolve({ validationResults: [], yamlDocument: null })
-  ),
-  applyValidationHighlightsToEditor: jest.fn(),
-}));
+vi.mock('./apply_workflow_yaml_validation_to_editor', () => {
+  const mocked = {
+    applyWorkflowYamlValidationToEditor: vi.fn(() =>
+      Promise.resolve({ validationResults: [], yamlDocument: null })
+    ),
+    applyValidationHighlightsToEditor: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
-jest.mock('./collect_yaml_schema_validation_results', () => ({
-  collectYamlSchemaValidationResults: jest.fn(() => []),
-  mergeWorkflowYamlValidationResults: (
-    customResults: YamlValidationResult[],
-    yamlResults: YamlValidationResult[]
-  ) => [...customResults, ...yamlResults],
-}));
+vi.mock('./collect_yaml_schema_validation_results', () => {
+  const mocked = {
+    collectYamlSchemaValidationResults: vi.fn(() => []),
+    mergeWorkflowYamlValidationResults: (
+      customResults: YamlValidationResult[],
+      yamlResults: YamlValidationResult[]
+    ) => [...customResults, ...yamlResults],
+  };
+  return { ...mocked, default: mocked };
+});
 
-jest.mock('../validate_workflow_yaml/model/use_workflow_json_schema', () => ({
-  useWorkflowJsonSchema: jest.fn(() => ({
-    jsonSchema: { type: 'object' },
-    uri: 'file:///workflow-schema.json',
-  })),
-}));
+vi.mock('../validate_workflow_yaml/model/use_workflow_json_schema', () => {
+  const mocked = {
+    useWorkflowJsonSchema: vi.fn(() => ({
+      jsonSchema: { type: 'object' },
+      uri: 'file:///workflow-schema.json',
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
-jest.mock('../validate_workflow_yaml/lib/use_workflow_yaml_validation_context', () => {
+vi.mock('../validate_workflow_yaml/lib/use_workflow_yaml_validation_context', () => {
   const mockValidationContextRef = {
     current: {
       connectorTypes: { status: 'ready', value: {} },
@@ -65,45 +83,54 @@ jest.mock('../validate_workflow_yaml/lib/use_workflow_yaml_validation_context', 
   };
 
   return {
-    useWorkflowYamlValidationContextRef: jest.fn(() => mockValidationContextRef),
-    getWorkflowYamlValidationContextError: jest.fn(() => null),
+    useWorkflowYamlValidationContextRef: vi.fn(() => mockValidationContextRef),
+    getWorkflowYamlValidationContextError: vi.fn(() => null),
   };
 });
 
-jest.mock('../../entities/connectors/model/use_available_connectors', () => ({
-  useAvailableConnectors: jest.fn(() => ({ connectorTypes: {} })),
-}));
+vi.mock('../../entities/connectors/model/use_available_connectors', () => {
+  const mocked = {
+    useAvailableConnectors: vi.fn(() => ({ connectorTypes: {} })),
+  };
+  return { ...mocked, default: mocked };
+});
 
-jest.mock('./wait_for_yaml_schema_markers_after_update', () => ({
-  waitForPreviewYamlSchemaMarkers: jest.fn(async (_model, schemas: unknown[]) => {
-    const { yamlLanguageService } = jest.requireMock(
-      '../../shared/ui/yaml_editor/yaml_language_service'
-    ) as { yamlLanguageService: { update: jest.Mock } };
+vi.mock('./wait_for_yaml_schema_markers_after_update', () => {
+  const mocked = {
+    waitForPreviewYamlSchemaMarkers: vi.fn(async (_model, schemas: unknown[]) => {
+      const { yamlLanguageService } = (await vi.importMock(
+        '../../shared/ui/yaml_editor/yaml_language_service'
+      )) as { yamlLanguageService: { update: Mock } };
 
-    if (schemas.length > 0) {
-      await yamlLanguageService.update(schemas);
-    }
-  }),
-}));
+      if (schemas.length > 0) {
+        await yamlLanguageService.update(schemas);
+      }
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
-jest.mock('../../widgets/workflow_yaml_editor/lib/utils', () => ({
-  navigateToErrorPosition: jest.fn(),
-}));
+vi.mock('../../widgets/workflow_yaml_editor/lib/utils', () => {
+  const mocked = {
+    navigateToErrorPosition: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
-jest.mock('@kbn/code-editor', () => {
-  const { setPreviewValidationMarkerChangeListener } = jest.requireActual(
+vi.mock('@kbn/code-editor', async () => {
+  const { setPreviewValidationMarkerChangeListener } = (await vi.importActual(
     './use_workflow_change_history_preview_validation_test_harness'
-  ) as typeof import('./use_workflow_change_history_preview_validation_test_harness');
+  )) as typeof import('./use_workflow_change_history_preview_validation_test_harness');
 
   return {
     monaco: {
       editor: {
-        onDidChangeMarkers: jest.fn((listener: (uris: monaco.Uri[]) => void) => {
+        onDidChangeMarkers: vi.fn((listener: (uris: monaco.Uri[]) => void) => {
           setPreviewValidationMarkerChangeListener(listener);
-          return { dispose: jest.fn() };
+          return { dispose: vi.fn() };
         }),
-        setModelMarkers: jest.fn(),
-        getModelMarkers: jest.fn(() => []),
+        setModelMarkers: vi.fn(),
+        getModelMarkers: vi.fn(() => []),
       },
     },
   };

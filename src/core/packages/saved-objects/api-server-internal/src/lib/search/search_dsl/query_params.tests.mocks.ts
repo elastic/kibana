@@ -7,8 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const getReferencesFilterMock = jest.fn();
+import { vi } from 'vitest';
 
-jest.doMock('./references_filter', () => ({
-  getReferencesFilter: getReferencesFilterMock,
-}));
+export const getReferencesFilterMock = vi.fn();
+
+vi.doMock('./references_filter', () => {
+  const mocked = {
+    getReferencesFilter: getReferencesFilterMock,
+  };
+  return { ...mocked, default: mocked };
+});

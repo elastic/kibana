@@ -17,7 +17,9 @@ const getApplicationResponse = {
 describe('Swimlane API', () => {
   let fetchMock: MockInstance<(...args: any[]) => Promise<unknown>>;
 
-  beforeAll(() => vi.spyOn(window, 'fetch'));
+  beforeAll(() => {
+    vi.spyOn(window, 'fetch');
+  });
   beforeEach(() => {
     vi.resetAllMocks();
     fetchMock = vi.spyOn(window, 'fetch');

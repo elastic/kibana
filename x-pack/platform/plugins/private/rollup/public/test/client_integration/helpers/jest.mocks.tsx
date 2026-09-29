@@ -5,16 +5,21 @@
  * 2.0.
  */
 
-jest.mock('lodash', () => ({
-  ...jest.requireActual('lodash'),
-  debounce: (fn: () => unknown) => fn,
-}));
+import { vi } from 'vitest';
 
-jest.mock('../../../crud_app/services/documentation_links', () => {
-  const coreMocks = jest.requireActual('@kbn/core/public/mocks');
+vi.mock('lodash', () => {
+  const mocked = {
+    ...require('lodash'),
+    debounce: (fn: () => unknown) => fn,
+  };
+  return { ...mocked, default: mocked };
+});
+
+vi.mock('../../../crud_app/services/documentation_links', async () => {
+  const coreMocks = await vi.importActual('@kbn/core/public/mocks');
 
   return {
-    init: jest.fn(),
+    init: vi.fn(),
     documentationLinks: coreMocks.docLinksServiceMock.createStartContract().links,
   };
 });

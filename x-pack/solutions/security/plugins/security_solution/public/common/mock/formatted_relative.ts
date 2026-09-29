@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-jest.mock('@kbn/i18n-react', () => {
-  const { i18n } = jest.requireActual('@kbn/i18n');
-  i18n.init({ locale: 'en' });
-  const originalModule = jest.requireActual('@kbn/i18n-react');
+import { vi } from 'vitest';
 
-  const FormattedRelative = jest.fn().mockImplementation(() => '20 hours ago');
+vi.mock('@kbn/i18n-react', async () => {
+  const { i18n } = await vi.importActual('@kbn/i18n');
+  i18n.init({ locale: 'en' });
+  const originalModule = await vi.importActual('@kbn/i18n-react');
+
+  const FormattedRelative = vi.fn().mockImplementation(() => '20 hours ago');
 
   return {
     ...originalModule,

@@ -15,7 +15,9 @@ describe('getPaddedAlertTimeRange', () => {
     .spyOn(global.Date, 'now')
     .mockImplementation(() => new Date(mockedDate).valueOf());
 
-  afterAll(() => mockDate.mockRestore());
+  afterAll(() => {
+    mockDate.mockRestore();
+  });
   const testData: any[] = [
     // Description, Start, End, Output
     [

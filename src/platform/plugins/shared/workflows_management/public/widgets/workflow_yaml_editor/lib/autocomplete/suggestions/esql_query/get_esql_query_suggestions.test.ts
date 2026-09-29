@@ -109,7 +109,9 @@ function buildContextAtMatch(
 }
 
 describe('getEsqlQuerySuggestions', () => {
-  beforeEach(() => mockSuggest.mockReset());
+  beforeEach(() => {
+    mockSuggest.mockReset();
+  });
 
   it('returns null when no region is provided (lets the dispatcher fall through)', async () => {
     const ctx = {

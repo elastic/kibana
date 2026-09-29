@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import { render } from '@testing-library/react';
@@ -15,8 +17,8 @@ import type { Props } from '..';
 import { ProcessorsEditorWithDeps } from './processors_editor';
 import { documentationService, uiMetricService } from '../../../services';
 
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const original = await vi.importActual('@elastic/eui');
 
   const isRecord = (v: unknown): v is Record<string, unknown> =>
     typeof v === 'object' && v !== null;
@@ -49,7 +51,7 @@ jest.mock('@elastic/eui', () => {
 });
 
 type AutoSizerChildren = (size: { height: number; width: number }) => React.ReactNode;
-jest.mock(
+vi.mock(
   'react-virtualized/dist/commonjs/AutoSizer',
   () =>
     ({ children }: { children: AutoSizerChildren }) =>

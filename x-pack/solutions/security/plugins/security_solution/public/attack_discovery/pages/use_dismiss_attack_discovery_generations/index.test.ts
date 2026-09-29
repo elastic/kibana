@@ -156,7 +156,9 @@ describe('useDismissAttackDiscoveryGeneration', () => {
       });
     });
 
-    afterEach(() => spy.mockClear());
+    afterEach(() => {
+      spy.mockClear();
+    });
 
     it('calls POST with the public API route', async () => {
       const expectedPublicUrl = replaceParams(ATTACK_DISCOVERY_GENERATIONS_BY_ID_DISMISS, {

@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type * as CodeEditorModule from '@kbn/code-editor';
 import { MockedCodeEditor } from './code_editor_mock';
 
-jest.mock('@kbn/code-editor', () => {
-  const module = jest.requireActual('@kbn/code-editor');
-
-  return {
-    ...module,
-    CodeEditorField: MockedCodeEditor,
-    CodeEditor: MockedCodeEditor,
-  };
-});
+// Only imported by Vitest unit tests; vi.mock is hoisted within this module, so importing the
+// helper first in a test file mocks @kbn/code-editor for everything imported after it.
+vi.mock('@kbn/code-editor', async (importOriginal) => ({
+  ...(await importOriginal<typeof CodeEditorModule>()),
+  CodeEditorField: MockedCodeEditor,
+  CodeEditor: MockedCodeEditor,
+}));

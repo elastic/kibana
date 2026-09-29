@@ -68,7 +68,9 @@ function makeCard(name: string, id?: string): IntegrationCardItem {
 
 describe('useOnboardingOverride', () => {
   describe('when onboarding is disabled', () => {
-    beforeEach(() => mockGetBooleanValue.mockReturnValue(false));
+    beforeEach(() => {
+      mockGetBooleanValue.mockReturnValue(false);
+    });
 
     it('returns cards unchanged', () => {
       const cards = ALL_HIDDEN_NAMES.map((name) => makeCard(name));
@@ -83,7 +85,9 @@ describe('useOnboardingOverride', () => {
   });
 
   describe('when onboarding is enabled', () => {
-    beforeEach(() => mockGetBooleanValue.mockReturnValue(true));
+    beforeEach(() => {
+      mockGetBooleanValue.mockReturnValue(true);
+    });
 
     it('filters every hidden name and replaces with single onboarding card', () => {
       const cards = ALL_HIDDEN_NAMES.map((name) => makeCard(name));

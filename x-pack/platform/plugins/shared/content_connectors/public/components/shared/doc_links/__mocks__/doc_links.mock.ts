@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { docLinksServiceMock } from '@kbn/core/public/mocks';
 
 const mockLinks = {
@@ -13,4 +15,7 @@ const mockLinks = {
   links: docLinksServiceMock.createStartContract().links,
 };
 
-jest.mock('../doc_links', () => ({ docLinks: mockLinks }));
+vi.mock('../doc_links', () => {
+  const mocked = { docLinks: mockLinks };
+  return { ...mocked, default: mocked };
+});

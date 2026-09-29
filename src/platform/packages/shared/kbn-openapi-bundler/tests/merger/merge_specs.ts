@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { join } from 'path';
 import {
   existsSync,
@@ -25,7 +27,7 @@ import { merge } from '../../src/openapi_merger';
 const ROOT_PATH = join(__dirname, '..');
 
 // Suppress merger logging via mocking the logger
-jest.mock('../../src/logger');
+vi.mock('../../src/logger');
 
 export async function mergeSpecs(
   oasSpecs: Record<string, OpenAPIV3.Document>,

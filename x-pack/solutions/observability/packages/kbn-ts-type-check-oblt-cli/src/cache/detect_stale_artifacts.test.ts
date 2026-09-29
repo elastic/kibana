@@ -143,7 +143,9 @@ describe('detectStaleArtifacts', () => {
     'packages/plugin-a/tsconfig.json',
   ];
 
-  beforeEach(() => mockExeca.mockReset());
+  beforeEach(() => {
+    mockExeca.mockReset();
+  });
 
   it('returns directly changed projects only (no BFS expansion)', async () => {
     // core changes — utils and plugin-a depend on it, but are NOT included here;

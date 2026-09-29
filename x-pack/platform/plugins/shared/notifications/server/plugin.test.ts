@@ -63,7 +63,9 @@ const createNotificationsPlugin = (config: NotificationsConfigType) => {
 };
 
 describe('Notifications Plugin', () => {
-  beforeEach(() => emailServiceProviderMock.mockClear());
+  beforeEach(() => {
+    emailServiceProviderMock.mockClear();
+  });
 
   it('should create an EmailServiceProvider passing in the configuration and logger from the initializer context', () => {
     const { logger } = createNotificationsPlugin(validConnectorConfig);

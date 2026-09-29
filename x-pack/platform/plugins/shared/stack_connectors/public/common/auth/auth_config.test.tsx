@@ -223,7 +223,7 @@ describe('AuthConfig renders', () => {
       },
     };
 
-    beforeEach(() =>
+    beforeEach(() => {
       useSecretHeadersMock
         .mockReturnValueOnce({
           isLoading: true,
@@ -234,8 +234,8 @@ describe('AuthConfig renders', () => {
           isLoading: false,
           isFetching: false,
           data: ['secret-key'],
-        })
-    );
+        });
+    });
 
     it('submits secret headers merged with config headers', async () => {
       render(

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React, { useEffect } from 'react';
 import { of } from 'rxjs';
 
@@ -16,8 +18,8 @@ const mockOf = of;
 const EDITOR_ID = 'testEditor';
 const MONACO_MODULE = '@kbn/monaco';
 
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const original = await vi.importActual('@elastic/eui');
 
   return {
     ...original,
@@ -52,8 +54,8 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-jest.doMock(MONACO_MODULE, () => {
-  const original = jest.requireActual(MONACO_MODULE);
+vi.doMock(MONACO_MODULE, () => {
+  const original = require(MONACO_MODULE);
   const originalMonaco = original.monaco;
 
   return {
@@ -78,7 +80,7 @@ jest.doMock(MONACO_MODULE, () => {
   };
 });
 
-jest.mock('react-use/lib/useDebounce', () => {
+vi.mock('react-use/lib/useDebounce', () => {
   return (cb: () => void, ms: number, deps: any[]) => {
     mockUseEffect(() => {
       cb();
@@ -86,8 +88,8 @@ jest.mock('react-use/lib/useDebounce', () => {
   };
 });
 
-jest.mock('@kbn/code-editor', () => {
-  const original = jest.requireActual('@kbn/code-editor');
+vi.mock('@kbn/code-editor', async () => {
+  const original = await vi.importActual('@kbn/code-editor');
 
   /**
    * We mock the CodeEditor because it requires the <KibanaReactContextProvider>

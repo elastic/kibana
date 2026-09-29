@@ -205,6 +205,7 @@ const DEV_FILE_PATTERNS = [
   '*.mock.{js,ts,tsx}',
   '*.test.{js,ts,tsx}',
   '*.test.mocks.{js,ts,tsx}',
+  '*.{mocks,tests.mocks,test_mocks}.{js,ts,tsx}',
   '*.test.helpers.{js,ts,tsx}',
   '*.stories.{js,ts,tsx}',
   '*.story.{js,ts,tsx}',
@@ -929,7 +930,12 @@ module.exports = {
      * synchronous replacement for `jest.requireActual()`.
      */
     {
-      files: ['**/*.test.{js,ts,tsx}', '**/*.test.mocks.{js,ts,tsx}'],
+      files: [
+        '**/*.test.{js,ts,tsx}',
+        '**/*.{test.mocks,mocks,mock,helpers}.{js,ts,tsx}',
+        '**/__jest__/**',
+        '**/__mocks__/**',
+      ],
       rules: {
         '@typescript-eslint/no-var-requires': 'off',
       },

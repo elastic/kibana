@@ -5,21 +5,26 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 /**
  * NOTE: This variable name MUST start with 'mock*' in order for
  * Jest to accept its use within a jest.mock()
  */
 export const mockHistory = {
-  createHref: jest.fn(({ pathname }) => `/enterprise_search${pathname}`),
-  push: jest.fn(),
+  createHref: vi.fn(({ pathname }) => `/enterprise_search${pathname}`),
+  push: vi.fn(),
   location: {
     pathname: '/current-path',
   },
 };
 
-jest.mock('react-router-dom', () => ({
-  useHistory: jest.fn(() => mockHistory),
-}));
+vi.mock('react-router-dom', () => {
+  const mocked = {
+    useHistory: vi.fn(() => mockHistory),
+  };
+  return { ...mocked, default: mocked };
+});
 
 /**
  * For example usage, @see public/applications/shared/react_router_helpers/eui_link.test.tsx

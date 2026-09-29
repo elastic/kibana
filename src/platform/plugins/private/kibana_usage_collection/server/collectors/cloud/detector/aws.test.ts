@@ -186,7 +186,9 @@ describe('AWS', () => {
 
   describe('tryToDetectUuid', () => {
     describe('checks the file system for UUID if not Windows', () => {
-      beforeAll(() => mockIsWindows.mockReturnValue(false));
+      beforeAll(() => {
+        mockIsWindows.mockReturnValue(false);
+      });
 
       it('checks /sys/hypervisor/uuid and /sys/devices/virtual/dmi/id/product_uuid', async () => {
         const response = await awsService['tryToDetectUuid']();

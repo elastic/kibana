@@ -1550,3 +1550,4 @@ const transformer = {
 module.exports = transformer;
 // Shared with the Vitest SWC plugin so both runners apply the same Babel-era source rewrites.
 module.exports.prepareSource = prepareSource;
+module.exports.makeEmotionLabelsSafe = makeEmotionLabelsSafe;

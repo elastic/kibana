@@ -23,7 +23,7 @@ const { readPackageMap } = require('@kbn/repo-packages');
 const { getJestSwcConfig } = require('@kbn/swc-config/jest');
 const Peggy = require('@kbn/peggy');
 const remapping = require('@ampproject/remapping');
-const { prepareSource } = require('../jest/transforms/swc');
+const { prepareSource, makeEmotionLabelsSafe } = require('../jest/transforms/swc');
 
 const APM_AGENT_MOCK = Path.resolve(__dirname, '../jest/mocks/apm_agent_mock.ts');
 
@@ -194,7 +194,8 @@ const kbnSwcPlugin = () => ({
     });
 
     const map = prepared.map ? remapping([result.map, prepared.map], () => null) : result.map;
-    return { code: result.code, map };
+    // Same fix-up as the Jest transformer so emotion class hashes (and snapshots) match.
+    return { code: makeEmotionLabelsSafe(result.code), map };
   },
 });
 

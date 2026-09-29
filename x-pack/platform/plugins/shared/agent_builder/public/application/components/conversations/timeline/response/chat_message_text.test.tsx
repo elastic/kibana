@@ -267,7 +267,9 @@ describe('chat_message_text', () => {
   });
 
   describe('createVisualizationRenderer', () => {
-    beforeEach(() => mockInlineVisualization.mockClear());
+    beforeEach(() => {
+      mockInlineVisualization.mockClear();
+    });
 
     it('renders a Vega visualization-type tool result via InlineVisualization', () => {
       const startDependencies = createStartDependencies();

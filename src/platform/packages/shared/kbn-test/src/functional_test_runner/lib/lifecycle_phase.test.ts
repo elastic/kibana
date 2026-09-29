@@ -68,7 +68,9 @@ describe('with randomness', () => {
 });
 
 describe('without randomness', () => {
-  beforeEach(() => vi.spyOn(Math, 'random').mockImplementation(() => 0));
+  beforeEach(() => {
+    vi.spyOn(Math, 'random').mockImplementation(() => 0);
+  });
   afterEach(() => vi.restoreAllMocks());
 
   it('calls all handlers and throws first error', async () => {

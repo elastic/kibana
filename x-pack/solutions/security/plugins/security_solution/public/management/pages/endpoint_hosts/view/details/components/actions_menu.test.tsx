@@ -185,9 +185,13 @@ describe('When using the Endpoint Details Actions Menu', () => {
   describe('and license is NOT PlatinumPlus', () => {
     const licenseServiceMock = licenseService as Mocked<typeof licenseService>;
 
-    beforeEach(() => licenseServiceMock.isPlatinumPlus.mockReturnValue(false));
+    beforeEach(() => {
+      licenseServiceMock.isPlatinumPlus.mockReturnValue(false);
+    });
 
-    afterEach(() => licenseServiceMock.isPlatinumPlus.mockReturnValue(true));
+    afterEach(() => {
+      licenseServiceMock.isPlatinumPlus.mockReturnValue(true);
+    });
 
     it('should still show `Release` action for endpoints that are currently isolated', async () => {
       setEndpointMetadataResponse(true);

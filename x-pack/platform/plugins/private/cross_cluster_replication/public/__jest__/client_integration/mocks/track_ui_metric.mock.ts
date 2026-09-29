@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-jest.mock('../../../app/services/track_ui_metric', () => {
-  const original = jest.requireActual('../../../app/services/track_ui_metric');
+import { vi } from 'vitest';
+
+vi.mock('../../../app/services/track_ui_metric', async () => {
+  const original = await vi.importActual('../../../app/services/track_ui_metric');
 
   return {
     ...original,
-    trackUiMetric: jest.fn(),
+    trackUiMetric: vi.fn(),
     trackUserRequest: <T>(request: Promise<T>): Promise<T> => request,
   };
 });

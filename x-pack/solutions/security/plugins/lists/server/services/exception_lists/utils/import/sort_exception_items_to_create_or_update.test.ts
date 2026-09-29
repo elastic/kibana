@@ -21,9 +21,9 @@ vi.mock('uuid', () => {
 });
 
 describe('sort_exception_lists_items_to_create_update', () => {
-  beforeEach(() =>
-    vi.spyOn(Date.prototype, 'toISOString').mockReturnValue('2021-12-07T09:13:51.888Z')
-  );
+  beforeEach(() => {
+    vi.spyOn(Date.prototype, 'toISOString').mockReturnValue('2021-12-07T09:13:51.888Z');
+  });
   afterAll(() => vi.restoreAllMocks());
 
   describe('sortExceptionItemsToUpdateOrCreate', () => {

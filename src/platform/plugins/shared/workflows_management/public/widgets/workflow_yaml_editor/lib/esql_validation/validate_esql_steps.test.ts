@@ -64,7 +64,9 @@ ${body}
 }
 
 describe('validateEsqlSteps — Liquid policy', () => {
-  beforeEach(() => mockValidate.mockReset());
+  beforeEach(() => {
+    mockValidate.mockReset();
+  });
 
   it('returns [] when no ES|QL step is present', async () => {
     const text = `steps:

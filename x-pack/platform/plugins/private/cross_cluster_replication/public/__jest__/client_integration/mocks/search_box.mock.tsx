@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { EuiSearchBoxProps } from '@elastic/eui/src/components/search_bar/search_box';
 
-jest.mock('@elastic/eui/lib/components/search_bar/search_box', () => {
+vi.mock('@elastic/eui/lib/components/search_bar/search_box', () => {
   return {
     EuiSearchBox: (props: EuiSearchBoxProps) => (
       <input

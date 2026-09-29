@@ -57,6 +57,12 @@ const createKbnVitestConfig = ({
   const isJsdom = environment === 'jsdom';
   const relativeRoots = roots.map(toRepoRelative);
 
+  // [vitest experiment] KBN_VITEST_CONDITIONS=browser,module overrides Vite's export conditions to
+  // compare module resolution with Jest's; unset in CI.
+  const experimentalConditions = process.env.KBN_VITEST_CONDITIONS
+    ? { conditions: process.env.KBN_VITEST_CONDITIONS.split(',') }
+    : undefined;
+
   return {
     root: REPO_ROOT,
     plugins: kbnVitestPlugins(),
@@ -67,7 +73,9 @@ const createKbnVitestConfig = ({
         find,
         replacement: toAbsolute(replacement),
       })),
+      ...experimentalConditions,
     },
+    ...(experimentalConditions ? { ssr: { resolve: experimentalConditions } } : {}),
     test: {
       include: (include ?? relativeRoots.map((root) => `${root}/**/*.test.${TEST_EXTENSIONS}`)).map(
         toRepoRelative

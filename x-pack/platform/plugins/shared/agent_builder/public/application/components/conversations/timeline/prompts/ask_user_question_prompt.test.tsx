@@ -88,7 +88,9 @@ const threeQuestions: AskUserQuestionItem[] = [
 ];
 
 describe('AskUserQuestionPrompt', () => {
-  beforeEach(() => mockReportEvent.mockClear());
+  beforeEach(() => {
+    mockReportEvent.mockClear();
+  });
 
   describe('Keyboard focus', () => {
     it('focuses the first option on mount', () => {

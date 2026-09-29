@@ -414,8 +414,12 @@ describe('#normalizeNamespace', () => {
 describe('#getCurrentTime', () => {
   let dateNowSpy: MockInstance<(...args: []) => number>;
 
-  beforeAll(() => (dateNowSpy = vi.spyOn(Date, 'now').mockImplementation(() => 1631307600000)));
-  afterAll(() => dateNowSpy.mockRestore());
+  beforeAll(() => {
+    dateNowSpy = vi.spyOn(Date, 'now').mockImplementation(() => 1631307600000);
+  });
+  afterAll(() => {
+    dateNowSpy.mockRestore();
+  });
 
   it('returns the current time', () => {
     expect(getCurrentTime()).toEqual('2021-09-10T21:00:00.000Z');

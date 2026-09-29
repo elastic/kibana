@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ExtendedDiscoverStateContainer } from '@kbn/discover-plugin/public';
 import React, { useRef, useCallback } from 'react';
 import type { FC, PropsWithChildren } from 'react';
@@ -16,7 +18,7 @@ import { useDiscoverInTimelineActions } from '../use_discover_in_timeline_action
 
 type Props = PropsWithChildren<{}>;
 
-jest.mock('../use_discover_in_timeline_actions');
+vi.mock('../use_discover_in_timeline_actions');
 
 export const createMockDiscoverStateContainer = (
   discoverServices: ReturnType<typeof createDiscoverServicesMock>

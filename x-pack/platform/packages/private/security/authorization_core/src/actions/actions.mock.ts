@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { Actions } from './actions';
 import { AiIndexActions } from './ai_index';
 import { AlertingActions } from './alerting';
@@ -16,15 +19,15 @@ import { SavedObjectActions } from './saved_object';
 import { SpaceActions } from './space';
 import { UIActions } from './ui';
 
-jest.mock('./api');
-jest.mock('./app');
-jest.mock('./saved_object');
-jest.mock('./space');
-jest.mock('./ui');
-jest.mock('./alerting');
-jest.mock('./alerts');
-jest.mock('./cases');
-jest.mock('./ai_index');
+vi.mock('./api');
+vi.mock('./app');
+vi.mock('./saved_object');
+vi.mock('./space');
+vi.mock('./ui');
+vi.mock('./alerting');
+vi.mock('./alerts');
+vi.mock('./cases');
+vi.mock('./ai_index');
 
 const create = (versionNumber: string) => {
   const t = {
@@ -38,7 +41,7 @@ const create = (versionNumber: string) => {
     cases: new CasesActions(),
     space: new SpaceActions(),
     ui: new UIActions(),
-  } as unknown as jest.Mocked<Actions>;
+  } as unknown as Mocked<Actions>;
   return t;
 };
 

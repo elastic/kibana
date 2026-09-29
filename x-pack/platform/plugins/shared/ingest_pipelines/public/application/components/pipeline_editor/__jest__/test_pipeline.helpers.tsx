@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
@@ -18,7 +20,7 @@ import { initHttpRequests } from './http_requests.helpers';
 import { ProcessorsEditorWithDeps } from './processors_editor';
 
 type AutoSizerChildren = (size: { height: number; width: number }) => React.ReactNode;
-jest.mock(
+vi.mock(
   'react-virtualized/dist/commonjs/AutoSizer',
   () =>
     ({ children }: { children: AutoSizerChildren }) =>
@@ -31,8 +33,8 @@ const getDomInputValue = (evt: unknown): string =>
     ? evt.target.value
     : '';
 
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const original = await vi.importActual('@elastic/eui');
 
   return {
     ...original,

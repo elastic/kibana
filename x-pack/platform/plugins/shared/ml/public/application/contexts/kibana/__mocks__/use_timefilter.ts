@@ -5,31 +5,34 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 
-jest.mock('./kibana_context');
+vi.mock('./kibana_context');
 
 export const timefilterMock = dataPluginMock.createStartContract().query.timefilter
-  .timefilter as jest.Mocked<TimefilterContract>;
+  .timefilter as Mocked<TimefilterContract>;
 
 export const createTimefilterMock = () => {
   return dataPluginMock.createStartContract().query.timefilter
-    .timefilter as jest.Mocked<TimefilterContract>;
+    .timefilter as Mocked<TimefilterContract>;
 };
 
-export const useTimefilter = jest.fn(() => {
+export const useTimefilter = vi.fn(() => {
   return timefilterMock;
 });
 
-export const useRefreshIntervalUpdates = jest.fn(() => {
+export const useRefreshIntervalUpdates = vi.fn(() => {
   return {
     pause: false,
     value: 0,
   };
 });
 
-export const useTimeRangeUpdates = jest.fn(() => {
+export const useTimeRangeUpdates = vi.fn(() => {
   return {
     from: '',
     to: '',

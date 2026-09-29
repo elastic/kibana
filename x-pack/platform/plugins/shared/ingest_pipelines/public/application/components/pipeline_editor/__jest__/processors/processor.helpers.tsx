@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
@@ -23,8 +26,8 @@ const getDomInputValue = (evt: unknown): string =>
     ? evt.target.value
     : '';
 
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const original = await vi.importActual('@elastic/eui');
 
   return {
     ...original,
@@ -47,7 +50,7 @@ jest.mock('@elastic/eui', () => {
 });
 
 type AutoSizerChildren = (size: { height: number; width: number }) => React.ReactNode;
-jest.mock(
+vi.mock(
   'react-virtualized/dist/commonjs/AutoSizer',
   () =>
     ({ children }: { children: AutoSizerChildren }) =>
@@ -67,7 +70,7 @@ export const setupEnvironment = () => {
   return initHttpRequests();
 };
 
-export const getProcessorValue = (onUpdate: jest.Mock) => {
+export const getProcessorValue = (onUpdate: Mock) => {
   const [onUpdateResult] = onUpdate.mock.calls[onUpdate.mock.calls.length - 1];
   const { processors } = onUpdateResult.getData();
   return processors;

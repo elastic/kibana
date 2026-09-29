@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const cleanupMock = jest.fn();
-jest.doMock('./migrations_state_machine_cleanup', () => ({
-  cleanup: cleanupMock,
-}));
+import { vi } from 'vitest';
+
+export const cleanupMock = vi.fn();
+vi.doMock('./migrations_state_machine_cleanup', () => {
+  const mocked = {
+    cleanup: cleanupMock,
+  };
+  return { ...mocked, default: mocked };
+});

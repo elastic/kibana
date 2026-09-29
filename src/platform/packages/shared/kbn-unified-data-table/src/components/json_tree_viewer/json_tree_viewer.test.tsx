@@ -305,7 +305,9 @@ describe('JsonTreeViewer', () => {
   });
 
   describe('copying values and subtrees', () => {
-    beforeEach(() => copyToClipboardMock.mockClear());
+    beforeEach(() => {
+      copyToClipboardMock.mockClear();
+    });
 
     it('copies a collapsed object subtree as pretty-printed JSON', async () => {
       render(<JsonTreeViewer json={{ user: { name: 'Alice', city: 'Berlin' } }} />);
@@ -350,7 +352,9 @@ describe('JsonTreeViewer', () => {
   // A host can pass `formatValue` to render a leaf's value — e.g. wrapping a query's matched terms
   // in `<mark>`. The tree keeps the raw value, so copy and in-table search keep working.
   describe('formatValue', () => {
-    beforeEach(() => copyToClipboardMock.mockClear());
+    beforeEach(() => {
+      copyToClipboardMock.mockClear();
+    });
 
     // Marks a value that contains `term`, so the formatted output is distinguishable from raw text.
     const markMatch =
@@ -503,7 +507,9 @@ describe('JsonTreeViewer', () => {
   });
 
   describe('copy all', () => {
-    beforeEach(() => copyToClipboardMock.mockClear());
+    beforeEach(() => {
+      copyToClipboardMock.mockClear();
+    });
 
     it('copies the whole document as pretty-printed JSON', async () => {
       const doc = { user: { name: 'Alice' }, count: 5 };

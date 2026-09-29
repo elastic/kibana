@@ -9,7 +9,7 @@
 
 // Vitest counterpart of src/jest/setup/enzyme.js.
 
-import { afterEach, vi } from 'vitest';
+import { afterAll, vi } from 'vitest';
 import { configure } from 'enzyme';
 import Adapter from '@wojtekmaj/enzyme-adapter-react-17';
 import { muteLegacyRootWarning } from '@kbn/react-mute-legacy-root-warning';
@@ -25,10 +25,12 @@ const ensureEmotionStyleTag = () => {
 };
 
 // Jest discards errors thrown after an environment is torn down; Vitest reports them. Unmount
-// every enzyme root after each test (as RTL does) so EUI timers cannot fire into a dead jsdom.
+// every enzyme root once the file is done so EUI timers cannot fire into a dead jsdom. (Not per
+// test: suites mount in beforeAll and assert across tests.)
 const mountedWrappers = vi.hoisted(() => new Set());
-afterEach(() => {
-  mountedWrappers.forEach((wrapper) => wrapper.unmount());
+afterAll(() => {
+  // A root wrapper has length 0 once the test unmounted it itself.
+  mountedWrappers.forEach((wrapper) => wrapper.length && wrapper.unmount());
   mountedWrappers.clear();
 });
 

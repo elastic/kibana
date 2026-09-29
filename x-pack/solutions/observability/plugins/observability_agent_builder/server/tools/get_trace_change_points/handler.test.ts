@@ -44,7 +44,9 @@ const BASE_ARGS = {
 const THIRTY_MIN_MS = 30 * 60 * 1000;
 
 describe('get_trace_change_points handler — 30-minute floor', () => {
-  beforeEach(() => mockSearch.mockClear());
+  beforeEach(() => {
+    mockSearch.mockClear();
+  });
 
   it('extends start to 30 minutes before end when window is shorter', async () => {
     const end = new Date('2026-01-01T12:00:00.000Z');

@@ -948,7 +948,9 @@ describe('MetricVisComponent', function () {
   });
 
   describe('coloring', () => {
-    afterEach(() => mockGetColorForValue.mockClear());
+    afterEach(() => {
+      mockGetColorForValue.mockClear();
+    });
 
     describe('by palette', () => {
       const colorFromPalette = faker.color.rgb();

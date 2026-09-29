@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-jest.mock('../../../app/services/notifications', () => ({
-  getFatalErrors: () => ({
-    add: jest.fn(),
-  }),
-}));
+import { vi } from 'vitest';
+
+vi.mock('../../../app/services/notifications', () => {
+  const mocked = {
+    getFatalErrors: () => ({
+      add: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});

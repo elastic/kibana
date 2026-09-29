@@ -35,7 +35,9 @@ describe('kibana_usage', () => {
   beforeAll(() => registerKibanaUsageCollector(usageCollectionMock, getIndicesForTypes));
   afterAll(() => vi.clearAllTimers());
 
-  afterEach(() => getSavedObjectsCountsMock.mockReset());
+  afterEach(() => {
+    getSavedObjectsCountsMock.mockReset();
+  });
 
   test('registered collector is set', () => {
     expect(collector).not.toBeUndefined();

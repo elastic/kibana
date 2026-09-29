@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type {
   DraggableProvided,
   DraggableStateSnapshot,
@@ -13,52 +15,55 @@ import type {
 } from '@hello-pangea/dnd';
 import type React from 'react';
 
-jest.mock('@hello-pangea/dnd', () => ({
-  Droppable: ({
-    children,
-  }: {
-    children: (a: DroppableProvided, b: DroppableStateSnapshot) => void;
-  }) =>
-    children(
-      {
-        droppableProps: {
-          'data-rfd-droppable-context-id': '123',
-          'data-rfd-droppable-id': '123',
+vi.mock('@hello-pangea/dnd', () => {
+  const mocked = {
+    Droppable: ({
+      children,
+    }: {
+      children: (a: DroppableProvided, b: DroppableStateSnapshot) => void;
+    }) =>
+      children(
+        {
+          droppableProps: {
+            'data-rfd-droppable-context-id': '123',
+            'data-rfd-droppable-id': '123',
+          },
+          innerRef: vi.fn(),
+          placeholder: null,
         },
-        innerRef: jest.fn(),
-        placeholder: null,
-      },
-      {
-        isDraggingOver: false,
-        draggingOverWith: null,
-        draggingFromThisWith: null,
-        isUsingPlaceholder: false,
-      }
-    ),
-  Draggable: ({
-    children,
-  }: {
-    children: (a: DraggableProvided, b: DraggableStateSnapshot) => void;
-  }) =>
-    children(
-      {
-        draggableProps: {
-          'data-rfd-draggable-context-id': '123',
-          'data-rfd-draggable-id': '123',
+        {
+          isDraggingOver: false,
+          draggingOverWith: null,
+          draggingFromThisWith: null,
+          isUsingPlaceholder: false,
+        }
+      ),
+    Draggable: ({
+      children,
+    }: {
+      children: (a: DraggableProvided, b: DraggableStateSnapshot) => void;
+    }) =>
+      children(
+        {
+          draggableProps: {
+            'data-rfd-draggable-context-id': '123',
+            'data-rfd-draggable-id': '123',
+          },
+          innerRef: vi.fn(),
+          dragHandleProps: null,
         },
-        innerRef: jest.fn(),
-        dragHandleProps: null,
-      },
-      {
-        isDragging: false,
-        isDropAnimating: false,
-        isClone: false,
-        dropAnimation: null,
-        draggingOver: null,
-        combineWith: null,
-        combineTargetFor: null,
-        mode: null,
-      }
-    ),
-  DragDropContext: ({ children }: { children: React.ReactNode }) => children,
-}));
+        {
+          isDragging: false,
+          isDropAnimating: false,
+          isClone: false,
+          dropAnimation: null,
+          draggingOver: null,
+          combineWith: null,
+          combineTargetFor: null,
+          mode: null,
+        }
+      ),
+    DragDropContext: ({ children }: { children: React.ReactNode }) => children,
+  };
+  return { ...mocked, default: mocked };
+});
