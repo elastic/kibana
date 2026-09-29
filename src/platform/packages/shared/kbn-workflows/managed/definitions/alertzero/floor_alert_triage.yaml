@@ -113,7 +113,10 @@ steps:
         access_mode: public
       metadata:
         status: open
-        severity: "{{ event.rule.severity | default: 'medium' }}"
+        # `event.rule` carries no severity (id, name, tags, consumer, producer, ruleTypeId only),
+        # so it is read off the first alert. A rule's alerts share one severity unless the rule
+        # maps it per alert. Both alert document shapes are read: dotted keys and nested objects.
+        severity: "{{ event.alerts[0]['kibana.alert.severity'] | default: event.alerts[0].kibana.alert.severity | default: 'medium' }}"
         description: >-
           Automated triage of {{ event.alerts.size }} alert{% if event.alerts.size != 1 %}s{% endif %} from rule
           "{{ event.rule.name }}" ({{ event.rule.id }}).

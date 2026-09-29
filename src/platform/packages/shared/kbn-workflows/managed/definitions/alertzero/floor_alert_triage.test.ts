@@ -421,6 +421,34 @@ describe('floor_alert_triage — post_comment_triage_started', () => {
 // than silently swallowed (a failed chunk never shows as evidence)
 // ---------------------------------------------------------------------------
 
+describe('floor_alert_triage — create_investigation severity', () => {
+  const renderSeverity = (event: Record<string, unknown>): string => {
+    const create = stepByName('create_investigation');
+    const template = (create?.with as { metadata?: { severity?: string } } | undefined)?.metadata
+      ?.severity;
+    return renderString(template ?? '', { event }).trim();
+  };
+
+  it('reads the severity off the first alert, since event.rule carries none', () => {
+    expect(
+      renderSeverity({ rule: { name: 'My Rule' }, alerts: [{ 'kibana.alert.severity': 'high' }] })
+    ).toBe('high');
+  });
+
+  it('reads a nested alert document too', () => {
+    expect(
+      renderSeverity({
+        rule: { name: 'My Rule' },
+        alerts: [{ kibana: { alert: { severity: 'critical' } } }],
+      })
+    ).toBe('critical');
+  });
+
+  it('falls back to medium when the alert has no severity', () => {
+    expect(renderSeverity({ rule: { name: 'My Rule' }, alerts: [{}] })).toBe('medium');
+  });
+});
+
 describe('floor_alert_triage — attach_alerts', () => {
   it('retries a failed chunk attach before continuing past it', () => {
     const chunkStep = stepByName('attach_alert_chunk');
