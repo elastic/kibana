@@ -239,9 +239,14 @@ describe('ServiceSettingsStep — manifest loading gate', () => {
     isManifestLoaded: false,
     isManifestError: false,
   };
-  const LOADED_SVC = makeService('loaded_svc', [{ method: 'managed_integration', preferred: true }]);
+  const LOADED_SVC = makeService('loaded_svc', [
+    { method: 'managed_integration', preferred: true },
+  ]);
 
-  function renderWithManifestState(servicesMap: Map<string, AwsServiceMatrixEntry>, selectedServiceIds: string[]) {
+  function renderWithManifestState(
+    servicesMap: Map<string, AwsServiceMatrixEntry>,
+    selectedServiceIds: string[]
+  ) {
     (useOnboardingFlow as jest.Mock).mockReturnValue({
       awsServicesMap: servicesMap,
       detectAndReviewStep: { policyIdsByInstance: {}, serviceStatuses: {} },
@@ -277,20 +282,14 @@ describe('ServiceSettingsStep — manifest loading gate', () => {
   }
 
   it('disables Next and shows a spinner while a selected service manifest is loading', () => {
-    renderWithManifestState(
-      new Map([['pending_svc', PENDING_SVC]]),
-      ['pending_svc']
-    );
+    renderWithManifestState(new Map([['pending_svc', PENDING_SVC]]), ['pending_svc']);
     const btn = screen.getByTestId('serviceSettingsStep-continueButton');
     expect(btn).toBeDisabled();
     expect(btn.querySelector('[role="progressbar"]')).not.toBeNull();
   });
 
   it('enables Next once the manifest has loaded', () => {
-    renderWithManifestState(
-      new Map([['loaded_svc', LOADED_SVC]]),
-      ['loaded_svc']
-    );
+    renderWithManifestState(new Map([['loaded_svc', LOADED_SVC]]), ['loaded_svc']);
     expect(screen.getByTestId('serviceSettingsStep-continueButton')).not.toBeDisabled();
   });
 

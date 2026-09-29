@@ -608,7 +608,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     deploymentMethods: [{ method: 'agent_based', preferred: true }],
     signalTypes: ['logs'],
   },
-
 ];
 
 // ── Private helpers ──────────────────────────────────────────────────────────

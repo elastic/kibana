@@ -83,8 +83,11 @@ export function useAwsServiceMatrix(): UseAwsServiceMatrixResult {
     isError: securityHubIsError,
     refetch: securityHubRefetch,
   } = useGetPackageInfoByKeyQuery('aws_securityhub', undefined, PACKAGE_QUERY_OPTIONS, CACHE_OPTS);
-  const { data: billingData, isError: billingIsError, refetch: billingRefetch } =
-    useGetPackageInfoByKeyQuery('aws_billing', undefined, PACKAGE_QUERY_OPTIONS, CACHE_OPTS);
+  const {
+    data: billingData,
+    isError: billingIsError,
+    refetch: billingRefetch,
+  } = useGetPackageInfoByKeyQuery('aws_billing', undefined, PACKAGE_QUERY_OPTIONS, CACHE_OPTS);
   const {
     data: securityLakeData,
     isError: securityLakeIsError,

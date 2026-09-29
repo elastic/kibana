@@ -551,7 +551,9 @@ describe('AWS service matrix', () => {
       expect(result.signalTypes).toContain('logs');
       expect(result.inputs).toContain('http_endpoint');
       expect(result.varDefsByDataStream?.log).toBeDefined();
-      expect(result.varDefsByDataStream?.log?.varDefsByInput?.http_endpoint?.listen_port).toBeDefined();
+      expect(
+        result.varDefsByDataStream?.log?.varDefsByInput?.http_endpoint?.listen_port
+      ).toBeDefined();
       expect(result.isManifestLoaded).toBe(true);
     });
 
