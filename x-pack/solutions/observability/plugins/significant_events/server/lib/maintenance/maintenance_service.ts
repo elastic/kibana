@@ -1173,6 +1173,18 @@ export const createSignificantEventsMaintenanceService = ({
         }
         await featureSettings.reassertFeatureSettingsOff({ request, spaceIds, failures });
 
+        // The snapshot below searches the knowledge-indicator stream; refresh it first so
+        // unrefreshed revisions are counted (and their rules found) before the wipe.
+        const esClient = server.core.elasticsearch.client.asScoped(request).asCurrentUser;
+        try {
+          await esClient.indices.refresh({
+            index: KNOWLEDGE_INDICATORS_DATA_STREAM,
+            ignore_unavailable: true,
+          });
+        } catch (error) {
+          failures.push({ target: 'snapshot:refresh', error: toMessage(error) });
+        }
+
         const { knowledgeIndicators, storedQueries, rules, remainingRuleIds } =
           await deleteOwnedRules({
             request,
@@ -1181,7 +1193,7 @@ export const createSignificantEventsMaintenanceService = ({
           });
         const investigations = await deleteInvestigations(failures);
         const wipedDataStreams = await resetDataStreams({
-          esClient: server.core.elasticsearch.client.asScoped(request).asCurrentUser,
+          esClient,
           internalEsClient: server.core.elasticsearch.client.asInternalUser,
           dataStreams: server.core.dataStreams,
           failures,

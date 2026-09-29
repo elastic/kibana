@@ -813,6 +813,7 @@ describe('SignificantEventsMaintenanceService', () => {
         streamDocuments,
         deleteAllInvestigations,
         asScoped,
+        countKnowledgeIndicators,
       } = makeService({
         management: api,
         indicatorStreams: ['logs.web'],
@@ -882,6 +883,13 @@ describe('SignificantEventsMaintenanceService', () => {
       expect(streamDocuments.get(KNOWLEDGE_INDICATORS_DATA_STREAM)).toBe(0);
       expect(streamDocuments.has(DISCOVERIES_DATA_STREAM)).toBe(false);
       expect(esClient.indices.createDataStream).not.toHaveBeenCalled();
+      expect(esClient.indices.refresh).toHaveBeenCalledWith({
+        index: KNOWLEDGE_INDICATORS_DATA_STREAM,
+        ignore_unavailable: true,
+      });
+      expect(esClient.indices.refresh.mock.invocationCallOrder[0]).toBeLessThan(
+        countKnowledgeIndicators.mock.invocationCallOrder[0]
+      );
       expect(asScoped).toHaveBeenCalledWith(REQUEST);
       expect(cancelAllActiveWorkflowExecutions.mock.invocationCallOrder[0]).toBeLessThan(
         deleteAllInvestigations!.mock.invocationCallOrder[0]
