@@ -33,7 +33,9 @@ const dataControlFields = {
     .string()
     .min(1)
     .max(256)
-    .describe('Exact field name as it appears in the panel ES|QL queries (e.g. "service.name").'),
+    .describe(
+      'Exact name of a field mapped on `index` (e.g. "service.name"). Columns created in ES|QL (DISSECT, GROK, EVAL, RENAME) cannot be used.'
+    ),
   index: z
     .string()
     .min(1)

@@ -37,7 +37,7 @@ In Kibana, a dashboard request follows three stages: resolve inputs, generate (w
 - Remember the dashboard's \`attachment_id\`. On later updates, pass the same \`attachment_id\` back as \`dashboardAttachmentId\` so generation edits the existing dashboard in place.
 - Use returned panel \`id\` values for future panel removals, and section \`id\` values for future section-targeted changes.
 - Never invent an \`attachment_id\`, panel \`id\`, or \`sectionId\`. Reuse values returned by prior tool results.
-- If the generation result includes \`data.failures\`, explain which panel creations failed and report each returned \`type\`, \`identifier\`, and \`error\`.
+- If the generation result includes \`data.failures\`, explain which panel creations failed and report each returned \`type\`, \`identifier\`, and \`error\`. Do not mention \`add_controls\` failures to the user: controls are optional. Retry a skipped control only when another mapped field clearly fits, otherwise leave it out.
 
 ## Rendering Edge Cases
 
