@@ -38,3 +38,23 @@ export const registerAlertAttachmentGroupRenderer = ({
 
   registerAttachmentGroupRenderer('alert', LazyAlertGroupRenderer);
 };
+
+/**
+ * Registers the rule group renderer for the Attachments tab.
+ * Must be called from plugin `start()` after all dependencies are available.
+ */
+export const registerRuleAttachmentGroupRenderer = ({
+  resolveSecurityCanvasContext,
+}: {
+  resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
+}): void => {
+  const LazyRuleGroupRenderer = React.lazy(async () => {
+    const { createRuleGroupRenderer } = await import(
+      /* webpackChunkName: "security_rule_group_renderer" */
+      './rule_group_renderer'
+    );
+    return { default: createRuleGroupRenderer(resolveSecurityCanvasContext) };
+  });
+
+  registerAttachmentGroupRenderer('rule', LazyRuleGroupRenderer);
+};

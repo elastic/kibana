@@ -100,7 +100,10 @@ import {
   registerInvestigationTimelineAttachment,
   registerInvestigationIocsAttachment,
 } from './agent_builder/attachment_types';
-import { registerAlertAttachmentGroupRenderer } from './agent_builder/attachment_group_renderers';
+import {
+  registerAlertAttachmentGroupRenderer,
+  registerRuleAttachmentGroupRenderer,
+} from './agent_builder/attachment_group_renderers';
 import type { SecurityCanvasEmbeddedBundle } from './agent_builder/components/security_redux_embedded_provider';
 import { registerWorkflowSteps } from './workflows/step_types';
 import { registerSecurityWorkflowTriggers } from './workflows/triggers';
@@ -376,6 +379,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         search: plugins.data.search,
         spaceId: getSpaceIdFromPath(core.http.basePath.get(), core.http.basePath.serverBasePath)
           .spaceId,
+      });
+      registerRuleAttachmentGroupRenderer({
+        resolveSecurityCanvasContext: () =>
+          this.getSecurityCanvasContext(core, plugins as StartPluginsDependencies),
       });
       registerAttackDiscoveryAttachment({
         attachments: plugins.agentBuilder.attachments,
