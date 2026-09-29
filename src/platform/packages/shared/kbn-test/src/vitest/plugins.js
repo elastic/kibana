@@ -199,6 +199,33 @@ const kbnSwcPlugin = () => ({
   },
 });
 
-const kbnVitestPlugins = () => [kbnResolvePlugin(), kbnSwcPlugin()];
+/**
+ * Uses the export conditions Jest's environments use (jsdom: `browser`, node: `node`). Vitest adds
+ * `development` to the ssr conditions and passes them to workers as `--conditions`, which made
+ * native requires in node_modules load dev builds (e.g. emotion) that render differently. User
+ * config arrays are concatenated, so the resolved config has to be overwritten.
+ */
+const kbnConditionsPlugin = (environment) => {
+  const conditions = environment === 'jsdom' ? ['browser'] : ['node'];
+  return {
+    name: 'kbn-vitest-conditions',
+    enforce: 'post',
+    configResolved(config) {
+      config.resolve.conditions = conditions;
+      config.ssr.resolve.conditions = conditions;
+      config.ssr.resolve.externalConditions = conditions;
+      for (const env of Object.values(config.environments ?? {})) {
+        env.resolve.conditions = conditions;
+        env.resolve.externalConditions = conditions;
+      }
+    },
+  };
+};
+
+const kbnVitestPlugins = (environment) => [
+  kbnResolvePlugin(),
+  kbnSwcPlugin(),
+  kbnConditionsPlugin(environment),
+];
 
 module.exports = { kbnVitestPlugins };
