@@ -848,11 +848,11 @@ On merge commits, Scout tests run in a non-blocking mode.
 Test events from every framework (Jest, FTR, Cypress and Scout/Playwright) are shipped to the AppEx QA cluster. The `discover-flaky-tests` command aggregates them into a ranked list of flaky and consistently failing tests and stores it under `.scout/flaky_tests.json`:
 
 ```bash
-# Last 7 days of kibana-on-merge, all frameworks
+# Last 14 days of kibana-on-merge, all frameworks
 node scripts/scout discover-flaky-tests
 
-# Include PR builds, widen the window, restrict to Jest and FTR
-node scripts/scout discover-flaky-tests --pipelines kibana-on-merge,kibana-pull-request --lookbackDays 14 --frameworks jest,ftr
+# Include PR builds, restrict to Jest and FTR
+node scripts/scout discover-flaky-tests --pipelines kibana-on-merge,kibana-pull-request --frameworks jest,ftr
 
 # Flaky tests only, leaving consistently failing tests out of the report
 node scripts/scout discover-flaky-tests --classifications flaky

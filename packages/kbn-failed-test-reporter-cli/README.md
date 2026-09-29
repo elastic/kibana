@@ -57,12 +57,15 @@ that could be about it. The matching rules then decide which suite an issue is r
 - `moved`: same test and file name at another location, i.e. the file moved since;
 - `file`: it only names the same file, for another test; it never counts as tracking the suite.
 
-A test counts as flaky when, within the report window, a single branch ran it in at least
-`minBuilds` builds (default 10), failed it in at least `minFailedBuilds` of them (default 2) and
-in at least `minFailRate` of them (default 3%), and it passed at least once or recovered on an
-in-run retry anywhere in the window. Thresholds apply per branch so that a clean branch cannot
-dilute a flaky one; the branch a test qualified on is recorded as `flakiestBranch`. Tests that
-never passed in the window are consistently failing rather than flaky and are not reported.
+A test counts as flaky when, over its latest `maxRuns` runs (default 200) on a single pipeline and
+branch within the report window, it failed in at least `minEpisodes` separate episodes (default
+2): runs of consecutive failed builds with a passing build in between. A breakage fails every
+build until it is fixed, so it is one episode however long it lasts. Runs in incident jobs, where
+at least `incidentFailures` tests failed (default 10), are left out. Thresholds apply per pipeline
+and branch so that a clean one cannot dilute a flaky one, and bounding the runs rather than the
+days holds `main` and the Elastic Cloud pipelines, which run a few times a day, to the same
+evidence; the branch a test qualified on is recorded as `flakiestBranch`. Tests whose latest runs
+failed without passing on a retry are consistently failing rather than flaky and are not reported.
 
 ```bash
 node scripts/scout discover-flaky-tests --pipelines kibana-on-merge --lookbackDays 7 --classifications flaky

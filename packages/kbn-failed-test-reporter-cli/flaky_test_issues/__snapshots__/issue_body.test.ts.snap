@@ -5,7 +5,7 @@ exports[`renderFlakySuiteIssueBody renders a multi-test suite with distinct fail
 
 | Test | Flaky branches | Dashboard |
 |---|---|---|
-| does not keep a hidden histogram after visiting Dashboard | **\`main\` 10% (20 / 200)**<br>**\`9.2\` 5% (3 / 64)** | [dashboard](https://appex-qa.kb.europe-west1.gcp.cloud.es.io/s/scout/app/dashboards#/view/a06c26f6-23ac-479d-acb5-5a8b234793a8?_g=(filters:!((meta:(alias:'Test%20ID',disabled:!f,negate:!f),query:(bool:(must:!((match_phrase:(test.id:'a'))))))))) |
+| does not keep a hidden histogram after visiting Dashboard | **\`main\` 10% (20 / 200)** | [dashboard](https://appex-qa.kb.europe-west1.gcp.cloud.es.io/s/scout/app/dashboards#/view/a06c26f6-23ac-479d-acb5-5a8b234793a8?_g=(filters:!((meta:(alias:'Test%20ID',disabled:!f,negate:!f),query:(bool:(must:!((match_phrase:(test.id:'a'))))))))) |
 | reverts breakdown, interval, and visibility on a saved session | **\`main\` 10% (49 / 509)** | [dashboard](https://appex-qa.kb.europe-west1.gcp.cloud.es.io/s/scout/app/dashboards#/view/a06c26f6-23ac-479d-acb5-5a8b234793a8?_g=(filters:!((meta:(alias:'Test%20ID',disabled:!f,negate:!f),query:(bool:(must:!((match_phrase:(test.id:'b'))))))))) |
 | persists hide/show of the histogram on a saved session | **\`main\` 10% (49 / 509)** | [dashboard](https://appex-qa.kb.europe-west1.gcp.cloud.es.io/s/scout/app/dashboards#/view/a06c26f6-23ac-479d-acb5-5a8b234793a8?_g=(filters:!((meta:(alias:'Test%20ID',disabled:!f,negate:!f),query:(bool:(must:!((match_phrase:(test.id:'c'))))))))) |
 

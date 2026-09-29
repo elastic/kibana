@@ -13,15 +13,15 @@ import { z } from '@kbn/zod/v4';
  * Bump whenever a change to the schemas below would break a consumer reading a previously
  * written report.
  */
-export const FLAKY_TEST_REPORT_SCHEMA_VERSION = 1;
+export const FLAKY_TEST_REPORT_SCHEMA_VERSION = 2;
 
 export const TEST_FRAMEWORKS = ['jest', 'ftr', 'cypress', 'playwright'] as const;
 export const TestFrameworkSchema = z.enum(TEST_FRAMEWORKS);
 export type TestFramework = z.infer<typeof TestFrameworkSchema>;
 
 /**
- * `flaky`: failed in some builds and passed in others. `consistently-failing`: never had a
- * clean pass in the window.
+ * `flaky`: failed in separate episodes, with passes in between, on one pipeline and branch.
+ * `consistently-failing`: its latest runs there failed without passing on a retry.
  */
 export const FLAKY_TEST_CLASSIFICATIONS = ['flaky', 'consistently-failing'] as const;
 export const FlakyTestClassificationSchema = z.enum(FLAKY_TEST_CLASSIFICATIONS);
@@ -132,16 +132,19 @@ export const FlakyTestTargetStatsSchema = z.object({
 export type FlakyTestTargetStats = z.infer<typeof FlakyTestTargetStatsSchema>;
 
 /**
- * The branch that qualified a test: the one with the highest build failure rate among the
- * branches that clear every threshold on their own, so that a clean branch cannot dilute a
- * flaky one.
+ * The pipeline and branch that qualified a test, each judged on its own so that neither a clean
+ * branch nor another pipeline can dilute it. Counts are over the runs the thresholds were checked
+ * against: the latest `maxRuns` there, runs in incident jobs left out.
  */
 export const FlakyTestFlakiestBranchSchema = z.object({
+  pipeline: z.string(),
   branch: z.string(),
   builds: z.int(),
   failedBuilds: z.int(),
   /** `failedBuilds / builds` on this branch. */
   buildFailRate: z.number(),
+  /** Runs of consecutive failed builds, each separated from the next by a pass. */
+  episodes: z.int(),
 });
 export type FlakyTestFlakiestBranch = z.infer<typeof FlakyTestFlakiestBranchSchema>;
 
@@ -190,8 +193,8 @@ export const FlakyTestEntrySchema = z.object({
   firstFailedAt: z.coerce.date(),
   lastFailedAt: z.coerce.date(),
   /**
-   * The branch on which the test cleared the thresholds; the top-level rate above is diluted
-   * by the other branches. Absent in reports written before thresholds applied per branch.
+   * The pipeline and branch on which the test cleared the thresholds; the top-level rate above is
+   * diluted by the other branches. Absent in reports written before thresholds applied per branch.
    */
   flakiestBranch: z.optional(FlakyTestFlakiestBranchSchema),
   /** Absent only if the test emitted no execution events in the window (should not happen). */
@@ -244,20 +247,22 @@ export const FlakyTestFileStatsSchema = z.object({
 export type FlakyTestFileStats = z.infer<typeof FlakyTestFileStatsSchema>;
 
 /**
- * A test qualifies when a single branch clears all three build thresholds on its own: a test
- * flaky on `9.5` but clean on `main` is judged on its `9.5` numbers, not on the diluted total.
+ * A test qualifies on a single pipeline and branch, judged on its latest runs there: a test flaky
+ * on `9.5` but clean on `main` is judged on its `9.5` runs, not on the diluted total. Counting
+ * episodes rather than failed builds means a breakage, however long, never passes for flakiness,
+ * and bounding the runs rather than the days means `main` and a Cloud pipeline that runs a few
+ * times a day are held to the same evidence.
  */
 export const FlakyTestReportThresholdsSchema = z.object({
-  /** Branches on which the test was seen in fewer builds than this cannot qualify it. */
-  minBuilds: z.int().min(1),
-  /** Branches on which the test failed in fewer builds than this cannot qualify it. */
-  minFailedBuilds: z.int().min(1),
+  /** Separate failure episodes a pipeline and branch needs to qualify a test as flaky. */
+  minEpisodes: z.int().min(1),
+  /** Latest runs per pipeline and branch the thresholds are checked against, within the window. */
+  maxRuns: z.int().min(1),
   /**
-   * Branches on which `failedBuilds / builds` is below this fraction cannot qualify the test
-   * (`0.03` for 3%); `0` keeps every test that clears the build counts. The schema default is
-   * `0` only so that reports written before the field existed, without a rate gate, still parse.
+   * Distinct failed tests that make a Buildkite job an incident, such as a service that did not
+   * start or a lost agent, rather than evidence against any one of its tests. Its runs are left out.
    */
-  minFailRate: z.number().min(0).max(1).default(0),
+  incidentFailures: z.int().min(1),
   /** Maximum number of tests kept per list. */
   maxTests: z.int().min(1),
 });
@@ -277,15 +282,15 @@ export interface FlakyTestReportOptions {
 }
 
 export const DEFAULT_FLAKY_TEST_REPORT_OPTIONS: Omit<FlakyTestReportOptions, 'now'> = {
-  lookbackDays: 7,
+  lookbackDays: 14,
   pipelines: ['kibana-on-merge'],
   branches: [],
   frameworks: [...TEST_FRAMEWORKS],
   classifications: [...FLAKY_TEST_CLASSIFICATIONS],
   thresholds: {
-    minBuilds: 10,
-    minFailedBuilds: 2,
-    minFailRate: 0.03,
+    minEpisodes: 2,
+    maxRuns: 200,
+    incidentFailures: 10,
     maxTests: 200,
   },
   samplesPerTest: 3,
@@ -323,9 +328,9 @@ export const FlakyTestReportSchema = z.object({
      */
     flakyByBranch: z.record(z.string(), z.int()).default({}),
   }),
-  /** Tests that failed in some builds and passed in others, ranked by failed builds. */
+  /** Tests that failed in separate episodes on one pipeline and branch, ranked by failed builds. */
   flaky: z.array(FlakyTestEntrySchema),
-  /** Tests that never had a clean pass in the window; broken rather than flaky. */
+  /** Tests whose latest runs on one pipeline and branch all failed; broken rather than flaky. */
   consistentlyFailing: z.array(FlakyTestEntrySchema),
   /**
    * Per-file, per-pipeline breakdown for the tests of both lists. Defaults so that reports

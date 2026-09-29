@@ -15,7 +15,6 @@ import type {
   FlakyTestBranchStats,
   FlakyTestError,
   FlakyTestPipelineStats,
-  FlakyTestReportThresholds,
   FlakyTestSampleFailure,
   FlakyTestTargetStats,
   TestFramework,
@@ -62,7 +61,8 @@ export interface TestMetadataRow {
 /** What the Jest reporter writes as the suite title of a test outside any describe block. */
 const UNKNOWN_SUITE_TITLE = 'unknown';
 
-const asArray = (value: string | string[] | null | undefined): string[] => {
+/** ES|QL returns a multi-valued field with a single value as a scalar. */
+const asArray = <T>(value: T | T[] | null | undefined): T[] => {
   if (value === null || value === undefined) return [];
   return Array.isArray(value) ? value : [value];
 };
@@ -188,26 +188,38 @@ export const buildBranchStatsQuery = (
   ].join(' | ');
 };
 
-/** The build count thresholds a branch has to clear before its failure rate matters. */
-export type BranchCountThresholds = Pick<
-  FlakyTestReportThresholds,
-  'minBuilds' | 'minFailedBuilds'
->;
+/**
+ * Buildkite jobs in which at least `minFailedTests` distinct tests failed. A job failing that
+ * broadly points at its environment rather than at its tests, so its runs are not counted as
+ * evidence. Failure documents only, so it stays cheap.
+ */
+export const buildIncidentJobsQuery = (
+  scope: FlakyTestQueryScope,
+  frameworks: readonly TestFramework[],
+  minFailedTests: number
+): string =>
+  [
+    `FROM ${SCOUT_TEST_EVENTS_INDEX_PATTERN}`,
+    `WHERE ${[...scopeClauses(scope), anyFailureFilter(frameworks)].join(' AND ')}`,
+    'STATS failed_tests = COUNT_DISTINCT(test.id) BY buildkite.job_id',
+    `WHERE failed_tests >= ${minFailedTests}`,
+    'RENAME buildkite.job_id AS job_id',
+    'KEEP job_id',
+    `LIMIT ${ESQL_ROW_LIMIT}`,
+  ].join(' | ');
 
 /**
- * Per-branch execution and build counts for the given tests of one execution model. This is
- * what the thresholds are checked against, branch by branch; it runs for every test that
- * clears the thresholds on its totals, before ranking. Branches below the build count thresholds
- * are dropped in the query: they cannot qualify a test, and leaving them out is what keeps the
- * result small when pull request pipelines, with a branch per PR, are in scope. Counts only, so
- * it stays cheap; the expensive latest-run lookup is left to `buildBranchStatsQuery`, which only
- * runs for the tests that make the report.
+ * The builds each of the given tests of one execution model ran in, per pipeline and branch,
+ * split into those it failed in and those it passed in; a build is in both when a retry passed.
+ * Build numbers are what orders runs within a pipeline, which counts cannot, so they are listed
+ * rather than counted. Runs in incident jobs are left out. This is what the thresholds are checked
+ * against; it runs for every test whose totals may qualify it, before ranking.
  */
-export const buildBranchCountsQuery = (
+export const buildBranchRunsQuery = (
   scope: FlakyTestQueryScope,
   frameworks: readonly TestFramework[],
   testIds: readonly string[],
-  thresholds: BranchCountThresholds
+  incidentJobIds: readonly string[]
 ): string => {
   const [model] = buildExecutionModels(frameworks);
 
@@ -217,13 +229,14 @@ export const buildBranchCountsQuery = (
       ...scopeClauses(scope),
       model.executionFilter,
       `test.id IN (${inList(testIds)})`,
+      ...(incidentJobIds.length > 0 ? [`buildkite.job_id NOT IN (${inList(incidentJobIds)})`] : []),
     ].join(' AND ')}`,
-    `EVAL failed = ${model.failedExpression}`,
-    'STATS builds = COUNT_DISTINCT(buildkite.build.id),' +
-      ' failed_builds = COUNT_DISTINCT(CASE(failed == 1, buildkite.build.id, NULL))' +
-      ' BY test.id, buildkite.branch',
-    `WHERE builds >= ${thresholds.minBuilds} AND failed_builds >= ${thresholds.minFailedBuilds}`,
-    'RENAME test.id AS test_id, buildkite.branch AS branch',
+    `EVAL failed = ${model.failedExpression}, retry_flake = ${model.retryFlakeExpression},` +
+      ' build = TO_INTEGER(buildkite.build.number)',
+    'STATS failed_builds = VALUES(build) WHERE failed == 1,' +
+      ' passed_builds = VALUES(build) WHERE failed == 0 OR retry_flake == 1' +
+      ' BY test.id, buildkite.pipeline.slug, buildkite.branch',
+    'RENAME test.id AS test_id, buildkite.pipeline.slug AS pipeline, buildkite.branch AS branch',
     `LIMIT ${ESQL_ROW_LIMIT}`,
   ].join(' | ');
 };
@@ -408,25 +421,45 @@ export const fetchBranchStats = async (
   return byTest;
 };
 
-/** Build counts of one test on one branch. */
-export interface BranchCountsRow {
+/** Ids of the incident jobs in scope, whose runs the thresholds leave out. */
+export const fetchIncidentJobs = async (
+  es: ESClient,
+  scope: FlakyTestQueryScope,
+  frameworks: readonly TestFramework[],
+  minFailedTests: number
+): Promise<string[]> => {
+  const records = await runEsql<{ job_id: string | null }>(
+    es,
+    buildIncidentJobsQuery(scope, frameworks, minFailedTests)
+  );
+  return records.flatMap((record) => (record.job_id ? [record.job_id] : []));
+};
+
+/** One build a test ran in; `hard` when it failed without also passing on a retry in that build. */
+export interface BranchRun {
+  build: number;
+  failed: boolean;
+  hard: boolean;
+}
+
+/** The runs of one test on one pipeline and branch, oldest first. */
+export interface BranchRuns {
+  pipeline: string;
   branch: string;
-  builds: number;
-  failedBuilds: number;
+  runs: BranchRun[];
 }
 
 /**
- * Per-branch build counts of the branches clearing the count thresholds, keyed by test id, most
- * failed builds first. A test whose rows were cut off by the row limit would pass for one that
- * qualifies on no branch, so unlike the lookups that only add detail this one fails rather than
- * return a truncated result.
+ * Runs of the given tests per pipeline and branch, keyed by test id. A test whose rows were cut
+ * off by the row limit would pass for one that qualifies nowhere, so unlike the lookups that only
+ * add detail this one fails rather than return a truncated result.
  */
-export const fetchBranchCounts = async (
+export const fetchBranchRuns = async (
   es: ESClient,
   scope: FlakyTestQueryScope,
   tests: ReadonlyArray<{ testId: string; framework: TestFramework }>,
-  thresholds: BranchCountThresholds
-): Promise<Map<string, BranchCountsRow[]>> => {
+  incidentJobIds: readonly string[]
+): Promise<Map<string, BranchRuns[]>> => {
   if (tests.length === 0) {
     return new Map();
   }
@@ -435,31 +468,35 @@ export const fetchBranchCounts = async (
     groupByExecutionModel(tests).map(({ frameworks, testIds }) =>
       runEsql<{
         test_id: string;
+        pipeline: string | null;
         branch: string | null;
-        builds: number;
-        failed_builds: number;
-      }>(es, buildBranchCountsQuery(scope, frameworks, testIds, thresholds))
+        failed_builds: number | number[] | null;
+        passed_builds: number | number[] | null;
+      }>(es, buildBranchRunsQuery(scope, frameworks, testIds, incidentJobIds))
     )
   );
   if (results.some((records) => records.length >= ESQL_ROW_LIMIT)) {
     throw new Error(
-      `Per-branch counts query hit the ${ESQL_ROW_LIMIT} row limit; narrow the scope with --branches`
+      `Per-branch runs query hit the ${ESQL_ROW_LIMIT} row limit; narrow the scope with --branches`
     );
   }
 
-  const byTest = new Map<string, BranchCountsRow[]>();
+  const byTest = new Map<string, BranchRuns[]>();
   for (const record of results.flat()) {
-    if (record.branch === null) continue;
-    const rows = byTest.get(record.test_id) ?? [];
-    rows.push({
-      branch: record.branch,
-      builds: record.builds,
-      failedBuilds: record.failed_builds,
-    });
-    byTest.set(record.test_id, rows);
-  }
-  for (const rows of byTest.values()) {
-    rows.sort((a, b) => b.failedBuilds - a.failedBuilds || b.builds - a.builds);
+    if (record.pipeline === null || record.branch === null) continue;
+    const failed = new Set(asArray(record.failed_builds));
+    const passed = new Set(asArray(record.passed_builds));
+    const runs = [...new Set([...failed, ...passed])]
+      .sort((a, b) => a - b)
+      .map((build) => ({
+        build,
+        failed: failed.has(build),
+        hard: failed.has(build) && !passed.has(build),
+      }));
+    byTest.set(record.test_id, [
+      ...(byTest.get(record.test_id) ?? []),
+      { pipeline: record.pipeline, branch: record.branch, runs },
+    ]);
   }
   return byTest;
 };
