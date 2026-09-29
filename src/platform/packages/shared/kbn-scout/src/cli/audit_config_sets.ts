@@ -33,8 +33,8 @@ export interface ConfigSetOverrides {
   kibana: Record<string, string>;
   /** Elasticsearch `serverArgs` that differ from the default set, key to value (`<removed>` when the set drops a default arg). */
   elasticsearch: Record<string, string>;
-  /** Dotted paths of every other field that differs from the default (license, files, env, servers, ...). */
-  other: string[];
+  /** Every other field that differs from the default (license, files, env, servers, ...): dotted path to the set's value. */
+  other: Record<string, string>;
 }
 
 export const REMOVED = '<removed>';
@@ -89,24 +89,37 @@ export function diffArgs(
 
 const SERVER_ARG_PATHS = new Set(['kbnTestServer.serverArgs', 'esTestCluster.serverArgs']);
 
+const isPlainObject = (value: unknown): value is Record<string, unknown> =>
+  Object.prototype.toString.call(value) === '[object Object]';
+
 const flatten = (value: unknown, prefix = '', out: Record<string, string> = {}) => {
-  if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
+  if (isPlainObject(value)) {
     for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
       flatten(v, prefix ? `${prefix}.${k}` : k, out);
     }
   } else if (!SERVER_ARG_PATHS.has(prefix)) {
-    out[prefix] = (JSON.stringify(value) ?? 'undefined').replace(/\d{10,}/g, '<n>');
+    // RegExp, Date and functions are leaves; JSON.stringify would turn a RegExp into `{}`.
+    const text =
+      value instanceof RegExp || typeof value === 'function'
+        ? String(value)
+        : JSON.stringify(value);
+    out[prefix] = (text ?? 'undefined').replace(/\d{10,}/g, '<n>');
   }
   return out;
 };
 
-/** Dotted paths of every field outside the server args where the set and the default differ. */
-export function otherDifferences(set: ScoutServerConfig, base: ScoutServerConfig): string[] {
+/** Every field outside the server args where the set and the default differ: dotted path to the set's value. */
+export function otherDifferences(
+  set: ScoutServerConfig,
+  base: ScoutServerConfig
+): Record<string, string> {
   const a = flatten(set);
   const b = flatten(base);
-  return [...new Set([...Object.keys(a), ...Object.keys(b)])]
-    .filter((path) => a[path] !== b[path])
-    .sort();
+  const out: Record<string, string> = {};
+  for (const path of [...new Set([...Object.keys(a), ...Object.keys(b)])].sort()) {
+    if (a[path] !== b[path]) out[path] = a[path] ?? REMOVED;
+  }
+  return out;
 }
 
 /** `true` when `key` equals a runtime key or sits under one (`feature_flags.overrides.x`). */
@@ -268,7 +281,13 @@ const label = (s: ConfigSetOverrides) =>
     ? `\`${s.name}\` (stateful)`
     : `\`${s.name}\` (serverless/${s.file.replace('.serverless.config.ts', '')})`;
 const signature = (s: ConfigSetOverrides) =>
-  JSON.stringify([s.flavor, s.file, sortEntries(s.kibana), sortEntries(s.elasticsearch), s.other]);
+  JSON.stringify([
+    s.flavor,
+    s.file,
+    sortEntries(s.kibana),
+    sortEntries(s.elasticsearch),
+    sortEntries(s.other),
+  ]);
 const sortEntries = (record: Record<string, string>) => Object.entries(record).sort();
 const isSubset = (a: Record<string, string>, b: Record<string, string>) =>
   Object.entries(a).every(([k, v]) => b[k] === v);
@@ -281,7 +300,7 @@ export function summarizeConfigSets(
   const isEmpty = (s: ConfigSetOverrides) =>
     Object.keys(s.kibana).length === 0 &&
     Object.keys(s.elasticsearch).length === 0 &&
-    s.other.length === 0;
+    Object.keys(s.other).length === 0;
   const sameAsDefault = sets.filter(isEmpty).map(label);
 
   const runtimeOnly = sets
@@ -289,7 +308,7 @@ export function summarizeConfigSets(
       (s) =>
         Object.keys(s.kibana).length > 0 &&
         Object.keys(s.elasticsearch).length === 0 &&
-        s.other.length === 0 &&
+        Object.keys(s.other).length === 0 &&
         Object.keys(s.kibana).every((k) => isRuntimeUpdatable(k, runtimeKeys))
     )
     .map(label);
@@ -318,8 +337,10 @@ export function summarizeConfigSets(
     const aSize = Object.keys(a.kibana).length + Object.keys(a.elasticsearch).length;
     // Only plain arg-level supersets: a set that also needs docker, a license or
     // preboot is not a merge target for one that does not.
-    if (aSize === 0 || a.other.length > 0) continue;
-    const supersets = representatives.filter((b) => b.other.length === 0 && covers(a, b));
+    if (aSize === 0 || Object.keys(a.other).length > 0) continue;
+    const supersets = representatives.filter(
+      (b) => Object.keys(b.other).length === 0 && covers(a, b)
+    );
     // Nearest supersets only: if A ⊆ B ⊆ C, listing C under A adds nothing.
     const nearest = supersets.filter((b) => !supersets.some((c) => c !== b && covers(c, b)));
     for (const b of nearest) subsets.push({ set: label(a), of: label(b) });

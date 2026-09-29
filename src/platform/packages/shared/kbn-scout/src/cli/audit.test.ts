@@ -318,7 +318,7 @@ describe('config set audit, pure parts', () => {
       file: 'classic.stateful.config.ts',
       kibana,
       elasticsearch: {},
-      other: [],
+      other: {},
       ...extra,
     } as ConfigSetOverrides);
 
@@ -340,7 +340,7 @@ describe('config set audit, pure parts', () => {
     });
   });
 
-  it('reports every non-arg field that differs, by dotted path, and ignores the args themselves', () => {
+  it('reports every non-arg field that differs, with its value, and treats RegExp as a leaf', () => {
     type Cfg = Parameters<typeof otherDifferences>[0];
     const base = {
       esTestCluster: { license: 'trial', files: [], serverArgs: ['a=1'], ssl: false },
@@ -349,15 +349,32 @@ describe('config set audit, pure parts', () => {
     } as unknown as Cfg;
     const actual = {
       esTestCluster: { license: 'basic', files: [], serverArgs: ['a=2'], ssl: false },
-      kbnTestServer: { serverArgs: ['--x=2'], env: { A: '1', TRACING: 'on' } },
+      kbnTestServer: {
+        serverArgs: ['--x=2'],
+        env: { A: '1', TRACING: 'on' },
+        runOptions: { wait: /Kibana has not been configured/ },
+      },
       servers: { kibana: { port: 5620 } },
       prebootOnly: true,
     } as unknown as Cfg;
-    expect(otherDifferences(actual, base)).toEqual([
-      'esTestCluster.license',
-      'kbnTestServer.env.TRACING',
-      'prebootOnly',
-    ]);
+    expect(otherDifferences(actual, base)).toEqual({
+      'esTestCluster.license': '"basic"',
+      'kbnTestServer.env.TRACING': '"on"',
+      'kbnTestServer.runOptions.wait': '/Kibana has not been configured/',
+      prebootOnly: 'true',
+    });
+  });
+
+  it('does not group sets that change the same non-arg field to different values', () => {
+    const report = summarizeConfigSets(
+      [
+        set('trace_a', {}, { other: { 'kbnTestServer.env.TRACING': '"a"' } }),
+        set('trace_b', {}, { other: { 'kbnTestServer.env.TRACING': '"b"' } }),
+        set('trace_a2', {}, { other: { 'kbnTestServer.env.TRACING': '"a"' } }),
+      ],
+      []
+    );
+    expect(report.identical).toEqual([['`trace_a2` (stateful)', '`trace_a` (stateful)']]);
   });
 
   it('reads runtime keys from plugin dynamicConfig declarations, prefixed by the plugin config path', () => {
@@ -404,7 +421,7 @@ describe('config set audit, pure parts', () => {
           { 'server.foo': '1' },
           { flavor: 'serverless', file: 'search.serverless.config.ts' }
         ),
-        set('with_docker', { 'server.foo': '1' }, { other: ['dockerServers'] }),
+        set('with_docker', { 'server.foo': '1' }, { other: { dockerServers: 'true' } }),
       ],
       ['feature_flags.overrides']
     );
