@@ -153,6 +153,16 @@ const buildClosureSummary = (state: CurrentRunState): string => {
   return `${title}. Confirmed hit.${hostPart}${evidence}`;
 };
 
+/** Per-host variant so proposals fanned out across hosts read as distinct, not duplicates. */
+const buildHostClosureSummary = (state: CurrentRunState, host: CurrentRunHost): string => {
+  const title = state.titles[0] ?? `Hunt run ${state.runId}`;
+  const evidence =
+    state.evidenceLines.length > 0
+      ? ` Evidence: ${state.evidenceLines.slice(0, 5).join('; ')}.`
+      : '';
+  return `${title}. Confirmed hit. Host: ${host.name}.${evidence}`;
+};
+
 const actionlessComment = ({
   state,
   reason,
@@ -263,6 +273,7 @@ export const decidePackageReport = ({
 
   for (const host of eligible) {
     const agentId = host.agentId!;
+    const hostClosureSummary = buildHostClosureSummary(state, host);
     for (const entry of respondActions) {
       const schema = actionInputSchema(entry);
       const processScoped = needsProcessParameters(schema);
@@ -286,7 +297,7 @@ export const decidePackageReport = ({
           proposals.push({
             subjectKey,
             conversationId,
-            comment: closureSummary,
+            comment: hostClosureSummary,
             category: entry.category ?? 'respond',
             impact: entry.impact,
             actionWorkflowId: entry.workflowId,
@@ -313,7 +324,7 @@ export const decidePackageReport = ({
       proposals.push({
         subjectKey,
         conversationId,
-        comment: closureSummary,
+        comment: hostClosureSummary,
         category: entry.category ?? 'respond',
         impact: entry.impact,
         actionWorkflowId: entry.workflowId,
