@@ -119,6 +119,7 @@ Controls query the index directly, so columns created in ES|QL (\`DISSECT\`, \`G
 - \`field_name\` (not for \`time_slider_control\`): exact name of a field mapped on \`index\` (e.g. \`"service.name"\`).
 - \`index\` (not for \`time_slider_control\`): same index as the dashboard panels (e.g. \`"logs-*"\`).
 - \`title\` (optional, \`options_list_control\` and \`range_slider_control\` only): human-readable label shown above the control (e.g. \`"Service"\`).
+- \`user_requested\` (optional, \`options_list_control\` and \`range_slider_control\` only): \`true\` when the user asked for this control. Leave it unset for controls you add on your own.
 
 **Defaults applied by the server:** \`width: "medium"\`, \`grow: true\` (fills available horizontal space). Override only if the user asks.
 

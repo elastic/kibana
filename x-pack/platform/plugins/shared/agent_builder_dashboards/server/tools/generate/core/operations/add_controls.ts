@@ -52,6 +52,12 @@ const controlLayoutFields = {
 const dataControlInputFields = {
   ...dataControlFields,
   title: z.string().max(256).optional().describe('Human-readable label shown above the control.'),
+  user_requested: z
+    .boolean()
+    .optional()
+    .describe(
+      'True when the user asked for this control. Leave unset for controls you add on your own.'
+    ),
   ...controlLayoutFields,
 };
 
@@ -161,26 +167,47 @@ const describeAvailableFields = (
     : '';
 };
 
-const recordSkippedControl = (skipped: OperationSkip[], fieldName: string, reason: string) => {
-  const sameReason = skipped.find(
-    (skip) => skip.type === DASHBOARD_OPERATION_FAILURE_TYPES.addControls && skip.reason === reason
-  );
-  if (sameReason) {
-    sameReason.identifier = `${sameReason.identifier}, ${fieldName}`;
+/**
+ * Report an unresolved control as a failure when the user asked for it, otherwise
+ * as a skip. Controls with the same message share one entry.
+ */
+const recordUnresolvedControl = ({
+  failures,
+  skipped,
+  fieldName,
+  message,
+  userRequested,
+}: {
+  failures: PanelFailure[];
+  skipped: OperationSkip[];
+  fieldName: string;
+  message: string;
+  userRequested: boolean;
+}) => {
+  const type = DASHBOARD_OPERATION_FAILURE_TYPES.addControls;
+  if (userRequested) {
+    const group = failures.find((failure) => failure.type === type && failure.error === message);
+    if (group) {
+      group.identifier = `${group.identifier}, ${fieldName}`;
+    } else {
+      failures.push({ type, identifier: fieldName, error: message });
+    }
     return;
   }
-  skipped.push({
-    type: DASHBOARD_OPERATION_FAILURE_TYPES.addControls,
-    identifier: fieldName,
-    reason,
-  });
+
+  const group = skipped.find((skip) => skip.type === type && skip.reason === message);
+  if (group) {
+    group.identifier = `${group.identifier}, ${fieldName}`;
+  } else {
+    skipped.push({ type, identifier: fieldName, reason: message });
+  }
 };
 
 /**
  * Keep controls whose field Elasticsearch can `STATS BY`, rewriting options list
  * text fields to their `.keyword` sibling. Range sliders additionally require a
- * numeric field. Other data controls are reported as skipped, grouped by reason,
- * together with the mapped fields that could back them instead.
+ * numeric field. Other data controls are reported with the mapped fields that
+ * could back them instead.
  */
 const resolveControlFields = async ({
   controls,
@@ -231,11 +258,13 @@ const resolveControlFields = async ({
     }
 
     const skip = (reason: string): ControlInput[] => {
-      recordSkippedControl(
+      recordUnresolvedControl({
+        failures,
         skipped,
         fieldName,
-        `${reason}${describeAvailableFields(fieldTypes, control.type)}`
-      );
+        message: `${reason}${describeAvailableFields(fieldTypes, control.type)}`,
+        userRequested: control.user_requested === true,
+      });
       return [];
     };
 
