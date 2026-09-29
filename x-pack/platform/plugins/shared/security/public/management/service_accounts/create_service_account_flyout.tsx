@@ -169,18 +169,19 @@ export const CreateServiceAccountFlyout = ({
           height: 62,
           display: 'flex',
           alignItems: 'center',
-          padding: `0 calc(${euiTheme.size.base} + ${euiTheme.size.xs})`,
           backgroundColor: euiTheme.colors.backgroundLightText,
         })}
       >
-        <EuiTitle size="xs">
-          <h2 id={titleId}>
-            <FormattedMessage
-              id="xpack.security.management.serviceAccounts.create.flyoutTitle"
-              defaultMessage="Create account"
-            />
-          </h2>
-        </EuiTitle>
+        <div css={css({ paddingInline: `calc(${euiTheme.size.base} + ${euiTheme.size.xs})` })}>
+          <EuiTitle size="xs">
+            <h2 id={titleId} css={css({ fontSize: 18, lineHeight: '22px' })}>
+              <FormattedMessage
+                id="xpack.security.management.serviceAccounts.create.flyoutTitle"
+                defaultMessage="Create account"
+              />
+            </h2>
+          </EuiTitle>
+        </div>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <EuiForm
@@ -256,53 +257,54 @@ export const CreateServiceAccountFlyout = ({
               />
             </EuiFormRow>
           )}
-          <EuiFormRow
-            id={rolesId}
-            fullWidth
-            css={css({ marginTop: euiTheme.size.l })}
-            label={
-              <span css={labelStyle}>
-                {i18n.translate('xpack.security.management.serviceAccounts.create.rolesLabel', {
-                  defaultMessage: 'Set privileges',
-                })}{' '}
-                <EuiIconTip
-                  type="info"
-                  aria-label={i18n.translate(
-                    'xpack.security.management.serviceAccounts.create.rolePrivilegesHelpLabel',
-                    { defaultMessage: 'About role privileges' }
-                  )}
-                  content={
-                    <>
-                      <FormattedMessage
-                        id="xpack.security.management.serviceAccounts.create.rolesHelpDescription"
-                        defaultMessage="An account can only use privileges allowed by both its selected roles and your access at creation time. Selecting a role does not grant privileges you do not have."
-                      />
-                      {isServerless && (
-                        <p>
-                          <FormattedMessage
-                            id="xpack.security.management.serviceAccounts.create.crossProjectRolesHelpDescription"
-                            defaultMessage="For cross-project search, selected role names also apply in linked projects where those roles exist. Custom roles are not copied between projects."
-                          />
-                        </p>
-                      )}
-                    </>
-                  }
-                />
-              </span>
-            }
-            isInvalid={(hasSubmitted || unavailableRoleNames.length > 0) && isRolesInvalid}
-            error={rolesError}
-          >
-            <ServiceAccountRoleSelector
-              createRoleUrl={createRoleUrl}
+          <div css={css({ marginTop: euiTheme.size.l })}>
+            <EuiFormRow
+              id={rolesId}
+              fullWidth
+              label={
+                <span css={labelStyle}>
+                  {i18n.translate('xpack.security.management.serviceAccounts.create.rolesLabel', {
+                    defaultMessage: 'Set privileges',
+                  })}{' '}
+                  <EuiIconTip
+                    type="info"
+                    aria-label={i18n.translate(
+                      'xpack.security.management.serviceAccounts.create.rolePrivilegesHelpLabel',
+                      { defaultMessage: 'About role privileges' }
+                    )}
+                    content={
+                      <>
+                        <FormattedMessage
+                          id="xpack.security.management.serviceAccounts.create.rolesHelpDescription"
+                          defaultMessage="An account can only use privileges allowed by both its selected roles and your access at creation time. Selecting a role does not grant privileges you do not have."
+                        />
+                        {isServerless && (
+                          <p>
+                            <FormattedMessage
+                              id="xpack.security.management.serviceAccounts.create.crossProjectRolesHelpDescription"
+                              defaultMessage="For cross-project search, selected role names also apply in linked projects where those roles exist. Custom roles are not copied between projects."
+                            />
+                          </p>
+                        )}
+                      </>
+                    }
+                  />
+                </span>
+              }
               isInvalid={(hasSubmitted || unavailableRoleNames.length > 0) && isRolesInvalid}
-              availableRoles={availableRoles.value ?? []}
-              selectedRoleNames={roles}
-              onChange={setRoles}
-              isLoading={availableRoles.loading}
-              isDisabled={isSaving || availableRoles.loading || Boolean(availableRoles.error)}
-            />
-          </EuiFormRow>
+              error={rolesError}
+            >
+              <ServiceAccountRoleSelector
+                createRoleUrl={createRoleUrl}
+                isInvalid={(hasSubmitted || unavailableRoleNames.length > 0) && isRolesInvalid}
+                availableRoles={availableRoles.value ?? []}
+                selectedRoleNames={roles}
+                onChange={setRoles}
+                isLoading={availableRoles.loading}
+                isDisabled={isSaving || availableRoles.loading || Boolean(availableRoles.error)}
+              />
+            </EuiFormRow>
+          </div>
           {availableRoles.error && (
             <>
               <EuiSpacer size="m" />
@@ -332,41 +334,46 @@ export const CreateServiceAccountFlyout = ({
       </EuiFlyoutBody>
       <EuiFlyoutFooter
         css={css({
-          padding: `${euiTheme.size.m} calc(${euiTheme.size.base} + ${euiTheme.size.xs})`,
           borderTop: euiTheme.border.thin,
           backgroundColor: euiTheme.colors.backgroundBasePlain,
         })}
       >
-        <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty size="s" color="text" onClick={onClose} isDisabled={isSaving}>
-              <FormattedMessage
-                id="xpack.security.management.serviceAccounts.create.cancelButtonLabel"
-                defaultMessage="Cancel"
-              />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              size="s"
-              type="submit"
-              form={formId}
-              isLoading={isSaving}
-              isDisabled={
-                isNameInvalid ||
-                isRolesInvalid ||
-                availableRoles.loading ||
-                Boolean(availableRoles.error)
-              }
-              data-test-subj="createServiceAccountSubmit"
-            >
-              <FormattedMessage
-                id="xpack.security.management.serviceAccounts.create.submitButtonLabel"
-                defaultMessage="Create account"
-              />
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <div
+          css={css({
+            padding: `${euiTheme.size.m} calc(${euiTheme.size.base} + ${euiTheme.size.xs})`,
+          })}
+        >
+          <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty size="s" color="text" onClick={onClose} isDisabled={isSaving}>
+                <FormattedMessage
+                  id="xpack.security.management.serviceAccounts.create.cancelButtonLabel"
+                  defaultMessage="Cancel"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                size="s"
+                type="submit"
+                form={formId}
+                isLoading={isSaving}
+                isDisabled={
+                  isNameInvalid ||
+                  isRolesInvalid ||
+                  availableRoles.loading ||
+                  Boolean(availableRoles.error)
+                }
+                data-test-subj="createServiceAccountSubmit"
+              >
+                <FormattedMessage
+                  id="xpack.security.management.serviceAccounts.create.submitButtonLabel"
+                  defaultMessage="Create account"
+                />
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </div>
       </EuiFlyoutFooter>
     </EuiFlyout>
   );

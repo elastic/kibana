@@ -88,6 +88,9 @@ export const ServiceAccountRoleSelector = ({
     justifyContent: 'space-between',
     alignItems: 'center',
     fontSize: 14,
+    color: euiTheme.colors.textParagraph,
+    paddingBlock: 0,
+    '&:not(:first-child)': { paddingBlockStart: 0 },
     borderBottom: euiTheme.border.thin,
   });
   const missingRoles = selectedRoleNames.filter(
@@ -211,7 +214,13 @@ export const ServiceAccountRoleSelector = ({
             nextOptions.filter((option) => option.checked === 'on').map(({ label }) => label)
           )
         }
-        listProps={{ rowHeight: 32, paddingSize: 'none', onFocusBadge: false, autoFocus: true }}
+        listProps={{
+          rowHeight: 32,
+          windowProps: { itemSize: () => 32 },
+          paddingSize: 'none',
+          onFocusBadge: false,
+          autoFocus: true,
+        }}
         renderOption={(option) => (
           <span>
             {option.label}
