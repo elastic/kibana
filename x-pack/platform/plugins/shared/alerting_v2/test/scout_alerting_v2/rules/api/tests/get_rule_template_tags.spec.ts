@@ -47,11 +47,12 @@ apiTest.describe('Get rule template tags API', { tag: tags.deploymentAgnostic },
   apiTest(
     'returns tags from all v2 templates independently of list pagination',
     async ({ apiClient, apiServices }) => {
-      for (const { suffix, templateTags } of [
-        { suffix: 'a-template', templateTags: ['first-page'] },
-        { suffix: 'b-template', templateTags: ['second-page'] },
+      const firstTemplateId = templateId('a-template');
+      const secondTemplateId = templateId('b-template');
+      for (const { id, templateTags } of [
+        { id: firstTemplateId, templateTags: ['first-page'] },
+        { id: secondTemplateId, templateTags: ['second-page'] },
       ]) {
-        const id = templateId(suffix);
         createdTemplateIds.add(id);
         await apiServices.alertingV2.ruleTemplates.create({
           id,
@@ -59,13 +60,16 @@ apiTest.describe('Get rule template tags API', { tag: tags.deploymentAgnostic },
         });
       }
 
-      const firstPage = await apiClient.get(getFindRuleTemplatesUrl({ page: 1, per_page: 1 }), {
-        headers: adminHeaders,
-      });
+      const firstPage = await apiClient.get(
+        getFindRuleTemplatesUrl({ search: templateNamespace, page: 1, per_page: 1 }),
+        { headers: adminHeaders }
+      );
       const response = await apiClient.get(getRuleTemplateTagsUrl(), { headers: adminHeaders });
 
       expect(firstPage).toHaveStatusCode(200);
+      expect(firstPage.body.total).toBe(2);
       expect(firstPage.body.items).toHaveLength(1);
+      expect(firstPage.body.items[0].id).toBe(firstTemplateId);
       expect(firstPage.body.items[0].rule.metadata.tags).toStrictEqual(['first-page']);
       expect(response).toHaveStatusCode(200);
       expect(response.body.tags).toStrictEqual(
