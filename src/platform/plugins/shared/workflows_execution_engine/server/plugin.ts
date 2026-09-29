@@ -1754,8 +1754,9 @@ export class WorkflowsExecutionEnginePlugin
 
       const spaceId = workflow.spaceId || 'default';
       const context: Record<string, unknown> = {
-        spaceId,
         ...(executionContext ?? {}),
+        // Client-provided test context must not override the request's space.
+        spaceId,
         contextOverride,
       };
 
