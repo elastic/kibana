@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { ServiceFlyoutService } from '..';
 import { ServiceFlyoutHeader } from '.';
@@ -124,6 +124,19 @@ describe('ServiceFlyoutHeader', () => {
     expect(titleLink).toHaveAttribute('data-ebt-action', 'viewService');
     expect(titleLink).toHaveAttribute('data-ebt-element', 'serviceFlyoutTitle');
     expect(screen.getByTestId('serviceBadgesMock')).toBeInTheDocument();
+  });
+
+  it('shows a tooltip describing the title link destination', async () => {
+    renderHeader();
+
+    const titleLink = screen.getByTestId('serviceFlyoutTitleLink');
+    const tooltipAnchor = titleLink.closest('.euiToolTipAnchor') ?? titleLink;
+    fireEvent.mouseEnter(tooltipAnchor);
+    fireEvent.mouseOver(tooltipAnchor);
+
+    await waitFor(() => {
+      expect(screen.getByRole('tooltip')).toHaveTextContent('Open service overview');
+    });
   });
 
   it('renders the title as plain text when serviceNameLink capability is disabled', () => {

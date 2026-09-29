@@ -17,7 +17,7 @@ export const LIST_RULE_EXECUTIONS_RESPONSE: ListRuleExecutionsResponse = {
       space_id: 'default',
       started_at: '2026-01-15T12:00:00.000Z',
       ended_at: '2026-01-15T12:00:01.250Z',
-      timings: { duration: 1250, scheduled_delay: 40 },
+      timings: { duration_ms: 1250, scheduled_delay_ms: 40 },
       outcome: 'success',
       reason: null,
       error: null,
