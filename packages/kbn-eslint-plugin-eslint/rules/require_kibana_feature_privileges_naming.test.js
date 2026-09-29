@@ -6,8 +6,11 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+const path = require('path');
 const { RuleTester } = require('eslint');
-const rule = require('./require_kibana_feature_privileges_naming');
+const rule = require('..').rules.require_kibana_feature_privileges_naming;
+
+const fixtureFilename = path.join(__dirname, '__fixtures__/privilege_resolver/consumer.ts');
 
 const ruleTester = new RuleTester({
   parser: require.resolve('@typescript-eslint/parser'),
@@ -64,6 +67,20 @@ ruleTester.run('@kbn/require_kibana_feature_privileges_naming', rule, {
           privileges: {
             all: {
               api: [validPrivilege, anotherValidPrivilege],
+            },
+          },
+        });
+      `,
+    },
+    {
+      filename: fixtureFilename,
+      code: `
+        import { missingPrivilege, privileges } from './index';
+
+        features.registerKibanaFeature({
+          privileges: {
+            all: {
+              api: [missingPrivilege, privileges.valid, privileges.missing],
             },
           },
         });
@@ -133,6 +150,66 @@ ruleTester.run('@kbn/require_kibana_feature_privileges_naming', rule, {
       errors: [
         {
           message: `API privilege 'users-manage' should start with [manage|create|update|delete|read] or use ApiPrivileges.manage instead`,
+        },
+      ],
+    },
+    {
+      filename: fixtureFilename,
+      code: `
+        import { reexportedPrivilege as importedPrivilege } from './index';
+
+        features.registerKibanaFeature({
+          privileges: {
+            all: {
+              api: [importedPrivilege],
+            },
+          },
+        });
+      `,
+      errors: [
+        {
+          message: `API privilege 'invalid-privilege' should start with [manage|create|update|delete|read] or use ApiPrivileges.manage instead`,
+        },
+      ],
+    },
+    {
+      filename: fixtureFilename,
+      code: `
+        import { privileges } from './index';
+
+        features.registerKibanaFeature({
+          privileges: {
+            all: {
+              api: [privileges.invalid],
+            },
+          },
+        });
+      `,
+      errors: [
+        {
+          message: `API privilege 'invalid-privilege' should start with [manage|create|update|delete|read] or use ApiPrivileges.manage instead`,
+        },
+      ],
+    },
+    {
+      filename: fixtureFilename,
+      code: `
+        import { invalidPrivilege, localPrivilege } from './index';
+
+        features.registerKibanaFeature({
+          privileges: {
+            all: {
+              api: [invalidPrivilege, localPrivilege],
+            },
+          },
+        });
+      `,
+      errors: [
+        {
+          message: `API privilege 'invalid-privilege' should start with [manage|create|update|delete|read] or use ApiPrivileges.manage instead`,
+        },
+        {
+          message: `API privilege 'invalid-privilege' should start with [manage|create|update|delete|read] or use ApiPrivileges.manage instead`,
         },
       ],
     },
