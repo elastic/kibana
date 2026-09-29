@@ -12,7 +12,8 @@ import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
-import { EuiFlyoutFooter, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
+import { useAlertTimeRange } from '../../../entity_analytics/hooks/use_alert_time_range';
 import { useAssetCriticalityPrivileges } from '../../../entity_analytics/components/asset_criticality/use_asset_criticality';
 import { useUpdateAssetCriticality } from '../../../entity_analytics/api/hooks/use_update_asset_criticality';
 import { buildEuidCspPreviewOptions } from '../../../cloud_security_posture/utils/build_euid_csp_preview_options';
@@ -51,6 +52,7 @@ import {
   USER_PANEL_OBSERVED_USER_QUERY_ID,
 } from '../../../flyout_v2/entity/user/main/constants';
 import { FlyoutBody } from '../../shared/components/flyout_body';
+import { FlyoutFooter } from '../../shared/components/flyout_footer';
 import { useEntityPanelTabs, TABLE_TAB_ID } from '../shared/hooks/use_entity_panel_tabs';
 import { EntityPanelHeaderTabs } from '../shared/components/entity_panel_tabs';
 import { EntityStoreTableTab } from '../shared/components/entity_store_table_tab';
@@ -98,7 +100,7 @@ export const UserPanel = memo(function UserPanel({
 
   const safeContextID = contextID ?? scopeId ?? 'user-panel';
 
-  const { to, from, setQuery, deleteQuery, isInitializing } = useGlobalTime();
+  const { setQuery, deleteQuery, isInitializing } = useGlobalTime();
 
   const userStoreIdentityFields = useMemo(
     () => (!entityIdProp && userName ? { 'user.name': userName } : undefined),
@@ -172,12 +174,13 @@ export const UserPanel = memo(function UserPanel({
     })
   );
 
+  const { from: alertFrom, to: alertTo } = useAlertTimeRange(scopeId);
   const { hasNonClosedAlerts } = useNonClosedAlerts({
     identityFields: documentEntityIdentifiers,
     entityType: EntityType.user,
     entityRecord: entityFromStoreResult.entityRecord,
-    to,
-    from,
+    to: alertTo,
+    from: alertFrom,
     queryId: `${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}USER_NAME_RIGHT`,
   });
 
@@ -327,22 +330,21 @@ export const UserPanel = memo(function UserPanel({
             identityFields={documentEntityIdentifiers}
             entityRecord={observedUser.entityRecord ?? undefined}
             refetchEntityRecord={entityFromStoreResult.refetch}
-            skipRiskAndCriticality={noEntityInStore}
+            noEntityInStore={noEntityInStore}
+            entityStoreV2Enabled={entityStoreV2Enabled}
             entityStoreEntityId={entityStoreEntityId}
             riskScoreQueryId={USER_PANEL_RISK_SCORE_QUERY_ID}
           />
         )}
       </FlyoutBody>
       {!isPreviewMode && assetInventoryEnabled && (
-        <EuiFlyoutFooter>
-          <EuiPanel color="transparent">
-            <Footer
-              userName={userName}
-              identityFields={documentEntityIdentifiers}
-              entity={entityFromStore}
-            />
-          </EuiPanel>
-        </EuiFlyoutFooter>
+        <FlyoutFooter>
+          <Footer
+            userName={userName}
+            identityFields={documentEntityIdentifiers}
+            entity={entityFromStore}
+          />
+        </FlyoutFooter>
       )}
       {isPreviewMode && (
         <UserPreviewPanelFooter

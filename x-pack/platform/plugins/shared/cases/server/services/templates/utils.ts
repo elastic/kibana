@@ -7,12 +7,21 @@
 
 import { parseDocument, isMap, isSeq, isScalar } from 'yaml';
 import type { ParsedTemplate } from '../../../common/types/domain/template/v1';
-import { isInlineField } from '../../../common/types/domain/template/fields';
+import type { FieldDefinition } from '../../../common/types/domain/field_definition/v1';
+import { resolveTemplateFields } from '../../../common/utils';
 
 type ParsedField = ParsedTemplate['definition']['fields'][number];
 
-export const toFieldDefinitions = (fields: ParsedField[]) =>
-  fields.filter(isInlineField).map((f) => ({
+/**
+ * Builds the cached `fieldDefinitions` summary stored on a template SO.
+ * Resolves `$ref` fields against the field library so search and label
+ * enrichment can see library-referenced fields.
+ */
+export const toFieldDefinitions = (
+  fields: ParsedField[],
+  libraryDefs: readonly FieldDefinition[] = []
+) =>
+  resolveTemplateFields(fields, libraryDefs).map((f) => ({
     name: f.name,
     label: f.label ?? f.name,
     type: f.type,

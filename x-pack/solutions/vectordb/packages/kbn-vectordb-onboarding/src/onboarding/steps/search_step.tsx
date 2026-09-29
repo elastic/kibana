@@ -6,27 +6,26 @@
  */
 
 import React from 'react';
-import { Redirect, useHistory, useLocation } from 'react-router-dom';
+import { Redirect } from 'react-router-dom';
 import { useKibana } from '../../services';
 import { ApiStep } from '../components/api_step';
 import { getStepContent } from '../components/onboarding_data';
 import { StepLayout } from '../components/step_layout';
 import { pathQuery, useWizardPath } from '../../hooks/use_wizard_path';
-import { ONBOARDING_PATH, TUTORIALS_PATH } from '../../routes';
+import { useOnboardingNavigate } from '../../hooks/use_onboarding_navigate';
+import { GETTING_STARTED_PATH } from '../../routes';
 
 export const SearchStep = () => {
-  const history = useHistory();
-  const { state } = useLocation<{ from?: string }>();
+  const navigate = useOnboardingNavigate();
   const path = useWizardPath();
-  const from = state?.from ?? TUTORIALS_PATH;
   const {
     services: { docLinks },
   } = useKibana();
 
-  if (!path) return <Redirect to={ONBOARDING_PATH} />;
+  if (!path) return <Redirect to={GETTING_STARTED_PATH} />;
 
   const contentKey = path === 'generate-vectors' ? 'generate' : 'have_vectors';
-  const { title, description, api, infoPanel } = getStepContent(docLinks)[contentKey].search;
+  const { title, description, api, docsPanel, pills } = getStepContent(docLinks)[contentKey].search;
   const step = 'search';
 
   return (
@@ -36,22 +35,14 @@ export const SearchStep = () => {
       step={step}
       title={title}
       description={description}
-      onBack={() =>
-        history.push({
-          pathname: `${ONBOARDING_PATH}/ingest`,
-          search: pathQuery(path),
-          state: { from },
-        })
-      }
-      onComplete={() => {
-        history.push('/');
-      }}
+      onBack={() => navigate(`${GETTING_STARTED_PATH}/ingest${pathQuery(path)}`)}
+      onComplete={() => navigate('/')}
     >
       <ApiStep
-        snippets={api.snippets}
-        consoleRequest={api.request}
+        tabs={api.tabs}
         consoleComment={api.consoleComment}
-        infoPanel={infoPanel}
+        docsPanel={docsPanel}
+        pills={pills}
         step={step}
         path={path}
       />

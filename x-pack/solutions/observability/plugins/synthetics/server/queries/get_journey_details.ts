@@ -9,7 +9,7 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 import type { SyntheticsEsClient } from '../lib';
 import { createEsParams } from '../lib';
 import { getCheckGroupTimeRangeFilter } from '../../common/constants/client_defaults';
-import { getSyntheticsCcsIndex } from '../../common/get_synthetics_indices';
+import { getSyntheticsScopedIndex } from '../../common/get_synthetics_indices';
 import type { JourneyStep, Ping, SyntheticsJourneyApiResponse } from '../../common/runtime_types';
 
 export interface GetJourneyDetails {
@@ -28,7 +28,7 @@ export const getJourneyDetails = async ({
 }: GetJourneyDetails & {
   syntheticsEsClient: SyntheticsEsClient;
 }): Promise<SyntheticsJourneyApiResponse['details']> => {
-  const index = getSyntheticsCcsIndex(remoteName, syntheticsEsClient.heartbeatIndices);
+  const index = getSyntheticsScopedIndex(remoteName, syntheticsEsClient.heartbeatIndices);
 
   const params = createEsParams({
     index,

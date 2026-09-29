@@ -70,7 +70,7 @@ function getRegisteredTaskRunner(params: { attachmentType?: string }) {
   return taskDef.createTaskRunner(
     taskManagerMock.createRunContext({
       taskInstance: { params } as any,
-      abortController: mockAbortController,
+      signal: mockAbortController.signal,
     })
   );
 }
@@ -177,6 +177,33 @@ describe('sml_task_definitions', () => {
       expect(mockLogger.error).toHaveBeenCalledWith(
         "SML crawler task failed for type 'visualization': crawl failed"
       );
+    });
+
+    it('creates the internal repository using only the hidden types the definition declares', async () => {
+      const mockCreateInternalRepository = jest.fn().mockReturnValue({});
+      mockGetCrawlerDeps.mockResolvedValue({
+        smlService: mockSmlService,
+        elasticsearch: { client: { asInternalUser: mockEsClient } },
+        savedObjects: { createInternalRepository: mockCreateInternalRepository },
+        uiSettings: mockUiSettings,
+        logger: mockLogger,
+      });
+
+      // Type with requiredHiddenTypes uses them; type without uses []
+      const connectorDef = createMockDefinition({
+        id: 'connector',
+        requiredHiddenTypes: ['action'],
+      });
+      const dashboardDef = createMockDefinition({ id: 'dashboard' });
+
+      mockSmlService.getTypeDefinition.mockReturnValue(connectorDef);
+      await getRegisteredTaskRunner({ attachmentType: 'connector' }).run();
+      expect(mockCreateInternalRepository).toHaveBeenCalledWith(['action']);
+
+      mockCreateInternalRepository.mockClear();
+      mockSmlService.getTypeDefinition.mockReturnValue(dashboardDef);
+      await getRegisteredTaskRunner({ attachmentType: 'dashboard' }).run();
+      expect(mockCreateInternalRepository).toHaveBeenCalledWith([]);
     });
   });
 

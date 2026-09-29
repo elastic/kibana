@@ -11,7 +11,9 @@ const { writeFileSync, readFileSync, copyFileSync, mkdirSync } = require('fs');
 const { resolve, extname, dirname } = require('path');
 
 const { optimize } = require('svgo');
-const { transformCode } = require('@kbn/babel-transform');
+const { transformFileSync } = require('@swc/core');
+// the /node subpath keeps worker threads free of imports that need a runtime transpiler
+const { getNodeSwcConfig } = require('@kbn/swc-config/node');
 
 const { REPO_ROOT } = require('@kbn/repo-info');
 const BUILD_ROOT = resolve(REPO_ROOT, 'build', 'kibana');
@@ -31,9 +33,10 @@ module.exports = async ({ source }) => {
     case '.js':
     case '.ts':
     case '.tsx':
-      const output = transformCode(absoluteSource, undefined, {
-        disableSourceMaps: true,
-      });
+      const output = transformFileSync(
+        absoluteSource,
+        getNodeSwcConfig(absoluteSource, { production: true })
+      );
 
       if (output.code) {
         const dest = absoluteDest.substring(0, absoluteDest.lastIndexOf('.')) + '.js';

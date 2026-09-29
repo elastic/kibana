@@ -64,9 +64,9 @@ function buildVisualizationState(config: LegacyMetricConfig): LegacyMetricVisual
     layerId: DEFAULT_LAYER_ID,
     layerType: 'data',
     accessor: ACCESSOR,
-    size: layer.metric.size,
-    titlePosition: layer.metric.labels?.alignment,
-    textAlign: layer.metric.values?.alignment,
+    ...(layer.metric.size ? { size: layer.metric.size } : {}),
+    ...(layer.metric.labels?.alignment ? { titlePosition: layer.metric.labels?.alignment } : {}),
+    ...(layer.metric.values?.alignment ? { textAlign: layer.metric.values?.alignment } : {}),
     ...(layer.metric.apply_color_to
       ? stripUndefined({
           colorMode: layer.metric.apply_color_to === 'background' ? 'Background' : 'Labels',

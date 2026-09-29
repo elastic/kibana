@@ -76,6 +76,7 @@ import { useNonClosedAlerts } from '../../../../cloud_security_posture/hooks/use
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { useNavigateToUserDetails } from '../../../entity_details/user_right/hooks/use_navigate_to_user_details';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
+import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
 import { useEntityFromStore } from '../../../entity_details/shared/hooks/use_entity_from_store';
 import { useObservedUser } from '../../../../flyout_v2/entity/user/main/hooks/use_observed_user';
@@ -158,7 +159,8 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
   const EntityCellActions = isAttackDetails ? AttackDetailsCellActions : DocumentDetailsCellActions;
 
   const { to, from, deleteQuery, setQuery, isInitializing } = useGlobalTime();
-  const selectedPatterns = useSelectedPatterns();
+  const { dataView } = useDataView();
+  const selectedPatterns = useSelectedPatterns(dataView);
   const { indexPatterns: securityDefaultPatterns } = useSecurityDefaultPatterns();
 
   const dispatch = useDispatch();

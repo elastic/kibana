@@ -22,6 +22,7 @@ export const createServices = (
   return {
     ...core,
     ...pluginsStart,
+    security: { ...core.security, ...pluginsStart.security },
     experimentalFeatures,
   };
 };

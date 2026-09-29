@@ -114,6 +114,7 @@ evaluate.describe('Attack Discovery', { tag: tags.stateful.classic }, () => {
             {
               name: 'Ran',
               kind: 'CODE',
+              direction: 'maximize',
               evaluate: async ({ output }) => ({ score: Array.isArray(output?.insights) ? 1 : 0 }),
             },
           ]
@@ -150,6 +151,7 @@ evaluate.describe('Attack Discovery', { tag: tags.stateful.classic }, () => {
             {
               name: 'Ran',
               kind: 'CODE',
+              direction: 'maximize',
               evaluate: async ({ output }) => ({ score: Array.isArray(output?.insights) ? 1 : 0 }),
             },
           ]

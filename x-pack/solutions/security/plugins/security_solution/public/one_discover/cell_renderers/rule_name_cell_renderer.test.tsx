@@ -15,8 +15,16 @@ import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import { RuleNameCellRenderer } from './rule_name_cell_renderer';
 import type { StartServices } from '../../types';
 import type { SecurityAppStore } from '../../common/store/types';
+import {
+  FlyoutV2EventTypes,
+  FLYOUT_ORIGIN,
+  FLYOUT_SESSION_KIND,
+  FLYOUT_SURFACE,
+  FLYOUT_TYPE,
+} from '../../common/lib/telemetry';
 
 const mockOpenSystemFlyout = jest.fn();
+const mockReportEvent = jest.fn();
 jest.mock('../../common/lib/kibana', () => ({
   useKibana: () => ({
     services: {
@@ -59,6 +67,7 @@ jest.mock('../../flyout_v2/shared/components/flyout_provider', () => ({
 
 const mockServices = {
   overlays: { openSystemFlyout: mockOpenSystemFlyout },
+  telemetry: { reportEvent: mockReportEvent },
 } as unknown as StartServices;
 const mockStore = {} as SecurityAppStore;
 
@@ -87,6 +96,7 @@ const baseProps: DataGridCellValueElementProps = {
 describe('RuleNameCellRenderer', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockOpenSystemFlyout.mockReturnValue({ onClose: new Promise<void>(() => {}) });
   });
 
   it('should render rule name as a clickable link', () => {
@@ -106,6 +116,13 @@ describe('RuleNameCellRenderer', () => {
 
     await userEvent.click(getByTestId('one-discover-rule-name-link'));
     expect(mockOpenSystemFlyout).toHaveBeenCalledTimes(1);
+    expect(mockReportEvent).toHaveBeenCalledWith(FlyoutV2EventTypes.FlyoutOpened, {
+      surface: FLYOUT_SURFACE.FLYOUT,
+      flyoutType: FLYOUT_TYPE.RULE,
+      tool: undefined,
+      session: FLYOUT_SESSION_KIND.START,
+      origin: FLYOUT_ORIGIN.TABLE_FIELD_LINK,
+    });
   });
 
   it('should render empty tag when rule name is null', () => {

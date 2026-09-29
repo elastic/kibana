@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { asSpaceId } from '@kbn/core-spaces-common';
 import { loggingSystemMock, securityServiceMock } from '@kbn/core/server/mocks';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
@@ -163,7 +164,7 @@ describe('runTask', () => {
     getAlertIndicesAliasMock.mockReturnValueOnce(['index1', 'index2', 'alert-index-3']);
 
     // @ts-ignore - accessing private function for testing
-    await alertDeletionClient.runTask(alertDeletionTaskInstance, new AbortController());
+    await alertDeletionClient.runTask(alertDeletionTaskInstance, new AbortController().signal);
 
     expect(ruleTypeRegistry.getAllTypes).toHaveBeenCalledTimes(0);
     expect(ruleTypeRegistry.getFilteredTypes).toHaveBeenCalledTimes(3);
@@ -199,7 +200,7 @@ describe('runTask', () => {
     expect(esClient.search).toHaveBeenNthCalledWith(
       1,
       {
-        query: inactiveAlertsQuery(30, 'default'),
+        query: inactiveAlertsQuery(30, asSpaceId('default')),
         size: 1000,
         sort: [{ [TIMESTAMP]: 'asc' }],
         pit: { id: 'pit1', keep_alive: '1m' },
@@ -210,7 +211,7 @@ describe('runTask', () => {
     expect(esClient.search).toHaveBeenNthCalledWith(
       2,
       {
-        query: inactiveAlertsQuery(30, 'space-1'),
+        query: inactiveAlertsQuery(30, asSpaceId('space-1')),
         size: 1000,
         sort: [{ [TIMESTAMP]: 'asc' }],
         pit: { id: 'pit2', keep_alive: '1m' },
@@ -221,7 +222,7 @@ describe('runTask', () => {
     expect(esClient.search).toHaveBeenNthCalledWith(
       3,
       {
-        query: inactiveAlertsQuery(30, 'another-space'),
+        query: inactiveAlertsQuery(30, asSpaceId('another-space')),
         size: 1000,
         sort: [{ [TIMESTAMP]: 'asc' }],
         pit: { id: 'pit3', keep_alive: '1m' },
@@ -407,7 +408,7 @@ describe('runTask', () => {
           spaceIds: ['default'],
         },
       },
-      new AbortController()
+      new AbortController().signal
     );
 
     expect(ruleTypeRegistry.getFilteredTypes).toHaveBeenCalledTimes(1);
@@ -426,7 +427,7 @@ describe('runTask', () => {
     expect(esClient.search).toHaveBeenNthCalledWith(
       1,
       {
-        query: inactiveAlertsQuery(30, 'default'),
+        query: inactiveAlertsQuery(30, asSpaceId('default')),
         size: 1000,
         sort: [{ [TIMESTAMP]: 'asc' }],
         pit: { id: 'pit1', keep_alive: '1m' },
@@ -437,7 +438,7 @@ describe('runTask', () => {
     expect(esClient.search).toHaveBeenNthCalledWith(
       2,
       {
-        query: inactiveAlertsQuery(30, 'default'),
+        query: inactiveAlertsQuery(30, asSpaceId('default')),
         size: 1000,
         sort: [{ [TIMESTAMP]: 'asc' }],
         pit: { id: 'pit1-1', keep_alive: '1m' },
@@ -449,7 +450,7 @@ describe('runTask', () => {
     expect(esClient.search).toHaveBeenNthCalledWith(
       3,
       {
-        query: inactiveAlertsQuery(30, 'default'),
+        query: inactiveAlertsQuery(30, asSpaceId('default')),
         size: 1000,
         sort: [{ [TIMESTAMP]: 'asc' }],
         pit: { id: 'pit1-2', keep_alive: '1m' },
@@ -461,7 +462,7 @@ describe('runTask', () => {
     expect(esClient.search).toHaveBeenNthCalledWith(
       4,
       {
-        query: inactiveAlertsQuery(30, 'default'),
+        query: inactiveAlertsQuery(30, asSpaceId('default')),
         size: 1000,
         sort: [{ [TIMESTAMP]: 'asc' }],
         pit: { id: 'pit1-3', keep_alive: '1m' },
@@ -593,7 +594,7 @@ describe('runTask', () => {
           spaceIds: ['default'],
         },
       },
-      new AbortController()
+      new AbortController().signal
     );
 
     expect(ruleTypeRegistry.getFilteredTypes).toHaveBeenCalledTimes(1);
@@ -618,7 +619,7 @@ describe('runTask', () => {
     expect(esClient.search).toHaveBeenNthCalledWith(
       1,
       {
-        query: activeAlertsQuery(90, 'default'),
+        query: activeAlertsQuery(90, asSpaceId('default')),
         size: 1000,
         sort: [{ [TIMESTAMP]: 'asc' }],
         pit: { id: 'pit1', keep_alive: '1m' },
@@ -629,7 +630,7 @@ describe('runTask', () => {
     expect(esClient.search).toHaveBeenNthCalledWith(
       2,
       {
-        query: inactiveAlertsQuery(30, 'default'),
+        query: inactiveAlertsQuery(30, asSpaceId('default')),
         size: 1000,
         sort: [{ [TIMESTAMP]: 'asc' }],
         pit: { id: 'pit2', keep_alive: '1m' },
@@ -715,7 +716,7 @@ describe('runTask', () => {
             spaceIds: ['default'],
           },
         },
-        new AbortController()
+        new AbortController().signal
       );
 
       expect(esClient.deleteByQuery).not.toHaveBeenCalled();
@@ -749,7 +750,7 @@ describe('runTask', () => {
             spaceIds: ['default'],
           },
         },
-        new AbortController()
+        new AbortController().signal
       );
 
       expect(esClient.deleteByQuery).not.toHaveBeenCalled();
@@ -788,7 +789,7 @@ describe('runTask', () => {
             },
           },
         },
-        new AbortController()
+        new AbortController().signal
       );
 
       expect(esClient.deleteByQuery).not.toHaveBeenCalled();
@@ -857,7 +858,7 @@ describe('runTask', () => {
             spaceIds: ['default'],
           },
         },
-        new AbortController()
+        new AbortController().signal
       );
 
       // active alerts search failures should not prevent inactive alerts from being deleted
@@ -867,7 +868,7 @@ describe('runTask', () => {
       expect(esClient.search).toHaveBeenNthCalledWith(
         1,
         {
-          query: activeAlertsQuery(45, 'default'),
+          query: activeAlertsQuery(45, asSpaceId('default')),
           size: 1000,
           sort: [{ [TIMESTAMP]: 'asc' }],
           pit: { id: 'pit1', keep_alive: '1m' },
@@ -878,7 +879,7 @@ describe('runTask', () => {
       expect(esClient.search).toHaveBeenNthCalledWith(
         2,
         {
-          query: inactiveAlertsQuery(100, 'default'),
+          query: inactiveAlertsQuery(100, asSpaceId('default')),
           size: 1000,
           sort: [{ [TIMESTAMP]: 'asc' }],
           pit: { id: 'pit2', keep_alive: '1m' },
@@ -971,7 +972,7 @@ describe('runTask', () => {
             spaceIds: ['default'],
           },
         },
-        new AbortController()
+        new AbortController().signal
       );
 
       expect(esClient.openPointInTime).toHaveBeenCalledTimes(1);
@@ -984,7 +985,7 @@ describe('runTask', () => {
       expect(esClient.search).toHaveBeenCalledTimes(1);
       expect(esClient.search).toHaveBeenCalledWith(
         {
-          query: activeAlertsQuery(45, 'default'),
+          query: activeAlertsQuery(45, asSpaceId('default')),
           size: 1000,
           sort: [{ [TIMESTAMP]: 'asc' }],
           pit: { id: 'pit1', keep_alive: '1m' },

@@ -13,61 +13,117 @@ import {
 } from '@kbn/esql-utils';
 import { getLensAttributesFromSuggestion } from '@kbn/visualization-utils';
 import type { LensSerializedState } from '@kbn/lens-common';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { isESQLModeEnabled } from './initializers/utils';
 import type { LensEmbeddableStartServices } from './types';
+
+// Used when no index can be discovered or when loadESQLAttributes times out.
+// ROW doesn't query any index, so the panel opens and the flyout works regardless of data state.
+const FALLBACK_ESQL_QUERY = 'ROW x = 1';
+
+// If building the initial Lens state (index discovery + timefield + column query) takes longer
+// than this, we fall back to FALLBACK_ESQL_QUERY so the flyout opens without waiting for slow
+// FDS endpoints.
+const LOAD_ESQL_ATTRIBUTES_TIMEOUT_MS = 5_000;
 
 export type ESQLStartServices = Pick<
   LensEmbeddableStartServices,
   'dataViews' | 'data' | 'visualizationMap' | 'datasourceMap' | 'uiSettings' | 'coreStart'
 >;
 
-export async function loadESQLAttributes({
+export async function loadESQLAttributes(
+  services: ESQLStartServices
+): Promise<LensSerializedState['attributes'] | undefined> {
+  if (!isESQLModeEnabled({ uiSettings: services.uiSettings })) {
+    return;
+  }
+
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
+
+  const timeoutFallback = new Promise<LensSerializedState['attributes'] | undefined>((resolve) => {
+    timeoutId = setTimeout(
+      () =>
+        buildESQLAttributes(FALLBACK_ESQL_QUERY, services).then(resolve, () => resolve(undefined)),
+      LOAD_ESQL_ATTRIBUTES_TIMEOUT_MS
+    );
+  });
+
+  try {
+    return await Promise.race([buildMainESQLAttributes(services), timeoutFallback]);
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+async function buildMainESQLAttributes({
   dataViews,
   data,
   visualizationMap,
   datasourceMap,
-  uiSettings,
   coreStart,
 }: ESQLStartServices): Promise<LensSerializedState['attributes'] | undefined> {
-  // Early exit if ESQL is not supported
-  if (!isESQLModeEnabled({ uiSettings })) {
-    return;
-  }
   const indexName = await getIndexForESQLQuery({ http: coreStart.http });
-  // Early exit if there's no data view to use
-  if (!indexName) {
-    return;
-  }
+  const initialQuery = indexName ? `FROM ${indexName}` : FALLBACK_ESQL_QUERY;
 
-  // From this moment on there are no longer early exists before suggestions
-  // so make sure to load async modules while doing other async stuff to save some time
-  const [dataView, { suggestionsApi }] = await Promise.all([
-    getESQLAdHocDataview({
-      dataViewsService: dataViews,
-      query: `FROM ${indexName}`,
-      http: coreStart.http,
-    }),
-    import('../async_services'),
-  ]);
+  const dataView = await getESQLAdHocDataview({
+    dataViewsService: dataViews,
+    query: initialQuery,
+    http: indexName ? coreStart.http : undefined,
+    options: indexName ? undefined : { allowNoIndex: true },
+  });
 
-  const esqlQuery = getInitialESQLQuery(dataView);
+  const esqlQuery = indexName ? getInitialESQLQuery(dataView) : FALLBACK_ESQL_QUERY;
 
-  const defaultEsqlQuery = {
-    esql: esqlQuery,
-  };
+  return buildESQLAttributesFromDataView(esqlQuery, dataView, {
+    data,
+    visualizationMap,
+    datasourceMap,
+  });
+}
+
+async function buildESQLAttributes(
+  esqlQuery: string,
+  { dataViews, data, visualizationMap, datasourceMap }: ESQLStartServices
+): Promise<LensSerializedState['attributes'] | undefined> {
+  const dataView = await getESQLAdHocDataview({
+    dataViewsService: dataViews,
+    query: esqlQuery,
+    options: { allowNoIndex: true },
+  });
+
+  return buildESQLAttributesFromDataView(esqlQuery, dataView, {
+    data,
+    visualizationMap,
+    datasourceMap,
+  });
+}
+
+async function buildESQLAttributesFromDataView(
+  esqlQuery: string,
+  dataView: DataView,
+  {
+    data,
+    visualizationMap,
+    datasourceMap,
+  }: Pick<ESQLStartServices, 'data' | 'visualizationMap' | 'datasourceMap'>
+): Promise<LensSerializedState['attributes'] | undefined> {
+  const defaultEsqlQuery = { esql: esqlQuery };
 
   // For the suggestions api we need only the columns
   // so we are requesting them with limit 0
   // this is much more performant than requesting
   // all the table
   const abortController = new AbortController();
-  const columns = await getESQLQueryColumns({
-    esqlQuery,
-    search: data.search.search,
-    signal: abortController.signal,
-    timeRange: data.query.timefilter.timefilter.getAbsoluteTime(),
-    includeColumnMetadata: true,
-  });
+  const [columns, { suggestionsApi }] = await Promise.all([
+    getESQLQueryColumns({
+      esqlQuery,
+      search: data.search.search,
+      signal: abortController.signal,
+      timeRange: data.query.timefilter.timefilter.getAbsoluteTime(),
+      includeColumnMetadata: true,
+    }),
+    import('../async_services'),
+  ]);
 
   const context = {
     dataViewSpec: dataView.toSpec(false),

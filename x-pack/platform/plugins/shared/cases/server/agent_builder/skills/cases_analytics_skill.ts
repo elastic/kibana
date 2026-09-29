@@ -57,7 +57,7 @@ The indices are named \`.cases\` / \`.cases-activity\` / \`.cases-attachments\` 
 
 | Index | Grain | Key fields |
 |-------|-------|-----------|
-| \`.cases\` | one doc per case (lookup-mode) | \`case.id\`, \`case.status\`, \`case.severity\`, \`case.owner\`, \`case.created_at\`, \`case.closed_at\`, \`case.in_progress_at\`, \`case.time_to_acknowledge\`, \`case.time_to_investigate\`, \`case.time_to_resolve\`, \`case.duration\`, \`case.total_alerts\`, \`case.total_comments\`, \`case.tags\`, \`case.category\`, \`case.assignees.uid\`, \`case.observables.observable-type-<x>\`, \`case.extended_fields\` |
+| \`.cases\` | one doc per case (lookup-mode) | \`case.id\`, \`case.status\`, \`case.severity\`, \`case.owner\`, \`case.created_at\`, \`case.closed_at\`, \`case.in_progress_at\`, \`case.time_to_acknowledge\`, \`case.time_to_investigate\`, \`case.time_to_resolve\`, \`case.duration\`, \`case.total_alerts\`, \`case.total_comments\`, \`case.tags\`, \`case.category\`, \`case.assignees.uid\`, \`case.assignees.username\`, \`case.assignees.full_name\`, \`case.assignees.email\`, \`case.observables.observable-type-<x>\`, \`case.extended_fields\`, \`case.template.id\`, \`case.template.version\` |
 | \`.cases-activity\` | one doc per user action | \`case.id\`, \`action.type\`, \`action.verb\`, \`action.status_new\`, \`action.severity_new\`, \`action.assignees_changed\`, \`action.tags_changed\`, \`action.connector_id_new\`, \`action.attachment_reference_id\`, \`actor.*\`, \`@timestamp\` |
 | \`.cases-attachments\` | one doc per comment/attachment | \`case.id\`, \`attachment.type\`, \`attachment.comment\`, \`attachment.alert.rule.id\`, \`attachment.alert.rule.name\`, \`attachment.alert.indices\`, \`attachment.event.indices\`, \`attachment.attachment_id\`, \`created_at\` |
 
@@ -87,6 +87,33 @@ These indices are **re-indexed from the case saved objects** by real-time hooks 
 
 cross-check against the source of truth with \`${platformCoreTools.cases}\` (get / bulk_get / search) and reconcile. Prefer the saved-object value when they disagree, and tell the user there may be indexing lag. Never present a suspicious analytics number as fact without this check.
 
+## Template analytics
+
+When the Cases templates feature is enabled, each case carries \`case.template.id\` (the saved-object ID of the template it was created from) and \`case.template.version\` (an integer recording which revision of the template was in effect at creation time). Both are \`keyword\` / \`integer\` fields — directly queryable in ES|QL without helpers.
+
+Cases created without a template have \`case.template.id\` absent — filter with \`IS NOT NULL\` / \`IS NULL\` to separate templated from ad-hoc cases.
+
+**Template name lookup.** The \`.cases\` index stores only the template ID, not its name. To label results by name, retrieve the matching templates via the \`${platformCoreTools.cases}\` tool or the public template API, then annotate the ES|QL results server-side — you cannot join to a templates index in ES|QL.
+
+Example — count open cases per template:
+\`\`\`esql
+FROM .cases
+| WHERE case.status != "closed" AND case.template.id IS NOT NULL
+| STATS open_cases = COUNT(*) BY case.template.id
+| SORT open_cases DESC
+\`\`\`
+
+Example — compare closure rate between templated and ad-hoc cases:
+\`\`\`esql
+FROM .cases
+| EVAL is_templated = CASE(case.template.id IS NOT NULL, "templated", "ad-hoc")
+| EVAL is_closed = CASE(case.status == "closed", 1, 0)
+| STATS total = COUNT(*), closed = SUM(is_closed) BY is_templated
+| EVAL closure_rate = ROUND(closed::double / total, 3)
+\`\`\`
+
+See the referenced "template-analytics" patterns for ready-made recipes.
+
 ## KQL / the Case Analytics data view (self-service + fallback)
 
 A managed, per-space **\`Case Analytics\` data view** spans all three indices and publishes each custom field as a typed top-level runtime field \`case.<name>_as_<type>\` (e.g. \`case.effort_as_integer\`). Use it:
@@ -113,9 +140,11 @@ FROM .cases
 
 \`FIELD_EXTRACT\` is a **Technical Preview** function. It reads numeric and keyword sub-keys from the flattened \`case.extended_fields\`, but blank/unset custom fields are common, so **always report how many docs had the field populated** (\`COUNT(<extracted>)\`) alongside the metric. When precision matters or FIELD_EXTRACT returns nothing, fall back to the \`Case Analytics\` data view (see "KQL / the Case Analytics data view"), whose typed runtime field \`case.<name>_as_<type>\` reads the same values.
 
-## Resolving user UIDs to names
+## Resolving assignee UIDs to names
 
-Assignees are stored as **profile UIDs only** — \`case.assignees.uid\` (and \`action.assignees_changed\` on the activity stream). No tool resolves them and there is no user directory index to join. But every \`.cases-activity\` row carries the **acting** user's identity (\`actor.profile_uid\` + \`actor.full_name\` + \`actor.username\`), so you can build a best-effort UID→name directory from the activity stream and use it to label UIDs:
+Assignees carry identity inline on \`.cases\`: \`case.assignees.username\`, \`case.assignees.full_name\` and \`case.assignees.email\` alongside \`case.assignees.uid\`. **Prefer these fields** — label assignees with \`case.assignees.full_name\` (fall back to \`username\`, then \`uid\`), no join or helper query needed.
+
+These fields are **forward-only**: they are populated when the case was created/updated after the identity rollout and the profile resolved. Legacy cases, unresolved UIDs, and deployments where population is still disabled leave them \`null\` — for those, and for \`action.assignees_changed\` on the activity stream (still UID-only), fall back to the activity-derived UID→name directory below.
 
 \`\`\`esql
 FROM .cases-activity
@@ -126,18 +155,18 @@ FROM .cases-activity
 | KEEP uid, actor.full_name, actor.username
 \`\`\`
 
-Run this as a helper query, then map the UIDs in your result (e.g. \`case.assignees.uid\`) to names. Key points:
+Run this as a helper query, then map any UIDs left unresolved by the inline fields to names. Key points:
 - **Best-effort coverage** — the directory only knows users who have *performed* a case action. A user who was assigned but never acted won't appear; show their UID and say the display name isn't available rather than guessing.
 - **Renamed users** — a user whose name/username changed may appear on more than one row; the most recent (top, by \`latest\`) is current.
 - **DLS-scoped** — you only see actors in the owners/spaces you can read, so the directory is naturally limited to authorized names.
 - **Not a \`LOOKUP JOIN\`** — \`.cases-activity\` is a fact index (not lookup-mode), so it can't be a join target. Build the directory table first, then annotate in a second step.
 - **Reporters need no resolution** — \`case.created_by\` / \`case.updated_by\` / \`case.closed_by\` already carry \`username\` / \`full_name\` / \`email\`.
 
-For a dashboard (where the two-step annotate isn't available), surface the same directory query as its own table/Lens panel so it acts as a UID→name key alongside the UID-keyed charts.
+For a dashboard, prefer the inline \`case.assignees.full_name\`; where UIDs remain (legacy docs, \`action.assignees_changed\`), surface the directory query as its own table/Lens panel so it acts as a UID→name key alongside the UID-keyed charts.
 
 ## Building visualizations
 
-Use \`${platformCoreTools.createVisualization}\`. Ground first (confirm the index and that referenced fields exist — use \`${platformCoreTools.getIndexMapping}\` if unsure), then pass an explicit \`index\` (\`.cases\`, \`.cases-activity\`, or \`.cases-attachments\`) so it doesn't have to auto-discover. Prefer letting it generate the ES|QL from a specific natural-language \`query\`; for complex aggregations/joins, pre-build with \`${platformCoreTools.generateEsql}\`, optionally validate with \`${platformCoreTools.executeEsql}\`, and pass it via \`esql\`. Render the returned attachment with \`<render_attachment id="..." version="..." />\`.
+Use \`${platformCoreTools.createVisualization}\`. Ground first (confirm the index and that referenced fields exist — use \`${platformCoreTools.getIndexMapping}\` if unsure), then pass an explicit \`index\` (\`.cases\`, \`.cases-activity\`, or \`.cases-attachments\`) so it doesn't have to auto-discover. Prefer letting it generate the ES|QL from a specific natural-language \`query\`; for complex aggregations/joins, pre-build with \`${platformCoreTools.generateEsql}\`, optionally validate with \`${platformCoreTools.executeEsql}\`, and pass it via \`target.esql\`. Render the returned attachment with \`<render_attachment id="..." version="..." />\`.
 
 ## Building dashboards
 
@@ -200,7 +229,7 @@ FROM .cases
 | STATS open_cases = COUNT(*) BY case.assignees.uid
 | SORT open_cases DESC
 \`\`\`
-Note: \`case.assignees.uid\` is a profile UID. Label it with the activity-derived UID→name directory (helper below) — best-effort, covering users who've performed an action; otherwise show the UID. Reporters (\`case.created_by\` / \`case.updated_by\` / \`case.closed_by\`) already carry \`username\` / \`full_name\` / \`email\`.
+Note: prefer the inline identity fields for labels — group/label by \`case.assignees.full_name\` (fall back to \`case.assignees.username\`, then \`case.assignees.uid\`). These are forward-only, so for legacy docs / unresolved UIDs (and for \`action.assignees_changed\`) fall back to the activity-derived UID→name directory (helper below) — best-effort, covering users who've performed an action; otherwise show the UID. Reporters (\`case.created_by\` / \`case.updated_by\` / \`case.closed_by\`) already carry \`username\` / \`full_name\` / \`email\`.
 
 ## User UID → name directory (helper for labeling assignee UIDs)
 \`\`\`esql
@@ -211,7 +240,7 @@ FROM .cases-activity
 | RENAME actor.profile_uid AS uid
 | KEEP uid, actor.full_name, actor.username
 \`\`\`
-Best-effort: only users who have performed an action appear. Use it to label \`case.assignees.uid\` / \`action.assignees_changed\`; fall back to the UID when absent (a renamed user's most recent row, by \`latest\`, is current). \`.cases-activity\` is a fact index, so this is a build-then-annotate step, not a \`LOOKUP JOIN\`.`,
+Best-effort: only users who have performed an action appear. Prefer the inline \`case.assignees.{full_name,username}\` fields first; use this directory only for UIDs they leave \`null\` (legacy/unresolved docs) and for \`action.assignees_changed\`, falling back to the UID when still absent (a renamed user's most recent row, by \`latest\`, is current). \`.cases-activity\` is a fact index, so this is a build-then-annotate step, not a \`LOOKUP JOIN\`.`,
     },
     {
       relativePath: './analytics',
@@ -285,6 +314,54 @@ Swap \`observable-type-ipv4\` for the type of interest. The set is open (custom 
 
 ## MTTD note
 The alert's original detection time is not stored on the attachment (only rule id/name and source indices). To compute MTTD, join out to the alerts indices in \`attachment.alert.indices\` using the alert ids in \`attachment.attachment_id\`, then compare the alert's original time to \`case.created_at\`.`,
+    },
+    {
+      relativePath: './analytics',
+      name: 'template-analytics',
+      content: `# Template analytics queries
+
+Template fields on \`.cases\`: \`case.template.id\` (keyword — the template SO id) and \`case.template.version\` (integer). Cases created without a template have these fields absent.
+
+## Open cases per template (top 10)
+\`\`\`esql
+FROM .cases
+| WHERE case.status != "closed" AND case.template.id IS NOT NULL
+| STATS open_cases = COUNT(*) BY case.template.id
+| SORT open_cases DESC
+| LIMIT 10
+\`\`\`
+Follow up with the public template API (or the \`${platformCoreTools.cases}\` tool) to resolve IDs to names.
+
+## Templated vs ad-hoc closure rate
+\`\`\`esql
+FROM .cases
+| EVAL is_templated = CASE(case.template.id IS NOT NULL, "templated", "ad-hoc")
+| EVAL is_closed = CASE(case.status == "closed", 1, 0)
+| STATS total = COUNT(*), closed = SUM(is_closed) BY is_templated
+| EVAL closure_rate = ROUND(closed::double / total, 3)
+| SORT total DESC
+\`\`\`
+
+## MTTR by template (last 90 days)
+\`\`\`esql
+FROM .cases
+| WHERE case.status == "closed"
+  AND case.time_to_resolve IS NOT NULL
+  AND case.template.id IS NOT NULL
+  AND case.created_at >= NOW() - 90 days
+| STATS mttr_seconds = AVG(case.time_to_resolve), case_count = COUNT(*) BY case.template.id
+| EVAL mttr_hours = ROUND(mttr_seconds / 3600, 1)
+| SORT mttr_seconds DESC
+\`\`\`
+
+## Extended-field breakdown filtered to one template
+\`\`\`esql
+FROM .cases
+| WHERE case.template.id == "<TEMPLATE_ID>"
+| EVAL effort = FIELD_EXTRACT(case.extended_fields, "effort_as_integer")
+| STATS avg_effort = AVG(effort::double), with_value = COUNT(effort), total = COUNT(*)
+\`\`\`
+Always surface the populated-vs-total counts — blank extended fields are common.`,
     },
     {
       relativePath: './analytics',

@@ -5,11 +5,15 @@
  * 2.0.
  */
 
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import {
+  EuiBadge,
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiCheckbox,
+  EuiCode,
+  EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -18,17 +22,23 @@ import {
   EuiFlyoutHeader,
   EuiForm,
   EuiFormRow,
+  EuiPanel,
   EuiSpacer,
+  EuiText,
   EuiTextArea,
   EuiTitle,
   EuiToolTip,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { parse as parseYaml } from 'yaml';
 import type { FieldDefinition } from '../../../../common/types/domain/field_definition/v1';
 import {
   FieldType,
+  InlineFieldSchema,
+  isDisplayOnlyField,
   UserPickerDefaultSchema,
 } from '../../../../common/types/domain/template/fields';
+import { StrictInlineFieldSchema } from '../../../../common/types/domain/template/strict_fields';
 import {
   type FieldDefaultValue,
   updateFieldDefinitionDefault,
@@ -65,40 +75,82 @@ export const FieldDefinitionFlyout: React.FC<FieldDefinitionFlyoutProps> = ({
   isSaving = false,
 }) => {
   const isEditing = !!fieldDefinition;
+  const flyoutTitleId = useGeneratedHtmlId();
 
   const [description, setDescription] = useState(fieldDefinition?.description ?? '');
   const [definition, setDefinition] = useState(fieldDefinition?.definition ?? EXAMPLE_FIELD_YAML);
   const [isGlobal, setApplyToAllCases] = useState(fieldDefinition?.isGlobal ?? false);
-  const [definitionError, setDefinitionError] = useState<string | undefined>();
 
   const definitionRef = useRef(definition);
   definitionRef.current = definition;
 
-  const parseName = useCallback((yaml: string): string | undefined => {
+  const parsedDefinition = useMemo(() => {
     try {
-      const parsed = parseYaml(yaml) as { name?: unknown } | null;
-      const n = parsed?.name;
-      return typeof n === 'string' && n.trim() ? n.trim() : undefined;
+      return InlineFieldSchema.safeParse(parseYaml(definition));
     } catch {
-      return undefined;
+      return null;
     }
-  }, []);
+  }, [definition]);
 
-  const validate = useCallback((): boolean => {
-    const name = parseName(definition);
-    if (!name) {
-      setDefinitionError(i18n.FIELD_DEFINITION_YAML_MISSING_NAME);
-      return false;
+  // On create the server enforces the authoring charset (strict); on update the server uses the
+  // lenient schema because the name is immutable anyway. Mirror that split in the UI so the Save
+  // button only enables when the definition matches what the server will accept.
+  const isDefinitionValid = useMemo(() => {
+    if (!parsedDefinition?.success) return false;
+    if (!isEditing) {
+      return StrictInlineFieldSchema.safeParse(parsedDefinition.data).success;
     }
-    setDefinitionError(undefined);
     return true;
-  }, [definition, parseName]);
+  }, [parsedDefinition, isEditing]);
+
+  // A definition's name and (YAML) type are its permanent identity: they form the
+  // storage key for case values and the Cases analytics field. Editing them is
+  // rejected by the server (409 field_identity_immutable), so prevent it inline.
+  const originalIdentity = useMemo(() => {
+    if (!fieldDefinition) return undefined;
+    try {
+      const parsed = InlineFieldSchema.safeParse(parseYaml(fieldDefinition.definition));
+      return {
+        name: fieldDefinition.name,
+        type: parsed.success ? parsed.data.type : undefined,
+      };
+    } catch {
+      return { name: fieldDefinition.name, type: undefined };
+    }
+  }, [fieldDefinition]);
+
+  const identityChanged =
+    isEditing &&
+    parsedDefinition?.success === true &&
+    originalIdentity !== undefined &&
+    (parsedDefinition.data.name !== originalIdentity.name ||
+      (originalIdentity.type !== undefined &&
+        parsedDefinition.data.type !== originalIdentity.type));
+
+  // Automated case creation (the cases connector) can only fill fields that have a default,
+  // so a required field without one is a promise no automated writer can keep — the case is
+  // created with the field empty. Non-blocking: humans creating cases in the UI still get
+  // prompted for it, so this configuration is legal, just worth a deliberate choice.
+  const requiredWithoutDefault =
+    parsedDefinition?.success === true &&
+    !isDisplayOnlyField(parsedDefinition.data) &&
+    parsedDefinition.data.validation?.required === true &&
+    (() => {
+      const defaultValue = (parsedDefinition.data.metadata as { default?: unknown } | undefined)
+        ?.default;
+      return defaultValue === undefined || defaultValue === null || defaultValue === '';
+    })();
 
   const handleSave = useCallback(() => {
-    if (!validate()) return;
-    const name = parseName(definition) as string;
-    onSave({ name, description: description.trim(), definition, isGlobal });
-  }, [validate, parseName, onSave, description, definition, isGlobal]);
+    if (!parsedDefinition?.success || identityChanged) return;
+
+    onSave({
+      name: parsedDefinition.data.name,
+      description: description.trim(),
+      definition,
+      isGlobal,
+    });
+  }, [parsedDefinition, identityChanged, onSave, description, definition, isGlobal]);
 
   const handleDefaultChange = useCallback((fieldName: string, value: string, control: string) => {
     const trimmedValue = value.trim();
@@ -139,18 +191,69 @@ export const FieldDefinitionFlyout: React.FC<FieldDefinitionFlyoutProps> = ({
   }, []);
 
   return (
-    <EuiFlyout onClose={onClose} size="m" data-test-subj="fieldDefinitionFlyout">
+    <EuiFlyout
+      onClose={onClose}
+      size="m"
+      data-test-subj="fieldDefinitionFlyout"
+      aria-labelledby={flyoutTitleId}
+    >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
-          <h2>
+          <h2 id={flyoutTitleId}>
             {isEditing
               ? i18n.FIELD_DEFINITION_FORM_TITLE_EDIT
               : i18n.FIELD_DEFINITION_FORM_TITLE_CREATE}
           </h2>
         </EuiTitle>
+        <EuiSpacer size="xs" />
+        <EuiText size="s" color="subdued">
+          <p>{i18n.FIELD_DEFINITION_FORM_DESCRIPTION}</p>
+        </EuiText>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <EuiForm component="form" data-test-subj="fieldDefinitionForm">
+          {isEditing && originalIdentity && (
+            <>
+              <EuiPanel
+                hasBorder
+                paddingSize="m"
+                color="subdued"
+                data-test-subj="fieldDefinitionIdentityPanel"
+              >
+                <EuiDescriptionList
+                  type="column"
+                  compressed
+                  listItems={[
+                    {
+                      title: i18n.FIELD_IDENTITY_NAME_LABEL,
+                      description: (
+                        <EuiCode data-test-subj="fieldDefinitionIdentityName">
+                          {originalIdentity.name}
+                        </EuiCode>
+                      ),
+                    },
+                    ...(originalIdentity.type !== undefined
+                      ? [
+                          {
+                            title: i18n.FIELD_IDENTITY_TYPE_LABEL,
+                            description: (
+                              <EuiBadge color="hollow" data-test-subj="fieldDefinitionIdentityType">
+                                {originalIdentity.type}
+                              </EuiBadge>
+                            ),
+                          },
+                        ]
+                      : []),
+                  ]}
+                />
+                <EuiSpacer size="s" />
+                <EuiText size="xs" color="subdued">
+                  <p>{i18n.FIELD_IDENTITY_HELP_TEXT}</p>
+                </EuiText>
+              </EuiPanel>
+              <EuiSpacer size="l" />
+            </>
+          )}
           <EuiFormRow label={i18n.FIELD_DEFINITION_DESCRIPTION_LABEL} fullWidth>
             <EuiTextArea
               value={description}
@@ -173,22 +276,80 @@ export const FieldDefinitionFlyout: React.FC<FieldDefinitionFlyoutProps> = ({
           <EuiSpacer size="l" />
           <EuiFormRow
             label={i18n.FIELD_DEFINITION_YAML_LABEL}
-            isInvalid={!!definitionError}
-            error={definitionError}
+            helpText={
+              isEditing
+                ? i18n.FIELD_DEFINITION_YAML_HELP_TEXT
+                : i18n.FIELD_DEFINITION_YAML_HELP_TEXT_CREATE
+            }
+            isInvalid={identityChanged}
+            error={
+              identityChanged && originalIdentity
+                ? [
+                    originalIdentity.type !== undefined
+                      ? i18n.FIELD_IDENTITY_CHANGED_ERROR(
+                          originalIdentity.name,
+                          originalIdentity.type
+                        )
+                      : i18n.FIELD_IDENTITY_NAME_CHANGED_ERROR(originalIdentity.name),
+                  ]
+                : undefined
+            }
             fullWidth
           >
             <FieldDefinitionYamlEditor
               value={definition}
               onChange={setDefinition}
+              isEditing={isEditing}
               data-test-subj="fieldDefinitionYamlInput"
             />
           </EuiFormRow>
-          <EuiSpacer size="m" />
-          <EuiTitle size="xs">
-            <h3>{i18n.FIELD_DEFINITION_PREVIEW_LABEL}</h3>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          <FieldDefinitionPreview definition={definition} onDefaultChange={handleDefaultChange} />
+          {!isEditing && parsedDefinition?.success === true && (
+            <>
+              <EuiSpacer size="m" />
+              <EuiCallOut
+                announceOnMount
+                size="s"
+                color="primary"
+                iconType="info"
+                title={i18n.FIELD_IDENTITY_CREATE_NOTICE_TITLE}
+                data-test-subj="fieldDefinitionIdentityNotice"
+              >
+                <p>
+                  {i18n.FIELD_IDENTITY_CREATE_NOTICE(
+                    parsedDefinition.data.name,
+                    parsedDefinition.data.type
+                  )}
+                </p>
+              </EuiCallOut>
+            </>
+          )}
+          {requiredWithoutDefault && (
+            <>
+              <EuiSpacer size="m" />
+              <EuiCallOut
+                announceOnMount
+                size="s"
+                color="warning"
+                iconType="warning"
+                title={i18n.REQUIRED_NO_DEFAULT_WARNING_TITLE}
+                data-test-subj="fieldDefinitionRequiredNoDefaultWarning"
+              >
+                <p>
+                  {isGlobal
+                    ? i18n.REQUIRED_NO_DEFAULT_WARNING_GLOBAL
+                    : i18n.REQUIRED_NO_DEFAULT_WARNING}
+                </p>
+              </EuiCallOut>
+            </>
+          )}
+          <EuiSpacer size="l" />
+          <EuiPanel hasBorder paddingSize="m" color="subdued">
+            <EuiTitle size="xs">
+              <h3>{i18n.FIELD_DEFINITION_PREVIEW_LABEL}</h3>
+            </EuiTitle>
+            <EuiSpacer size="s" />
+            <FieldDefinitionPreview definition={definition} onDefaultChange={handleDefaultChange} />
+          </EuiPanel>
         </EuiForm>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
@@ -203,6 +364,7 @@ export const FieldDefinitionFlyout: React.FC<FieldDefinitionFlyoutProps> = ({
               fill
               onClick={handleSave}
               isLoading={isSaving}
+              disabled={!isDefinitionValid || identityChanged}
               data-test-subj="fieldDefinitionSaveButton"
             >
               {i18n.SAVE_FIELD_DEFINITION}

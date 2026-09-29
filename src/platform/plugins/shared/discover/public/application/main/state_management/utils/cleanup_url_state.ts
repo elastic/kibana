@@ -26,6 +26,10 @@ export interface AppStateUrl extends Omit<DiscoverAppState, 'sort'> {
    * Legacy data view ID prop
    */
   index?: string;
+  /**
+   * Legacy ESQL approximate
+   */
+  isApproximate?: boolean;
 }
 
 /**
@@ -101,6 +105,15 @@ export function cleanupUrlState(
       appStateFromUrl.dataSource = createDataViewDataSource({ dataViewId: migratedDataViewId });
     }
   }
+
+  // Migrate legacy isApproximate
+  if (
+    typeof appStateFromUrl.esqlApproximation !== 'boolean' &&
+    typeof appStateFromUrl.isApproximate === 'boolean'
+  ) {
+    appStateFromUrl.esqlApproximation = appStateFromUrl.isApproximate;
+  }
+  delete appStateFromUrl.isApproximate;
 
   return appStateFromUrl as DiscoverAppState;
 }

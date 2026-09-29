@@ -7,6 +7,7 @@
 
 import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { CPSServerSetup } from '@kbn/cps/server';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
@@ -45,6 +46,7 @@ export interface SLOPluginSetupDependencies {
   taskManager: TaskManagerSetupContract;
   spaces?: SpacesPluginSetup;
   cloud?: CloudSetup;
+  cps?: CPSServerSetup;
   usageCollection: UsageCollectionSetup;
   licensing: LicensingPluginSetup;
   dataViews: DataViewsServerPluginStart;

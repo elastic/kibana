@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ParsedPart } from '@kbn/content-list-assembly';
+import type { ParsedPart } from '@kbn/ui-react-assembly';
 import { filter, type FilterContext } from './part';
 
 import './sort/sort';

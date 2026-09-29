@@ -1,0 +1,4 @@
+java.lang.RuntimeException: Synthesized frame
+	at co.elastic.otel.android.integration.Crasher.crash(Crasher.kt:24)
+	at co.elastic.otel.android.integration.CrashActivity.onCreate$lambda$0(CrashActivity.kt:31)
+	at android.os.Handler.handleCallback(Handler.java:789)

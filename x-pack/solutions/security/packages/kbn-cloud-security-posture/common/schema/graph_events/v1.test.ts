@@ -8,6 +8,20 @@
 import { eventsRequestSchema, eventOrAlertItemSchema } from './v1';
 
 describe('graph events schema', () => {
+  it('accepts Elasticsearch document IDs up to 512 characters and rejects longer IDs', () => {
+    const buildRequest = (eventId: string) => ({
+      page: { index: 0, size: 10 },
+      query: {
+        eventIds: [eventId],
+        start: 'now-1d',
+        end: 'now',
+      },
+    });
+
+    expect(() => eventsRequestSchema.validate(buildRequest('a'.repeat(512)))).not.toThrow();
+    expect(() => eventsRequestSchema.validate(buildRequest('a'.repeat(513)))).toThrow();
+  });
+
   it('accepts a page size up to 100', () => {
     expect(() =>
       eventsRequestSchema.validate({

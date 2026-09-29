@@ -8,175 +8,149 @@
 /**
  * Entity attachment cases E2E tests.
  *
- * PREREQUISITE — server must be started with the experimental feature flag enabled:
+ * `entityAttachmentsEnabled` now defaults to `true`, so the `security.entity`
+ * unified cases attachment type is registered at server boot in the default config
+ * (see `server/cases/attachments/register.ts`). These tests therefore run against
+ * the default config with no custom boot-time `serverArgs`.
  *
- *   node scripts/kibana --dev \
- *     --xpack.securitySolution.enableExperimental='["entityAttachmentsEnabled"]'
+ * The Cases UI uses the unified attachment framework: there is no dedicated
+ * "Entities" tab. Entity attachments render as an accordion
+ * (`case-view-attachment-accordion-security.entity`) inside the consolidated
+ * Attachments tab, and that accordion only renders when the case has at least one
+ * entity attachment.
  *
- * The entity store must also be running so that entities have a canonical `entity.id`
- * (entityStoreId). Without it the "Add to new/existing case" actions are hidden even
- * when the flag is on. Start the entity store via the Entity Analytics management page
- * or via:
+ * Coverage:
+ *  - Opening the host entity flyout and using "Add to new case" creates a
+ *    `security.entity` attachment that then shows as an Entities accordion (with a
+ *    count badge) in the Attachments tab.
+ *  - The Entities accordion renders for attachments created via API.
+ *  - A case with no entity attachments renders no Entities accordion.
  *
- *   curl -X POST 'http://localhost:5601/api/entity_store/enable' \
- *     -H 'kbn-xsrf: true' -H 'Content-Type: application/json' -d '{}'
+ * The flyout test opens the host entity flyout directly by URL (mirroring the
+ * entity-flyout-anomalies suite) and seeds a single host in the entity store so it
+ * resolves to a canonical `entity.id` — without which the "Add to new/existing
+ * case" actions are hidden (see `use_entity_case_take_action_items.tsx`). Opening
+ * the flyout directly keeps the test free of detection-rule / alert-generation
+ * dependencies.
  *
- * SKIPPED IN CI (intentionally): `entityAttachmentsEnabled` gates server-side
- * attachment-type registration in the plugin `setup` lifecycle (see
- * `server/cases/attachments/register.ts`), so it must be set at server boot and
- * cannot be enabled at runtime via Scout's `apiServices.core.settings()`. Running
- * this suite in CI requires a dedicated custom server config set (boot-time
- * `serverArgs`) plus the entity store running — tracked in
- * https://github.com/elastic/security-team/issues/17889 and must land before
- * `entityAttachmentsEnabled` defaults on. Until then the core logic is covered by
- * unit/integration tests (attachments service guard, server registration gating,
- * and metadata builder).
+ * These tests assert the Entities accordion and its count badge (rendered by the
+ * cases framework from the case's attachments), not the Entity Analytics table
+ * inside the accordion. The table is gated on EA index-read privileges and
+ * entity-store data — Entity Analytics' concern, not the cases-attachment feature
+ * under test — so this suite runs as the least-privileged `platform_engineer` role
+ * (per Security Solution convention, `loginAsAdmin()` is reserved for scenarios
+ * that genuinely require admin, e.g. entity-store management).
  *
- * To run them locally: remove the `.skip` from `spaceTest.describe.skip` below,
- * start the server with the flag above, and run:
+ * To run locally:
  *
  *   node scripts/scout.js run-tests --arch stateful --domain classic \
  *     --testFiles x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/entity_cases.spec.ts
  */
 
 import { expect } from '@kbn/scout-security/ui';
-import { CUSTOM_QUERY_RULE } from '@kbn/scout-security/src/playwright/constants/detection_rules';
-import { SECURITY_ENTITY_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 import { spaceTest, tags } from '../../fixtures';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-const CASE_DEFAULTS = {
-  connector: { id: 'none', name: 'none', type: '.none', fields: null },
-  settings: { syncAlerts: false, extractObservables: false },
-  owner: 'securitySolution',
-} as const;
+// Seed identity for the host entity the flyout add-to-case test opens. The entity
+// store is seeded with this id/name so the host flyout (opened directly by URL)
+// resolves to a canonical `entity.id` and the case take-action items render.
+const SEED_HOST_ENTITY_ID = 'test-entity-store-id';
+const SEED_HOST_NAME = 'scout-host';
 
 // ── Test suite ────────────────────────────────────────────────────────────────
 
-const ALERT_RULE: typeof CUSTOM_QUERY_RULE = {
-  ...CUSTOM_QUERY_RULE,
-  name: 'Entity Cases E2E Rule',
-  query: 'host.name:* or user.name:*',
-  rule_id: 'entity-cases-e2e-rule',
-};
-
-/*
- * Skipped in CI pending a custom server config set that enables
- * `entityAttachmentsEnabled` at boot — see file-level JSDoc and
- * https://github.com/elastic/security-team/issues/17889. To run locally, remove
- * `.skip` and start the server with the flag.
- */
-// eslint-disable-next-line playwright/no-skipped-test
-spaceTest.describe.skip(
-  'Entity attachment cases – flyout add-to-case actions and Entities tab',
+spaceTest.describe(
+  'Entity attachment cases – flyout add-to-case actions and Entities accordion',
   { tag: [...tags.stateful.classic] },
   () => {
+    // The host flyout add-to-case test needs a running entity store so the seeded
+    // host resolves to a canonical entity.id. Install once per worker; the other
+    // two (API-driven) tests are unaffected by it being present.
+    spaceTest.beforeAll(async ({ apiServices }) => {
+      await apiServices.entityAnalytics.installEntityStoreV2(['host']);
+      await apiServices.entityAnalytics.indexEntityStoreEntry(SEED_HOST_ENTITY_ID, SEED_HOST_NAME);
+    });
+
     spaceTest.beforeEach(async ({ browserAuth, apiServices, scoutSpace }) => {
       await apiServices.cases.cleanup.deleteAllCases(scoutSpace.id);
-      await apiServices.detectionRule.deleteAll();
-
-      await apiServices.detectionRule.createCustomQueryRule({
-        ...ALERT_RULE,
-        name: `${ALERT_RULE.name}_${scoutSpace.id}`,
-      });
-
       await browserAuth.loginAsPlatformEngineer();
     });
 
     spaceTest.afterEach(async ({ apiServices, scoutSpace }) => {
       await apiServices.cases.cleanup.deleteAllCases(scoutSpace.id);
-      await apiServices.detectionRule.deleteAll();
+    });
+
+    spaceTest.afterAll(async ({ apiServices }) => {
+      await apiServices.entityAnalytics.uninstallEntityStoreV2(['host']);
     });
 
     spaceTest(
-      'adds a host entity to a new case and the Entities tab shows the attached entity',
+      'adds a host entity to a new case and the Entities accordion shows the attached entity',
       async ({ pageObjects, scoutSpace }) => {
         const { entityCases } = pageObjects;
         const caseName = `Scout entity case – host – ${scoutSpace.id}`;
 
-        await spaceTest.step('open host flyout and click Add to new case', async () => {
-          await entityCases.navigateToAlerts();
-          await entityCases.openHostFlyoutForRule(`${ALERT_RULE.name}_${scoutSpace.id}`);
+        await spaceTest.step('open the host entity flyout and click Add to new case', async () => {
+          await entityCases.navigateToHostFlyout(SEED_HOST_ENTITY_ID, SEED_HOST_NAME);
           await entityCases.openTakeActionMenu();
           await entityCases.clickAddToNewCase();
         });
 
         await spaceTest.step('create the case via the Cases flyout', async () => {
           await entityCases.fillCaseName(caseName);
+          await entityCases.fillCaseDescription('Created by Scout entity attachment test');
           await entityCases.submitNewCase();
         });
 
-        await spaceTest.step('navigate to the new case and check the Entities tab', async () => {
-          await entityCases.clickCaseToastLink();
+        await spaceTest.step(
+          'navigate to the new case and check the Entities accordion',
+          async () => {
+            await entityCases.clickCaseToastLink();
 
-          await expect(entityCases.entitiesTab).toBeVisible();
-          await entityCases.clickEntitiesTab();
+            await entityCases.openAttachmentsTab();
+            await expect(entityCases.entityAccordion).toBeVisible();
+            await expect(entityCases.entityAccordionBadge).toHaveText('1');
+          }
+        );
+      }
+    );
 
-          await expect(entityCases.entityTabTable).toBeVisible();
+    spaceTest(
+      'Entities accordion renders when entity attachments were added via API',
+      async ({ pageObjects, entityCasesApi }) => {
+        const { entityCases } = pageObjects;
+        const created = await entityCasesApi.createCaseWithEntityAttachment({
+          entityId: SEED_HOST_ENTITY_ID,
+          entityName: SEED_HOST_NAME,
+          entityType: 'host',
         });
+
+        await entityCases.navigateToCase(created.id);
+
+        await entityCases.openAttachmentsTab();
+        await expect(entityCases.entityAccordion).toBeVisible();
+        await expect(entityCases.entityAccordionBadge).toHaveText('1');
       }
     );
 
     spaceTest(
-      'Entities tab renders the entity table when attachments were added via API',
-      async ({ pageObjects, scoutSpace, apiServices }) => {
+      'renders no Entities accordion when a case has no entity attachments',
+      async ({ pageObjects, entityCasesApi }) => {
         const { entityCases } = pageObjects;
-        const { data: created } = await apiServices.cases.create(
-          {
-            title: `Scout entity case – API – ${scoutSpace.id}`,
-            description: 'Created by Scout entity attachment test',
-            tags: ['scout'],
-            ...CASE_DEFAULTS,
-          },
-          scoutSpace.id
-        );
-        // Entity attachment is a unified type not present in the shared AttachmentRequest
-        // union — double-assert to bridge the gap without widening to `any`.
-        type CasesCommentParam = Parameters<typeof apiServices.cases.comments.create>[1];
-        await apiServices.cases.comments.create(
-          created.id,
-          {
-            type: SECURITY_ENTITY_ATTACHMENT_TYPE,
-            attachmentId: 'test-entity-store-id',
-            metadata: { entityName: 'scout-host', entityType: 'host' },
-            owner: 'securitySolution',
-          } as unknown as CasesCommentParam,
-          scoutSpace.id
-        );
-        const caseId = created.id;
+        const created = await entityCasesApi.createCase({
+          description: 'No entity attachments',
+          tags: [],
+        });
 
-        await entityCases.navigateToCase(caseId);
+        await entityCases.navigateToCase(created.id);
 
-        await expect(entityCases.entitiesTab).toBeVisible();
-        await entityCases.clickEntitiesTab();
-
-        await expect(entityCases.entityTabTable).toBeVisible();
-      }
-    );
-
-    spaceTest(
-      'Entities tab renders the empty state when a case has no entity attachments',
-      async ({ pageObjects, scoutSpace, apiServices }) => {
-        const { entityCases } = pageObjects;
-        const { data: created } = await apiServices.cases.create(
-          {
-            title: `Scout entity case – empty – ${scoutSpace.id}`,
-            description: 'No entity attachments',
-            tags: [],
-            ...CASE_DEFAULTS,
-          },
-          scoutSpace.id
-        );
-        const caseId = created.id;
-
-        await entityCases.navigateToCase(caseId);
-
-        await expect(entityCases.entitiesTab).toBeVisible();
-        await entityCases.clickEntitiesTab();
-
-        await expect(entityCases.entityTabEmpty).toBeVisible();
-        await expect(entityCases.entityTabTable).toBeHidden();
+        // The Attachments tab renders; because the case has no entity attachments,
+        // the framework does not render the Entities accordion at all (accordions
+        // are only shown for types with a non-zero count). Assert its absence rather
+        // than a per-type empty state, which no longer exists in the unified UI.
+        await entityCases.openAttachmentsTab();
+        await expect(entityCases.entityAccordion).toBeHidden();
       }
     );
   }

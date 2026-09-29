@@ -44,13 +44,19 @@ export const DebouncedTemplateMarkdownField: React.FC<DebouncedTemplateMarkdownF
   editorId,
   dataTestSubj,
 }) => {
-  const { value: localValue, setValue, flush } = useDebouncedFieldValue<string>(value, onChange);
+  const {
+    value: localValue,
+    setValue,
+    onFocus,
+    onBlur,
+  } = useDebouncedFieldValue<string>(value, onChange);
 
   return (
     <EuiFormRow label={label} fullWidth>
-      {/* React's onBlur bubbles from the inner textarea, so it flushes any pending debounced change
-          the moment focus leaves the editor — guaranteeing Save sees the latest markdown. */}
-      <div onBlur={flush}>
+      {/* React's focus/blur bubble from the inner textarea, so the editor takes ownership of its
+          value while the user is typing and flushes any pending change the moment focus leaves —
+          guaranteeing Save sees the latest markdown. */}
+      <div onFocus={onFocus} onBlur={onBlur}>
         <MarkdownEditor
           ariaLabel={ariaLabel}
           editorId={editorId}

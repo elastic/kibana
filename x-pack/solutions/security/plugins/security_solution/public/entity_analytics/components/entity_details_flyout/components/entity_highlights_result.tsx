@@ -34,8 +34,10 @@ import type {
   EntitySummaryStalenessSignal,
 } from '@kbn/entity-store/common';
 import { getChangedStalenessSignals } from '@kbn/entity-store/common/entity_summary';
+import { getUserDisplayName } from '@kbn/user-profile-components';
 import moment from 'moment';
 import { formatRiskScore } from '../../../common/utils';
+import { useBulkGetUserProfiles } from '../../../../common/components/user_profiles/use_bulk_get_user_profiles';
 import type { EntityHighlightsResponse } from '../types';
 
 interface EntityHighlightsResultProps {
@@ -46,8 +48,10 @@ interface EntityHighlightsResultProps {
   showAnonymizedValues: boolean;
   generatedAt: number | null;
   generatedBy?: string;
+  authorProfileUid?: string;
   stalenessReasons?: EntitySummaryStalenessReason[];
   onRefresh: () => void;
+  onDismiss?: () => void;
   canRegenerate?: boolean;
   isRefreshing?: boolean;
 }
@@ -77,7 +81,8 @@ const stalenessReasonMessage = (reason: EntitySummaryStalenessReason): string =>
       return i18n.translate(
         'xpack.securitySolution.flyout.entityDetails.highlights.stalenessReason.riskScore',
         {
-          defaultMessage: 'Risk score changed from {previousScore} to {currentScore}',
+          defaultMessage:
+            "This entity's risk score changed from {previousScore} to {currentScore} after the summary was generated.",
           values: {
             previousScore: formatRiskScore(reason.previousScore),
             currentScore: formatRiskScore(reason.currentScore),
@@ -106,13 +111,23 @@ export const EntityHighlightsResult: React.FC<EntityHighlightsResultProps> = ({
   showAnonymizedValues,
   generatedAt,
   generatedBy,
+  authorProfileUid,
   stalenessReasons,
   onRefresh,
+  onDismiss,
   canRegenerate = true,
   isRefreshing = false,
 }) => {
   const anonymizedResult = useAnonymizedResponse(assistantResult, showAnonymizedValues);
   const textToCopy = useMemo(() => formatTextToCopy(anonymizedResult), [anonymizedResult]);
+
+  const { data: userProfiles } = useBulkGetUserProfiles({
+    uids: new Set(authorProfileUid ? [authorProfileUid] : []),
+  });
+  const authorProfile = userProfiles?.[0];
+  const authorDisplayName = authorProfile?.user
+    ? getUserDisplayName(authorProfile.user)
+    : generatedBy;
 
   if (!anonymizedResult) {
     return null;
@@ -145,43 +160,46 @@ export const EntityHighlightsResult: React.FC<EntityHighlightsResultProps> = ({
         <>
           <EuiCallOut
             announceOnMount
-            color="warning"
-            iconType="warning"
+            color="primary"
+            size="s"
             data-test-subj="entity-highlights-staleness-callout"
+            onDismiss={onDismiss}
             title={
-              <FormattedMessage
-                id="xpack.securitySolution.flyout.entityDetails.highlights.stalenessTitle"
-                defaultMessage="{signals} {signalCount, plural, one {has} other {have}} changed since this summary was generated"
-                values={{
-                  signals: joinSignalLabels(changedSignalLabels),
-                  signalCount: changedSignalLabels.length,
-                }}
-              />
+              <>
+                <FormattedMessage
+                  id="xpack.securitySolution.flyout.entityDetails.highlights.staleness.outOfDateHeading"
+                  defaultMessage="Summary out of date"
+                />
+                <span style={{ fontWeight: 'normal' }}>
+                  {' · '}
+                  {isSingleReason ? (
+                    <FormattedMessage
+                      id="xpack.securitySolution.flyout.entityDetails.highlights.staleness.outOfDateSingle"
+                      defaultMessage="{detail} Regenerate to update."
+                      values={{ detail: stalenessMessages[0] }}
+                    />
+                  ) : (
+                    <FormattedMessage
+                      id="xpack.securitySolution.flyout.entityDetails.highlights.staleness.outOfDateMulti"
+                      defaultMessage="{signals} changed after the summary was generated. Regenerate to update."
+                      values={{ signals: joinSignalLabels(changedSignalLabels) }}
+                    />
+                  )}
+                </span>
+              </>
             }
           >
-            {/* Single reason reads as plain prose; only fall back to a list for multiple reasons. */}
-            <EuiText size="s">
-              {isSingleReason ? (
-                <p>{stalenessMessages[0]}</p>
-              ) : (
-                <ul>
-                  {stalenessMessages.map((message) => (
-                    <li key={message}>{message}</li>
-                  ))}
-                </ul>
-              )}
-            </EuiText>
-            <EuiSpacer size="s" />
             {canRegenerate && (
               <EuiButton
-                color="warning"
+                color="primary"
+                size="s"
                 iconType="refresh"
                 onClick={onRefresh}
                 data-test-subj="entity-highlights-staleness-regenerate"
               >
                 <FormattedMessage
-                  id="xpack.securitySolution.flyout.entityDetails.highlights.stalenessRegenerate"
-                  defaultMessage="Regenerate summary"
+                  id="xpack.securitySolution.flyout.entityDetails.highlights.staleness.regenerate"
+                  defaultMessage="Regenerate"
                 />
               </EuiButton>
             )}
@@ -190,8 +208,7 @@ export const EntityHighlightsResult: React.FC<EntityHighlightsResultProps> = ({
         </>
       )}
 
-      {/* Stale content is dimmed so the user immediately senses something is off */}
-      <div style={{ opacity: isStale ? 0.45 : 1 }}>
+      <div>
         {anonymizedResult.highlights.length > 0 ? (
           anonymizedResult.highlights.map((highlight, index) => (
             <React.Fragment key={index}>
@@ -247,12 +264,12 @@ export const EntityHighlightsResult: React.FC<EntityHighlightsResultProps> = ({
           <EuiFlexItem grow={false}>
             {generatedAt && anonymizedResult.highlights.length > 0 && (
               <EuiText size="xs" color="subdued">
-                {generatedBy ? (
+                {authorDisplayName ? (
                   <FormattedMessage
                     id="xpack.securitySolution.flyout.entityDetails.highlights.generatedByUserTimestamp"
                     defaultMessage="Generated by {username} on {timestamp}"
                     values={{
-                      username: <strong>{generatedBy}</strong>,
+                      username: <strong>{authorDisplayName}</strong>,
                       timestamp: formattedGeneratedAt,
                     }}
                   />

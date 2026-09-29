@@ -8,8 +8,15 @@
  */
 
 import { createSlice } from 'redux-toolkit-v1';
-import type { EsWorkflow, WorkflowDetailDto, WorkflowExecutionDto } from '@kbn/workflows';
+import type { Action } from 'redux-toolkit-v1';
+import type {
+  EsWorkflow,
+  WorkflowDetailDto,
+  WorkflowExecutionDto,
+  WorkflowStepExecutionDto,
+} from '@kbn/workflows';
 import { WORKFLOW_GRAPH_FOCUS_TRIGGER } from '@kbn/workflows';
+import { loadExecutionThunk } from './thunks/load_execution_thunk';
 import type { ActiveTab, ComputedData, LineColumnPosition, WorkflowDetailState } from './types';
 import { addLoadingStateReducers, initialLoadingState } from './utils/loading_states';
 import { resolveFocusForLine } from './utils/trigger_finder';
@@ -36,11 +43,14 @@ const initialState: WorkflowDetailState = {
   computed: undefined,
   workflow: undefined,
   execution: undefined,
+  stepExecutionsTotal: 0,
+  stepExecutionPages: [],
   computedExecution: undefined,
   activeTab: undefined,
   connectors: undefined,
+  connectorsLoadState: { status: 'loading' },
   workflows: initialWorkflowsState,
-  schema: getWorkflowZodSchema({}, triggerSchemas.getRegisteredIds()),
+  schema: getWorkflowZodSchema({}, triggerSchemas.getRegisteredTriggersForSchema()),
   cursorPosition: undefined,
   focusedStepId: undefined,
   focusedTriggerId: undefined,
@@ -124,16 +134,42 @@ const workflowDetailSlice = createSlice({
     },
     setConnectors: (state, action: { payload: WorkflowDetailState['connectors'] }) => {
       state.connectors = action.payload;
+      state.connectorsLoadState = { status: 'ready' };
     },
     setWorkflows: (state, action: { payload: WorkflowDetailState['workflows'] }) => {
       state.workflows = action.payload;
     },
     setExecution: (state, action: { payload: WorkflowExecutionDto | undefined }) => {
+      if (!action.payload || action.payload.id !== state.execution?.id) {
+        state.stepExecutionsTotal = 0;
+        state.stepExecutionPages = [];
+        state.executionRequest = undefined;
+        state.executionError = undefined;
+      }
       state.execution = action.payload;
+    },
+    setStepExecutionsTotal: (state, action: { payload: number }) => {
+      state.stepExecutionsTotal = action.payload;
+    },
+    /** Sets loaded pages and their flattened view in `execution.stepExecutions`. */
+    setStepExecutionPages: (state, action: { payload: WorkflowStepExecutionDto[][] }) => {
+      state.stepExecutionPages = action.payload;
+      if (state.execution) {
+        state.execution.stepExecutions = action.payload.flat();
+      }
+    },
+    cancelExecutionLoading: (state, action: { payload: string }) => {
+      if (state.executionRequest?.id === action.payload) {
+        state.executionRequest = undefined;
+      }
     },
     clearExecution: (state) => {
       state.execution = undefined;
+      state.stepExecutionsTotal = 0;
+      state.stepExecutionPages = [];
       state.computedExecution = undefined;
+      state.executionRequest = undefined;
+      state.executionError = undefined;
     },
     setActiveTab: (state, action: { payload: ActiveTab | undefined }) => {
       state.activeTab = action.payload;
@@ -175,7 +211,8 @@ const workflowDetailSlice = createSlice({
       }
     },
     _clearComputedData: (state) => {
-      state.computed = {};
+      // Not `undefined`, which re-arms the middleware bootstrap (see `setWorkflow`).
+      state.computed = { yamlString: undefined };
       state.focusedStepId = undefined;
       state.focusedTriggerId = undefined;
     },
@@ -187,7 +224,62 @@ const workflowDetailSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
+    builder.addCase(loadExecutionThunk.pending, (state, { meta }) => {
+      if (state.execution?.id !== meta.arg.id) {
+        state.execution = undefined;
+        state.stepExecutionPages = [];
+        state.stepExecutionsTotal = 0;
+        state.computedExecution = undefined;
+      }
+      state.executionRequest = {
+        id: meta.arg.id,
+        requestId: meta.requestId,
+        loadMore: meta.arg.loadMore ?? false,
+      };
+      state.executionError = undefined;
+    });
+    builder.addCase(loadExecutionThunk.fulfilled, (state, { meta, payload }) => {
+      if (state.executionRequest?.requestId !== meta.requestId) {
+        return;
+      }
+      state.execution = payload.execution;
+      state.stepExecutionPages = payload.stepExecutionPages;
+      state.stepExecutionsTotal = payload.stepExecutionsTotal;
+      state.computedExecution = payload.computedExecution;
+      state.executionRequest = undefined;
+    });
+    builder.addCase(loadExecutionThunk.rejected, (state, { meta, payload }) => {
+      if (state.executionRequest?.requestId !== meta.requestId) {
+        return;
+      }
+      state.executionRequest = undefined;
+      if (!meta.aborted && !meta.arg.loadMore) {
+        state.executionError = { id: meta.arg.id, message: payload ?? 'Failed to load execution' };
+      }
+    });
     addLoadingStateReducers(builder);
+    builder.addMatcher(
+      (action: Action): action is Action => action.type === 'detail/loadConnectorsThunk/pending',
+      (state) => {
+        state.connectorsLoadState = { status: 'loading' };
+      }
+    );
+    builder.addMatcher(
+      (action: Action): action is Action => action.type === 'detail/loadConnectorsThunk/fulfilled',
+      (state) => {
+        state.connectorsLoadState = { status: 'ready' };
+      }
+    );
+    builder.addMatcher(
+      (action: Action): action is Action & { payload?: unknown } =>
+        action.type === 'detail/loadConnectorsThunk/rejected',
+      (state, action) => {
+        state.connectorsLoadState = {
+          status: 'failed',
+          error: typeof action.payload === 'string' ? action.payload : 'Failed to load connectors',
+        };
+      }
+    );
   },
 });
 
@@ -210,7 +302,10 @@ export const {
   setConnectors,
   setWorkflows,
   setExecution,
+  setStepExecutionsTotal,
+  setStepExecutionPages,
   clearExecution,
+  cancelExecutionLoading,
   setActiveTab,
   setHasYamlSchemaValidationErrors,
   setAiAssisted,
@@ -238,4 +333,5 @@ export const ignoredActions: Array<string> = [
   'detail/_setComputedDataInternal',
   'detail/_setGeneratedSchemaInternal',
   'detail/_setComputedExecution',
+  'detail/loadExecutionThunk/fulfilled',
 ];

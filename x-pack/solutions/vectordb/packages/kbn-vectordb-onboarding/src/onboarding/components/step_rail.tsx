@@ -18,6 +18,8 @@ import {
 import type { EuiStepsProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { WizardStep, VectorPath } from '../types';
+import { getWizardTelemetryPrefix } from '../utils/wizard_telemetry_prefix';
+import { stepsStyle } from './step_rail.styles';
 
 interface StepConfig {
   label: string;
@@ -29,10 +31,10 @@ const STEPS: StepConfig[] = [
     label: i18n.translate('vectordbOnboarding.wizard.steps.ingest', { defaultMessage: 'Ingest' }),
     description: {
       'generate-vectors': i18n.translate('vectordbOnboarding.wizard.steps.ingest.generate', {
-        defaultMessage: "Generate embeddings with Elastic's models",
+        defaultMessage: 'Load your content and generate embeddings with built-in models',
       }),
       'have-vectors': i18n.translate('vectordbOnboarding.wizard.steps.ingest.have', {
-        defaultMessage: 'Ingest your embeddings into Elasticsearch',
+        defaultMessage: 'Index pre-generated embeddings into vector-optimized storage',
       }),
     },
   },
@@ -40,10 +42,10 @@ const STEPS: StepConfig[] = [
     label: i18n.translate('vectordbOnboarding.wizard.steps.search', { defaultMessage: 'Search' }),
     description: {
       'generate-vectors': i18n.translate('vectordbOnboarding.wizard.steps.search.generate', {
-        defaultMessage: 'Search across your data using vectors',
+        defaultMessage: 'Run your first query and get ranked results',
       }),
       'have-vectors': i18n.translate('vectordbOnboarding.wizard.steps.search.have', {
-        defaultMessage: 'Search across your data using vectors',
+        defaultMessage: 'Run your first query and get ranked results',
       }),
     },
   },
@@ -60,7 +62,7 @@ export interface StepRailProps {
 export const StepRail = ({ currentStep, stepName, path, onNext, onComplete }: StepRailProps) => {
   const { euiTheme } = useEuiTheme();
   const isLargeScreen = useIsWithinMinBreakpoint('m');
-  const telemetryPrefix = `vectordbOnboarding-${stepName}-${path}`;
+  const telemetryPrefix = getWizardTelemetryPrefix(path, stepName);
   const steps: EuiStepsProps['steps'] = useMemo(
     () =>
       STEPS.map((step, i) => {
@@ -92,12 +94,7 @@ export const StepRail = ({ currentStep, stepName, path, onNext, onComplete }: St
           steps={steps}
           titleSize="xxs"
           data-test-subj="vectordbWizardSteps"
-          css={{
-            '.euiStep__content': {
-              paddingBlockStart: 0,
-              paddingBlockEnd: euiTheme.size.l,
-            },
-          }}
+          css={stepsStyle}
         />
       </EuiPanel>
       <EuiHorizontalRule margin="none" />
@@ -107,10 +104,10 @@ export const StepRail = ({ currentStep, stepName, path, onNext, onComplete }: St
             fill
             fullWidth
             onClick={onNext}
-            data-test-subj="vectordbWizardReadyToSearch"
-            data-telemetry-id={`${telemetryPrefix}-readyToSearch`}
+            data-test-subj="vectordbWizardContinueToSearch"
+            data-telemetry-id={`${telemetryPrefix}-continueToSearch`}
           >
-            {i18n.translate('vectordbOnboarding.wizard.readyToSearch', {
+            {i18n.translate('vectordbOnboarding.wizard.continueToSearch', {
               defaultMessage: 'Continue',
             })}
           </EuiButton>
@@ -119,10 +116,10 @@ export const StepRail = ({ currentStep, stepName, path, onNext, onComplete }: St
             fill
             fullWidth
             onClick={onComplete}
-            data-test-subj="vectordbWizardContinueHome"
-            data-telemetry-id={`${telemetryPrefix}-continueToHome`}
+            data-test-subj="vectordbWizardCompleteSetup"
+            data-telemetry-id={`${telemetryPrefix}-completeSetup`}
           >
-            {i18n.translate('vectordbOnboarding.wizard.continueToHome', {
+            {i18n.translate('vectordbOnboarding.wizard.completeSetup', {
               defaultMessage: 'Complete setup',
             })}
           </EuiButton>

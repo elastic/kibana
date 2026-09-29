@@ -62,10 +62,13 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       await waitForPluginInitialized({ retry, supertest, logger });
       await ebtUIHelper.setOptIn(true); // starts the recording of events from this moment
 
-      // Enable asset inventory and entity store v2 settings
+      // Enable asset inventory and entity store v2 settings.
+      // Disable the new flyout so the graph preview panel uses its legacy expandable-flyout
+      // selectors (e.g. `previewSection`), which don't exist in the new flyout system.
       await kibanaServer.uiSettings.update({
         'securitySolution:enableAssetInventory': true,
         'securitySolution:entityStoreEnableV2': true,
+        'securitySolution:enableNewFlyout': false,
       });
 
       // Initialize security-solution-default data-view (required by entity store)
@@ -87,6 +90,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       await esArchiver.unload(
         'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/logs_gcp_audit'
       );
+      await kibanaServer.uiSettings.unset('securitySolution:enableNewFlyout');
     });
 
     it('expanded flyout - filter by node', async () => {
@@ -110,45 +114,45 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       await expandedFlyoutGraph.assertGraphNodesNumber(3);
       await expandedFlyoutGraph.toggleSearchBar();
 
+      // Entity filters come from the Entity Store's EUID logic, so they carry more than the bare
+      // identity field: a namespace disjunction (so the same id in another namespace is a
+      // different entity) and, when the entity resolved below the top ranking position, guards
+      // excluding the higher-ranked fields it fell through. `admin@example.com` has no
+      // `user.email`, so it resolves via `user.id` and picks up the `NOT user.email` guard.
+      const NAMESPACE = '(event.module: gcp OR data_stream.dataset: gcp.audit)';
+      const ACTOR = `user.id: admin@example.com AND ${NAMESPACE} AND NOT user.email: exists`;
+      const TARGET = `user.target.id: admin@example.com AND ${NAMESPACE} AND NOT user.target.email: exists`;
+      const RELATED = 'related.user: admin@example.com';
+      const ACTION = 'event.action: google.iam.admin.v1.CreateRole';
+
+      // A filter rendered on its own shows no outer parentheses, but once it becomes one arm of
+      // an OR the UI wraps every arm that is itself a conjunction, to make precedence explicit.
+      // Single-clause arms (related.user, event.action) are left bare.
+      const orOf = (...arms: string[]) =>
+        arms.map((arm) => (arm.includes(' AND ') ? `(${arm})` : arm)).join(' OR ');
+
+      // The chip label already spells out the whole expression, so asserting it is enough;
+      // reopening the filter editor to read the same string back adds no coverage.
+      const expectFilter = async (expected: string) =>
+        expandedFlyoutGraph.expectFilterTextEquals(0, expected);
+
       // Show actions by entity
       await expandedFlyoutGraph.showActionsByEntity('user:admin@example.com@gcp');
-      await expandedFlyoutGraph.expectFilterTextEquals(0, 'user.id: admin@example.com');
-      await expandedFlyoutGraph.expectFilterPreviewEquals(0, 'user.id: admin@example.com');
+      await expectFilter(ACTOR);
 
       // Show actions on entity
       await expandedFlyoutGraph.showActionsOnEntity('user:admin@example.com@gcp');
-      await expandedFlyoutGraph.expectFilterTextEquals(
-        0,
-        'user.id: admin@example.com OR user.target.id: admin@example.com'
-      );
-      await expandedFlyoutGraph.expectFilterPreviewEquals(
-        0,
-        'user.id: admin@example.com OR user.target.id: admin@example.com'
-      );
+      await expectFilter(orOf(ACTOR, TARGET));
 
       // Explore related entities
       await expandedFlyoutGraph.exploreRelatedEntities('user:admin@example.com@gcp');
-      await expandedFlyoutGraph.expectFilterTextEquals(
-        0,
-        'user.id: admin@example.com OR user.target.id: admin@example.com OR related.entity: user:admin@example.com@gcp'
-      );
-      await expandedFlyoutGraph.expectFilterPreviewEquals(
-        0,
-        'user.id: admin@example.com OR user.target.id: admin@example.com OR related.entity: user:admin@example.com@gcp'
-      );
+      await expectFilter(orOf(ACTOR, TARGET, RELATED));
 
       // Show events with the same action
       await expandedFlyoutGraph.showEventsOfSameAction(
         'label(google.iam.admin.v1.CreateRole)ln(b0f4971b57721f2778832a4f81523af433a4f974671ce49770e1846d12e20760)oe(1)oa(1)'
       );
-      await expandedFlyoutGraph.expectFilterTextEquals(
-        0,
-        'user.id: admin@example.com OR user.target.id: admin@example.com OR related.entity: user:admin@example.com@gcp OR event.action: google.iam.admin.v1.CreateRole'
-      );
-      await expandedFlyoutGraph.expectFilterPreviewEquals(
-        0,
-        'user.id: admin@example.com OR user.target.id: admin@example.com OR related.entity: user:admin@example.com@gcp OR event.action: google.iam.admin.v1.CreateRole'
-      );
+      await expectFilter(orOf(ACTOR, TARGET, RELATED, ACTION));
 
       await expandedFlyoutGraph.clickOnFitGraphIntoViewControl();
 
@@ -164,25 +168,11 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       await expandedFlyoutGraph.hideEventsOfSameAction(
         'label(google.iam.admin.v1.CreateRole)ln(b0f4971b57721f2778832a4f81523af433a4f974671ce49770e1846d12e20760)oe(1)oa(1)'
       );
-      await expandedFlyoutGraph.expectFilterTextEquals(
-        0,
-        'user.id: admin@example.com OR user.target.id: admin@example.com OR related.entity: user:admin@example.com@gcp'
-      );
-      await expandedFlyoutGraph.expectFilterPreviewEquals(
-        0,
-        'user.id: admin@example.com OR user.target.id: admin@example.com OR related.entity: user:admin@example.com@gcp'
-      );
+      await expectFilter(orOf(ACTOR, TARGET, RELATED));
 
       // Hide actions on entity
       await expandedFlyoutGraph.hideActionsOnEntity('user:admin@example.com@gcp');
-      await expandedFlyoutGraph.expectFilterTextEquals(
-        0,
-        'user.id: admin@example.com OR related.entity: user:admin@example.com@gcp'
-      );
-      await expandedFlyoutGraph.expectFilterPreviewEquals(
-        0,
-        'user.id: admin@example.com OR related.entity: user:admin@example.com@gcp'
-      );
+      await expectFilter(orOf(ACTOR, RELATED));
 
       // Clear filters
       await expandedFlyoutGraph.clearAllFilters();
@@ -322,18 +312,22 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
           await expandedFlyoutGraph.assertGraphNodesNumber(5);
           await expandedFlyoutGraph.toggleSearchBar();
 
-          // Test filter actions - Show actions by entity (user.id)
+          // Test filter actions - Show actions by entity.
+          // The emitted filter uses only the highest-ranking identity field present, per the
+          // entity type's EUID ranking (for `user`, user.email outranks user.id and user.name).
+          // Filtering on the lower-ranked fields as well would match documents that resolve to a
+          // different entity — see https://github.com/elastic/kibana/issues/262882.
+          //
+          // The namespace disjunction is appended so the same email in the okta / entra_id
+          // namespaces (distinct entities) is not matched. No `NOT ...: exists` guards appear
+          // here because user.email is the top-ranked field — nothing was fallen through.
+          const expectedFilter =
+            'user.email: serviceaccount@example.com AND (event.module: gcp OR data_stream.dataset: gcp.audit)';
           await expandedFlyoutGraph.showActionsByEntity('user:serviceaccount@example.com@gcp');
           await expandedFlyoutGraph.showSearchBar();
           await expandedFlyoutGraph.clickOnFitGraphIntoViewControl();
-          await expandedFlyoutGraph.expectFilterTextEquals(
-            0,
-            'user.name: Service Account OR user.email: serviceaccount@example.com OR user.id: serviceaccount@example.com'
-          );
-          await expandedFlyoutGraph.expectFilterPreviewEquals(
-            0,
-            'user.name: Service Account OR user.email: serviceaccount@example.com OR user.id: serviceaccount@example.com'
-          );
+          await expandedFlyoutGraph.expectFilterTextEquals(0, expectedFilter);
+          await expandedFlyoutGraph.expectFilterPreviewEquals(0, expectedFilter);
 
           await expandedFlyoutGraph.showEntityDetails(
             'aee6fb9ccf55bf0e3e974083019a0a1ba7786ef99ed3fe59a1504f22ac94ee31'
@@ -431,8 +425,8 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
             es,
             logger,
             retry,
-            entitiesIndex: '.entities.v2.latest.security_*',
-            expectedCount: 46,
+            entitiesIndex: '.entities.v2.latest.*',
+            expectedCount: 51,
           });
         });
 

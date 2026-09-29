@@ -26,6 +26,7 @@ export interface EarsEndpoints {
   authorizeEndpoint: string;
   tokenEndpoint: string;
   refreshEndpoint: string;
+  revokeEndpoint: string;
 }
 
 export function getEarsEndpointsForProvider(provider: string | undefined): EarsEndpoints {
@@ -40,5 +41,6 @@ export function getEarsEndpointsForProvider(provider: string | undefined): EarsE
     authorizeEndpoint: `${EARS_API_VERSION}/${provider}/oauth/authorize`,
     tokenEndpoint: `${EARS_API_VERSION}/${provider}/oauth/token`,
     refreshEndpoint: `${EARS_API_VERSION}/${provider}/oauth/refresh`,
+    revokeEndpoint: `${EARS_API_VERSION}/${provider}/oauth/revoke`,
   };
 }

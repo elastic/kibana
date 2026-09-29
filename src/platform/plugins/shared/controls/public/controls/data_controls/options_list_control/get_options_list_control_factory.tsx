@@ -35,6 +35,8 @@ import {
   initializeRelatedPanels,
   initializeStateApi,
   type PublishingSubject,
+  getViewModeSubject,
+  type ViewMode,
 } from '@kbn/presentation-publishing';
 
 import type { OptionsListSuccessResponse } from '../../../../common/options_list';
@@ -175,7 +177,7 @@ export const getOptionsListControlFactory = (): EmbeddablePublicDefinition<
       /** Fetch the suggestions and perform validation */
       const suggestionLoadError$ = new BehaviorSubject<Error | undefined>(undefined);
       const loadMoreSubject = new Subject<void>();
-      const fetchSubscription = fetchAndValidate$({
+      const { suggestions$, cancelRequests } = fetchAndValidate$({
         api: {
           ...dataControlManager.api,
           loadMoreSubject,
@@ -189,7 +191,8 @@ export const getOptionsListControlFactory = (): EmbeddablePublicDefinition<
         selectedOptions$: selectionsManager.api.selectedOptions$,
         searchTechnique$: editorStateManager.api.searchTechnique$,
         sort$: selectionsManager.api.sort$,
-      }).subscribe((result) => {
+      });
+      const fetchSubscription = suggestions$.subscribe((result) => {
         // if there was an error during fetch, set suggestion load error and return early
         if (Object.hasOwn(result, 'error')) {
           suggestionLoadError$.next((result as { error: Error }).error);
@@ -206,6 +209,7 @@ export const getOptionsListControlFactory = (): EmbeddablePublicDefinition<
         temporaryStateManager.api.setInvalidSelections(
           new Set(successResponse.invalidSelections ?? [])
         );
+        temporaryStateManager.api.setIsPartial(successResponse.isPartial);
 
         // reset the request size back to the minimum (if it's not already)
         if (temporaryStateManager.api.requestSize$.getValue() !== MIN_OPTIONS_LIST_REQUEST_SIZE) {
@@ -324,6 +328,7 @@ export const getOptionsListControlFactory = (): EmbeddablePublicDefinition<
         .subscribe((error) => blockingError$.next(error));
 
       const api = finalizeApi({
+        cancelRequests,
         ...stateApi,
         ...dataControlManager.api,
         ...relatedPanelsApi,
@@ -333,6 +338,7 @@ export const getOptionsListControlFactory = (): EmbeddablePublicDefinition<
         clearSelections: () => clearSelections({ selectionsManager, temporaryStateManager }),
         hasSelections$: hasSelections$ as PublishingSubject<boolean | undefined>,
         setSelectedOptions: selectionsManager.api.setSelectedOptions,
+        supportsJsonExport: true,
       });
 
       const componentApi: DSLOptionsListComponentApi = {
@@ -352,6 +358,7 @@ export const getOptionsListControlFactory = (): EmbeddablePublicDefinition<
             key,
             showOnlySelected,
           }),
+        viewMode$: getViewModeSubject(parentApi) ?? new BehaviorSubject('view' as ViewMode),
         selectAll: (keys: string[]) => selectAll({ api, keys, selectionsManager }),
         deselectAll: (keys: string[]) => deselectAll({ api, keys, selectionsManager }),
       };

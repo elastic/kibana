@@ -6,35 +6,29 @@
  */
 
 import React from 'react';
-import { TestProviders } from '../../../../common/mock';
+import { render, screen } from '@testing-library/react';
 import { TimelineModalHeader } from '.';
-import { render } from '@testing-library/react';
-import { useCreateTimeline } from '../../../hooks/use_create_timeline';
-import { useInspect } from '../../../../common/components/inspect/use_inspect';
-import { useKibana } from '../../../../common/lib/kibana';
-import { timelineActions } from '../../../store';
+import { TestProviders } from '../../../../common/mock';
 
-jest.mock('../../../../common/hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: jest.fn(),
+jest.mock('./super_timeline_modal_header', () => ({
+  SuperTimelineModalHeader: () => <div data-test-subj="super-timeline-modal-header" />,
 }));
-jest.mock('../../../hooks/use_create_timeline');
-jest.mock('../../../../common/components/inspect/use_inspect');
-jest.mock('../../../../common/lib/kibana');
+jest.mock('./regular_timeline_modal_header', () => ({
+  RegularTimelineModalHeader: () => <div data-test-subj="regular-timeline-modal-header" />,
+}));
 
-const mockGetState = jest.fn();
+const mockRef = { current: null };
+
+const mockGetState = jest.fn().mockReturnValue({});
 jest.mock('react-redux-v7', () => {
   const actual = jest.requireActual('react-redux-v7');
   return {
     ...actual,
-    useDispatch: jest.fn(),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    useSelector: (selector: any) =>
+    useSelector: (selector: (s: unknown) => unknown) =>
       selector({
         timeline: {
           timelineById: {
-            'timeline-1': {
-              ...mockGetState(),
-            },
+            'timeline-1': mockGetState(),
           },
         },
         dataViewManager: { timeline: {} },
@@ -42,75 +36,29 @@ jest.mock('react-redux-v7', () => {
   };
 });
 
-const timelineId = 'timeline-1';
-const mockRef = {
-  current: null,
-};
-const renderTimelineModalHeader = () =>
-  render(
-    <TestProviders>
-      <TimelineModalHeader timelineId={timelineId} openToggleRef={mockRef} />
-    </TestProviders>
-  );
-
 describe('TimelineModalHeader', () => {
-  (useCreateTimeline as jest.Mock).mockReturnValue(jest.fn());
-  (useInspect as jest.Mock).mockReturnValue(jest.fn());
-
-  it('should render all dom elements', () => {
-    const { getByTestId, getByText } = renderTimelineModalHeader();
-
-    expect(getByTestId('timeline-favorite-empty-star')).toBeInTheDocument();
-    expect(getByText('Untitled Timeline')).toBeInTheDocument();
-    expect(getByTestId('timeline-save-status')).toBeInTheDocument();
-    expect(getByTestId('timeline-modal-header-actions')).toBeInTheDocument();
-    expect(getByTestId('timeline-modal-new-timeline-dropdown-button')).toBeInTheDocument();
-    expect(getByTestId('timeline-modal-open-timeline-button')).toBeInTheDocument();
-    expect(getByTestId('inspect-empty-button')).toBeInTheDocument();
-    expect(getByTestId('timeline-modal-save-timeline')).toBeInTheDocument();
-    expect(getByTestId('timeline-modal-header-close-button')).toBeInTheDocument();
+  beforeEach(() => {
+    mockGetState.mockReturnValue({});
   });
 
-  it('should show attach to case if user has the correct permissions', () => {
-    (useKibana as jest.Mock).mockReturnValue({
-      services: {
-        application: {
-          navigateToApp: jest.fn(),
-        },
-        cases: {
-          helpers: {
-            canUseCases: jest.fn().mockReturnValue({
-              createComment: true,
-              read: true,
-            }),
-          },
-          hooks: {
-            useCasesAddToNewCaseFlyout: jest.fn().mockReturnValue({ open: jest.fn() }),
-            useCasesAddToExistingCaseModal: jest.fn().mockReturnValue({ open: jest.fn() }),
-          },
-          config: { attachmentsEnabled: false },
-        },
-        uiSettings: {
-          get: jest.fn(),
-        },
-      },
-    });
-
-    const { getByTestId } = renderTimelineModalHeader();
-
-    expect(getByTestId('timeline-modal-attach-to-case-dropdown-button')).toBeInTheDocument();
+  it('renders RegularTimelineModalHeader for a regular timeline', () => {
+    render(
+      <TestProviders>
+        <TimelineModalHeader timelineId="timeline-1" openToggleRef={mockRef} />
+      </TestProviders>
+    );
+    expect(screen.getByTestId('regular-timeline-modal-header')).toBeInTheDocument();
+    expect(screen.queryByTestId('super-timeline-modal-header')).not.toBeInTheDocument();
   });
 
-  it('should call showTimeline action when closing timeline', () => {
-    const spy = jest.spyOn(timelineActions, 'showTimeline');
-
-    const { getByTestId } = renderTimelineModalHeader();
-
-    getByTestId('timeline-modal-header-close-button').click();
-
-    expect(spy).toHaveBeenCalledWith({
-      id: timelineId,
-      show: false,
-    });
+  it('renders SuperTimelineModalHeader when isSuperTimeline is true', () => {
+    mockGetState.mockReturnValue({ isSuperTimeline: true });
+    render(
+      <TestProviders>
+        <TimelineModalHeader timelineId="timeline-1" openToggleRef={mockRef} />
+      </TestProviders>
+    );
+    expect(screen.getByTestId('super-timeline-modal-header')).toBeInTheDocument();
+    expect(screen.queryByTestId('regular-timeline-modal-header')).not.toBeInTheDocument();
   });
 });

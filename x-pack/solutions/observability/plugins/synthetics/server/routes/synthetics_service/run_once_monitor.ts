@@ -4,8 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import { isEmpty } from 'lodash';
+import { routeId } from '../zod_query';
+import { createMonitorRequestBody } from '../monitor_cruds/monitor_request_body';
 import type { PrivateLocationAttributes } from '../../runtime_types/private_locations';
 import { getPrivateLocationsForMonitor } from '../monitor_cruds/add_monitor/utils';
 import type { SyntheticsRestApiRouteFactory } from '../types';
@@ -18,14 +20,15 @@ export const runOnceSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =
   method: 'POST',
   path: SYNTHETICS_API_URLS.RUN_ONCE_MONITOR + '/{monitorId}',
   validate: {
-    body: schema.any(),
-    params: schema.object({
-      monitorId: schema.string({ minLength: 1, maxLength: 1024 }),
+    body: createMonitorRequestBody,
+    params: z.strictObject({
+      monitorId: routeId,
     }),
   },
   handler: async ({
     request,
     response,
+    server,
     syntheticsMonitorClient,
     savedObjectsClient,
     spaceId,
@@ -36,7 +39,7 @@ export const runOnceSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =
       return response.badRequest({ body: { message: 'Monitor data is empty.' } });
     }
 
-    const validationResult = validateMonitor(monitor, spaceId);
+    const validationResult = validateMonitor(monitor, spaceId, server.cloud?.isServerlessEnabled);
 
     const decodedMonitor = validationResult.decodedMonitor;
     if (!validationResult.valid || !decodedMonitor) {

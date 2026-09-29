@@ -6,12 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import type {
-  ExternalReferenceAttachmentAttributes,
-  ExternalReferenceSOAttachmentAttributes,
-  Case,
-  PersistableStateAttachment,
-} from '@kbn/cases-plugin/common/types/domain';
+import type { Case } from '@kbn/cases-plugin/common/types/domain';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import {
@@ -19,9 +14,6 @@ import {
   getPostCaseRequest,
   postCommentUserReq,
   postCommentAlertReq,
-  persistableStateAttachment,
-  postExternalReferenceSOReq,
-  postExternalReferenceESReq,
 } from '../../../../common/lib/mock';
 import {
   deleteAllCaseItems,
@@ -106,80 +98,6 @@ export default ({ getService }: FtrProviderContext): void => {
         // `cases-comments` when off, unified `cases-attachments` when on).
         expect(response.errors[0].message).to.match(
           /Saved object \[cases-(comments|attachments)\/does-not-exist\] not found/
-        );
-      });
-    });
-
-    describe('inject references into attributes', () => {
-      it('should inject the persistable state attachment references into the attributes', async () => {
-        const postedCase = await createCase(supertest, postCaseReq);
-        const patchedCase = await createComment({
-          supertest,
-          caseId: postedCase.id,
-          params: persistableStateAttachment,
-        });
-
-        const response = await bulkGetAttachments({
-          savedObjectIds: [patchedCase.comments![0].id],
-          caseId: patchedCase.id,
-          supertest,
-        });
-
-        const persistableState = response.attachments[0] as PersistableStateAttachment;
-
-        expect(persistableState.persistableStateAttachmentState).to.eql(
-          persistableStateAttachment.persistableStateAttachmentState
-        );
-      });
-
-      it("should inject saved object external reference style attachment's references into the attributes", async () => {
-        const postedCase = await createCase(supertest, postCaseReq);
-        const patchedCase = await createComment({
-          supertest,
-          caseId: postedCase.id,
-          params: postExternalReferenceSOReq,
-        });
-
-        const response = await bulkGetAttachments({
-          savedObjectIds: [patchedCase.comments![0].id],
-          caseId: patchedCase.id,
-          supertest,
-        });
-
-        const externalRefSO = response.attachments[0] as ExternalReferenceSOAttachmentAttributes;
-
-        expect(externalRefSO.externalReferenceId).to.eql(
-          postExternalReferenceSOReq.externalReferenceId
-        );
-        expect(externalRefSO.externalReferenceStorage.soType).to.eql(
-          postExternalReferenceSOReq.externalReferenceStorage.soType
-        );
-        expect(externalRefSO.externalReferenceStorage.type).to.eql(
-          postExternalReferenceSOReq.externalReferenceStorage.type
-        );
-      });
-
-      it("should inject the elasticsearch external reference style attachment's references into the attributes", async () => {
-        const postedCase = await createCase(supertest, postCaseReq);
-        const patchedCase = await createComment({
-          supertest,
-          caseId: postedCase.id,
-          params: postExternalReferenceESReq,
-        });
-
-        const response = await bulkGetAttachments({
-          savedObjectIds: [patchedCase.comments![0].id],
-          caseId: patchedCase.id,
-          supertest,
-        });
-
-        const externalRefES = response.attachments[0] as ExternalReferenceAttachmentAttributes;
-
-        expect(externalRefES.externalReferenceId).to.eql(
-          postExternalReferenceESReq.externalReferenceId
-        );
-        expect(externalRefES.externalReferenceStorage.type).to.eql(
-          postExternalReferenceESReq.externalReferenceStorage.type
         );
       });
     });

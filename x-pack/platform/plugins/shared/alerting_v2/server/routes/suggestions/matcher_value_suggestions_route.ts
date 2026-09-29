@@ -12,24 +12,39 @@ import type { RouteSecurity } from '@kbn/core-http-server';
 import { inject, injectable } from 'inversify';
 import { Request } from '@kbn/core-di-server';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
-import { ALERTING_V2_MATCHER_VALUE_SUGGESTIONS_API_PATH } from '../constants';
+import { ALERTING_V2_INTERNAL_SUGGESTIONS_MATCHER_VALUES_API_PATH } from '../constants';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { MatcherSuggestionsService } from '../../lib/services/matcher_suggestions_service/matcher_suggestions_service';
+
+const MAX_UNUSED_FIELD_LENGTH = 16_000;
+const unusedFieldSchema = z
+  .unknown()
+  .refine((value) => JSON.stringify(value).length <= MAX_UNUSED_FIELD_LENGTH, {
+    message: `must not exceed ${MAX_UNUSED_FIELD_LENGTH} characters when serialized`,
+  })
+  .optional();
 
 const suggestionsBodySchema = z
   .object({
     field: z.string().min(1).max(256).describe('The field to suggest values for.'),
     query: z.string().max(1024).describe('Optional search query for filtering suggestions.'),
+    // filters and fieldMeta are sent by @kbn/kql's value suggestion provider; unused by this route, so only their size is bounded.
+    fieldMeta: unusedFieldSchema,
+    filters: unusedFieldSchema,
   })
   .strict();
+
+const matcherValueSuggestionsResponseSchema = z
+  .array(z.string())
+  .describe('The list of suggested matcher values.');
 
 type SuggestionsBody = z.infer<typeof suggestionsBodySchema>;
 
 @injectable()
 export class MatcherValueSuggestionsRoute extends BaseAlertingRoute {
   static method = 'post' as const;
-  static path = ALERTING_V2_MATCHER_VALUE_SUGGESTIONS_API_PATH;
+  static path = ALERTING_V2_INTERNAL_SUGGESTIONS_MATCHER_VALUES_API_PATH;
   static security: RouteSecurity = {
     authz: {
       requiredPrivileges: [
@@ -39,6 +54,7 @@ export class MatcherValueSuggestionsRoute extends BaseAlertingRoute {
     },
   };
   static routeOptions = {
+    access: 'internal' as const,
     summary: 'Get matcher value suggestions',
     description:
       'Get suggestions for action policy matcher values based on an optional search query.',
@@ -48,6 +64,10 @@ export class MatcherValueSuggestionsRoute extends BaseAlertingRoute {
       body: suggestionsBodySchema,
     },
     response: {
+      200: {
+        body: () => matcherValueSuggestionsResponseSchema,
+        description: 'Returns the suggested matcher values.',
+      },
       400: {
         body: () => errorResponseSchema,
         description: 'Indicates an invalid schema or parameters.',

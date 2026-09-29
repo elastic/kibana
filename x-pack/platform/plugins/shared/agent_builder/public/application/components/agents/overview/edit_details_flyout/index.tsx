@@ -42,6 +42,7 @@ import { AccessSection } from './access_section';
 import { CustomInstructionsSection } from './custom_instructions_section';
 import { CustomizationSection } from './customization_section';
 import { IdentificationSection } from './identification_section';
+import { SubagentsSection } from './subagents_section';
 import { TagsSection } from './tags_section';
 import type { EditDetailsFormData } from './types';
 
@@ -74,12 +75,16 @@ export const EditDetailsFlyout: React.FC<EditDetailsFlyoutProps> = ({
       avatar_color: agent.avatar_color ?? '',
       labels: agent.labels ?? [],
       access_control: {
-        access_mode: agent.access_control?.access_mode ?? AgentAccessControlMode.Private,
+        // Legacy agents without access control resolve to Public server-side.
+        access_mode: agent.access_control?.access_mode ?? AgentAccessControlMode.Public,
       },
       configuration: {
         enable_elastic_capabilities: agent.configuration?.enable_elastic_capabilities ?? false,
         workflow_ids: agent.configuration?.workflow_ids ?? [],
+        post_execution_workflow_ids: agent.configuration?.post_execution_workflow_ids ?? [],
         instructions: agent.configuration?.instructions ?? '',
+        ai_indices: agent.configuration?.ai_indices ?? [],
+        subagent_ids: agent.configuration?.subagent_ids ?? [],
       },
     },
     mode: 'onBlur',
@@ -101,7 +106,10 @@ export const EditDetailsFlyout: React.FC<EditDetailsFlyoutProps> = ({
         configuration: {
           enable_elastic_capabilities: data.configuration.enable_elastic_capabilities,
           workflow_ids: data.configuration.workflow_ids,
+          post_execution_workflow_ids: data.configuration.post_execution_workflow_ids,
           instructions: data.configuration.instructions,
+          ai_indices: data.configuration.ai_indices,
+          subagent_ids: data.configuration.subagent_ids,
         },
       }),
     onSuccess: () => {
@@ -166,7 +174,9 @@ export const EditDetailsFlyout: React.FC<EditDetailsFlyoutProps> = ({
             <AccessSection canChangeAccessControlMode={canChangeAccessControlMode} />
 
             <EuiHorizontalRule margin="xl" />
-            <CustomizationSection showWorkflowSection={showWorkflowSection} />
+            <CustomizationSection showWorkflowSection={showWorkflowSection} agentId={agent.id} />
+
+            <SubagentsSection agentId={agent.id} />
 
             <EuiHorizontalRule margin="xl" />
             <CustomInstructionsSection />

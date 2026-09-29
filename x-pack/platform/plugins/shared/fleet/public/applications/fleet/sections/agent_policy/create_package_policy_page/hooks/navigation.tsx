@@ -6,6 +6,7 @@
  */
 
 import { useCallback, useMemo, useEffect, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 
 import { splitPkgKey } from '../../../../../../../common/services';
@@ -17,6 +18,12 @@ import type { EditPackagePolicyFrom, SavedPolicyResult } from '../types';
 
 import { appendOnSaveQueryParamsToPath } from '../utils';
 
+const ALLOWED_RETURN_APP_IDS = new Set([
+  'integrations',
+  'observabilityOnboarding',
+  'securitySolutionUI',
+]);
+
 interface UseCancelParams {
   from: EditPackagePolicyFrom;
   pkgkey: string;
@@ -26,10 +33,11 @@ interface UseCancelParams {
 export const useCancelAddPackagePolicy = (params: UseCancelParams) => {
   const { from, pkgkey, agentPolicyId } = params;
   const {
-    application: { navigateToApp },
+    application: { navigateToApp, getUrlForApp },
   } = useStartServices();
   const routeState = useIntraAppState<CreatePackagePolicyRouteState>();
   const { getHref } = useLink();
+  const { search } = useLocation();
 
   const cancelClickHandler = useCallback(
     (ev: React.SyntheticEvent) => {
@@ -45,6 +53,16 @@ export const useCancelAddPackagePolicy = (params: UseCancelParams) => {
     if (routeState && routeState.onCancelUrl) {
       return routeState.onCancelUrl;
     }
+
+    // External apps (Integrations catalog, Security, Observability Onboarding) append
+    // returnPath/returnAppId as query params so Cancel returns to the originating page.
+    const searchParams = new URLSearchParams(search);
+    const returnPath = searchParams.get('returnPath');
+    const returnAppId = searchParams.get('returnAppId');
+    if (returnPath && returnAppId && ALLOWED_RETURN_APP_IDS.has(returnAppId)) {
+      return getUrlForApp(returnAppId, { path: returnPath });
+    }
+
     if (from === 'installed-integrations' || from === 'copy-from-installed-integrations') {
       return `${getHref('integrations_installed', {})}?viewPolicies=${splitPkgKey(pkgkey).pkgName}`;
     }
@@ -54,7 +72,7 @@ export const useCancelAddPackagePolicy = (params: UseCancelParams) => {
           policyId: agentPolicyId,
         })
       : getHref('integration_details_overview', { pkgkey });
-  }, [routeState, from, agentPolicyId, getHref, pkgkey]);
+  }, [routeState, search, from, agentPolicyId, getHref, getUrlForApp, pkgkey]);
 
   return { cancelClickHandler, cancelUrl };
 };
@@ -88,7 +106,6 @@ export const useOnSaveNavigate = (params: UseOnSaveNavigateParams) => {
       }
       const isAgentless = savedPolicyResult.type === 'agentless';
       const policyIds = isAgentless ? [] : savedPolicyResult.policy.policy_ids;
-      const hasNoAgentPolicies = policyIds.length === 0;
       let onSaveNavigateTo: Parameters<ApplicationStart['navigateToApp']>;
       let onSaveQueryParams: CreatePackagePolicyRouteState['onSaveQueryParams'];
 
@@ -96,8 +113,8 @@ export const useOnSaveNavigate = (params: UseOnSaveNavigateParams) => {
         onSaveNavigateTo = routeState.onSaveNavigateTo;
         onSaveQueryParams = routeState?.onSaveQueryParams;
       } else {
-        // If agentless or no agent policies, navigate to the integration's policies table
-        if ((isAgentless || hasNoAgentPolicies) && !queryParamsPolicyId) {
+        // If agentless or came from integrations (no policyId in URL), navigate to the integration's policies table
+        if (isAgentless || !queryParamsPolicyId) {
           onSaveNavigateTo = [
             INTEGRATIONS_PLUGIN_ID,
             {

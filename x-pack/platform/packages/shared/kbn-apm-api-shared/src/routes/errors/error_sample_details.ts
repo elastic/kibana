@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { Transaction, APMError } from '@kbn/apm-types';
 import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
@@ -26,8 +26,10 @@ export interface ErrorSampleDetailsResponse {
 
 export const errorSampleDetailsRoute = defineRoute<ErrorSampleDetailsResponse>()({
   endpoint: 'GET /internal/apm/services/{serviceName}/errors/{groupId}/error/{errorId}',
-  params: z.object({
-    path: z.object({ serviceName: z.string(), groupId: z.string(), errorId: z.string() }),
-    query: environmentSchema.merge(kuerySchema).merge(rangeSchema),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({ serviceName: z.string(), groupId: z.string(), errorId: z.string() }),
+      query: environmentSchema.merge(kuerySchema).merge(rangeSchema),
+    })
+  ),
 });

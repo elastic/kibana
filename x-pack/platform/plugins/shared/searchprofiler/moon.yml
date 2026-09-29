@@ -35,6 +35,7 @@ dependsOn:
   - '@kbn/css-utils'
   - '@kbn/licensing-types'
   - '@kbn/scout'
+  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod

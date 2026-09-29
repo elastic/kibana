@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { createLeadGenerationEngine } from './lead_generation_engine';
+export { createLeadGenerationEngine, type LeadCandidate } from './lead_generation_engine';

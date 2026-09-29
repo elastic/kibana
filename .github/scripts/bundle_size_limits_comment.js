@@ -9,12 +9,13 @@
 
 const THRESHOLD = 0.15;
 const MARKER = '<!-- bundle-size-limits-comment -->';
+const LIMITS_PATH = 'packages/kbn-rspack-optimizer/limits.yml';
 
-const getContent = async ({ github, context }, ref) => {
+const getContent = async ({ github, context }, ref, path) => {
   const { data } = await github.rest.repos.getContent({
     owner: context.repo.owner,
     repo: context.repo.repo,
-    path: 'packages/kbn-optimizer/limits.yml',
+    path,
     ref,
   });
   return Buffer.from(data.content, 'base64').toString('utf8');
@@ -33,8 +34,8 @@ module.exports = async ({ github, context }) => {
   const pr = context.payload.pull_request;
 
   const [baseContent, headContent] = await Promise.all([
-    getContent({ github, context }, pr.base.sha),
-    getContent({ github, context }, pr.head.sha),
+    getContent({ github, context }, pr.base.sha, LIMITS_PATH),
+    getContent({ github, context }, pr.head.sha, LIMITS_PATH),
   ]);
 
   const baseMap = parseYaml(baseContent);
@@ -80,7 +81,7 @@ module.exports = async ({ github, context }) => {
     .join('\n');
 
   const body =
-    `@${pr.user.login}, this PR increases one or more page-load bundle sizes by 15% or more:\n\n` +
+    `@${pr.user.login}, this PR increases one or more page-load bundle sizes in \`${LIMITS_PATH}\` by 15% or more:\n\n` +
     `| Plugin | Before (bytes) | After (bytes) | Change |\n` +
     `|--------|----------------|---------------|--------|\n` +
     `${rows}\n\n` +

@@ -9,9 +9,19 @@ import sinon from 'sinon';
 import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { ConnectorTokenClient } from './connector_token_client';
+import { revokeEarsCredentials } from './ears/revoke_ears_credentials';
 import type { Logger } from '@kbn/core/server';
 import type { ConnectorToken } from '../types';
 import * as allRetry from './retry_if_conflicts';
+import { actionsConfigMock } from '../actions_config.mock';
+
+jest.mock('./ears/revoke_ears_credentials', () => ({
+  revokeEarsCredentials: jest.fn(),
+}));
+
+const mockRevokeEarsCredentials = revokeEarsCredentials as jest.MockedFunction<
+  typeof revokeEarsCredentials
+>;
 
 const rootLogger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 const logger = {
@@ -30,6 +40,7 @@ jest.mock('@kbn/core-saved-objects-utils-server', () => {
 
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
 const encryptedSavedObjectsClient = encryptedSavedObjectsMock.createClient();
+const configurationUtilities = actionsConfigMock.create();
 
 let connectorTokenClient: ConnectorTokenClient;
 
@@ -42,10 +53,12 @@ beforeEach(() => {
   clock.reset();
   jest.resetAllMocks();
   jest.restoreAllMocks();
+  mockRevokeEarsCredentials.mockResolvedValue(undefined);
   connectorTokenClient = new ConnectorTokenClient({
     unsecuredSavedObjectsClient,
     encryptedSavedObjectsClient,
     logger,
+    configurationUtilities,
   });
 });
 afterAll(() => clock.restore());
@@ -552,7 +565,10 @@ describe('delete()', () => {
       unsecuredSavedObjectsClient.delete.mockResolvedValue({});
       unsecuredSavedObjectsClient.find.mockResolvedValueOnce(sharedFindResult);
 
-      await connectorTokenClient.deleteConnectorTokens({ connectorId: '123', authMode: 'shared' });
+      await connectorTokenClient.deleteConnectorTokens({
+        connectorId: '123',
+        authMode: 'shared',
+      });
 
       expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledWith(
         'connector_token',
@@ -560,19 +576,97 @@ describe('delete()', () => {
       );
     });
 
-    test('routes to user client when authMode is per-user', async () => {
-      unsecuredSavedObjectsClient.delete.mockResolvedValue({});
-      unsecuredSavedObjectsClient.find.mockResolvedValueOnce(userFindResult);
+    test('authMode per-user without profileUid bulk-deletes all user tokens for the connector', async () => {
+      (
+        encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser as jest.Mock
+      ).mockResolvedValueOnce({
+        close: jest.fn(),
+        async *find() {
+          yield {
+            saved_objects: [
+              {
+                id: 'user-token-1',
+                type: 'user_connector_token',
+                references: [],
+                attributes: {
+                  profileUid: 'user-123',
+                  connectorId: '123',
+                  credentialType: 'oauth',
+                  credentials: { accessToken: 'Bearer access-1' },
+                  createdAt: new Date().toISOString(),
+                  updatedAt: new Date().toISOString(),
+                },
+              },
+            ],
+          };
+        },
+      });
+      unsecuredSavedObjectsClient.find
+        .mockResolvedValueOnce({
+          total: 1,
+          per_page: 100,
+          page: 1,
+          saved_objects: userFindResult.saved_objects,
+        })
+        .mockResolvedValueOnce({
+          total: 0,
+          per_page: 100,
+          page: 1,
+          saved_objects: [],
+        });
+      unsecuredSavedObjectsClient.bulkDelete.mockResolvedValueOnce({
+        statuses: [{ id: 'user-token-1', type: 'user_connector_token', success: true }],
+      });
 
       await connectorTokenClient.deleteConnectorTokens({
         connectorId: '123',
         authMode: 'per-user',
+        authType: 'ears',
+        provider: 'google',
       });
 
-      expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledWith(
-        'user_connector_token',
-        'user-token-1'
-      );
+      expect(unsecuredSavedObjectsClient.bulkDelete).toHaveBeenCalledWith([
+        { type: 'user_connector_token', id: 'user-token-1' },
+      ]);
+      expect(unsecuredSavedObjectsClient.delete).not.toHaveBeenCalled();
+      expect(mockRevokeEarsCredentials).toHaveBeenCalledWith({
+        provider: 'google',
+        credentials: { accessToken: 'Bearer access-1' },
+        configurationUtilities,
+        logger,
+      });
+    });
+
+    test('skipRevocation skips EARS revoke while still bulk-deleting per-user tokens', async () => {
+      unsecuredSavedObjectsClient.find
+        .mockResolvedValueOnce({
+          total: 1,
+          per_page: 100,
+          page: 1,
+          saved_objects: userFindResult.saved_objects,
+        })
+        .mockResolvedValueOnce({
+          total: 0,
+          per_page: 100,
+          page: 1,
+          saved_objects: [],
+        });
+      unsecuredSavedObjectsClient.bulkDelete.mockResolvedValueOnce({
+        statuses: [{ id: 'user-token-1', type: 'user_connector_token', success: true }],
+      });
+
+      await connectorTokenClient.deleteConnectorTokens({
+        connectorId: '123',
+        authMode: 'per-user',
+        authType: 'ears',
+        provider: 'google',
+        skipRevocation: true,
+      });
+
+      expect(mockRevokeEarsCredentials).not.toHaveBeenCalled();
+      expect(unsecuredSavedObjectsClient.bulkDelete).toHaveBeenCalledWith([
+        { type: 'user_connector_token', id: 'user-token-1' },
+      ]);
     });
 
     test('routes to user client when profileUid is provided', async () => {
@@ -582,12 +676,15 @@ describe('delete()', () => {
       await connectorTokenClient.deleteConnectorTokens({
         connectorId: '123',
         profileUid: 'user-123',
+        skipRevocation: true,
       });
 
       expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledWith(
         'user_connector_token',
         'user-token-1'
       );
+      expect(unsecuredSavedObjectsClient.bulkDelete).not.toHaveBeenCalled();
+      expect(mockRevokeEarsCredentials).not.toHaveBeenCalled();
     });
 
     test('profileUid takes priority over authMode shared', async () => {
@@ -598,27 +695,28 @@ describe('delete()', () => {
         connectorId: '123',
         profileUid: 'user-123',
         authMode: 'shared',
+        skipRevocation: true,
       });
 
       expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledWith(
         'user_connector_token',
         'user-token-1'
       );
+      expect(unsecuredSavedObjectsClient.delete).not.toHaveBeenCalledWith(
+        'connector_token',
+        expect.anything()
+      );
     });
 
-    test('profileUid takes priority over authMode per-user', async () => {
+    test('deleteConnectorTokens defaults to shared when no authMode', async () => {
       unsecuredSavedObjectsClient.delete.mockResolvedValue({});
-      unsecuredSavedObjectsClient.find.mockResolvedValueOnce(userFindResult);
+      unsecuredSavedObjectsClient.find.mockResolvedValueOnce(sharedFindResult);
 
-      await connectorTokenClient.deleteConnectorTokens({
-        connectorId: '123',
-        profileUid: 'user-123',
-        authMode: 'per-user',
-      });
+      await connectorTokenClient.deleteConnectorTokens({ connectorId: '123' });
 
       expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledWith(
-        'user_connector_token',
-        'user-token-1'
+        'connector_token',
+        'shared-token-1'
       );
     });
   });

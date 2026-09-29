@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "map_version": "2.2",
+  "obfuscated_class": "kg",
+  "original_class": "androidx.profileinstaller.FileSectionType$EnumUnboxingSharedUtility",
+  "source_file": "R8$$SyntheticClass",
+  "methods": {
+    "e": {
+      "mappings": [
+        {
+          "obf_range": [
+            1,
+            7
+          ],
+          "orig_range": [
+            0,
+            0
+          ],
+          "method": "m",
+          "class": "FileSectionType$EnumUnboxingSharedUtility",
+          "extras": [
+            {
+              "id": "com.android.tools.r8.synthesized"
+            },
+            {
+              "id": "com.android.tools.r8.outline"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

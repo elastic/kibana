@@ -70,12 +70,16 @@ export const getDurationNumberInItsUnit = (duration: string): number => {
   return parseInt(match[1], 10);
 };
 
+/** Returns true for `date`, `date_nanos`, and `datetime` field types. */
+export const isDateLikeFieldType = (type: string): boolean =>
+  type === 'date' || type === 'date_nanos' || type === 'datetime';
+
 export const getTimeFieldOptions = (
   fields: DataViewFieldMap
 ): Array<{ text: string; value: string }> => {
   const options: Array<{ text: string; value: string }> = [];
   Object.values(fields).forEach((field) => {
-    if (field.type === 'date' || field.type === 'date_nanos') {
+    if (isDateLikeFieldType(field.type)) {
       options.push({
         text: field.name,
         value: field.name,

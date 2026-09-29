@@ -11,9 +11,10 @@ import type { UseEuiTheme } from '@elastic/eui';
 import { EuiLoadingChart, transparentize, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
-import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import { apiCanCancelRequests, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import classNames from 'classnames';
-import React, { useLayoutEffect, useMemo } from 'react';
+import React, { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../../dashboard_api/use_dashboard_internal_api';
@@ -33,7 +34,7 @@ export interface Props extends DivProps {
   setDragHandles?: (refs: Array<HTMLElement | null>) => void;
 }
 
-export const Item = React.forwardRef<HTMLDivElement, Props>(
+export const DashboardGridItem = React.forwardRef<HTMLDivElement, Props>(
   (
     {
       appFixedViewport,
@@ -50,6 +51,7 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
   ) => {
     const dashboardApi = useDashboardApi();
     const dashboardInternalApi = useDashboardInternalApi();
+    const embeddableApiRef = useRef<DefaultEmbeddableApi | null>(null);
     const [
       hidePanelBorders,
       highlightPanelId,
@@ -120,15 +122,23 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
       }
     }, [id, dashboardApi, scrollToPanelId, highlightPanelId, ref, blurPanel]);
 
+    useEffect(() => {
+      return () => {
+        if (embeddableApiRef.current && apiCanCancelRequests(embeddableApiRef.current)) {
+          embeddableApiRef.current.cancelRequests();
+        }
+      };
+    }, []);
+
     const dashboardContainerTopOffset = dashboardContainerRef?.offsetTop || 0;
     const globalNavTopOffset = appFixedViewport?.offsetTop || 0;
     const styles = useMemoCss(dashboardGridItemStyles);
 
     const renderedEmbeddable = useMemo(() => {
       const panelProps = {
+        isSharedItem: true,
         showBadges: true,
         showBorder,
-        showNotifications: true,
         showShadow: false,
         setDragHandles,
       };
@@ -140,7 +150,10 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
           getParentApi={() => dashboardApi}
           key={`${type}_${id}`}
           panelProps={panelProps}
-          onApiAvailable={(api) => dashboardApi.registerChildApi(api)}
+          onApiAvailable={(api) => {
+            embeddableApiRef.current = api;
+            dashboardApi.registerChildApi(api);
+          }}
         />
       );
     }, [id, dashboardApi, type, showBorder, setDragHandles]);
@@ -182,14 +195,6 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
     );
   }
 );
-
-export const DashboardGridItem = React.forwardRef<HTMLDivElement, Props>((props, ref) => {
-  // The `labs:dashboard:deferBelowFold` setting is intentionally not honored: its deferred
-  // (below-the-fold) loading behavior is currently broken, so panels are always rendered
-  // eagerly. The advanced setting remains available but has no effect until it is fixed
-  // (https://github.com/elastic/kibana/issues/150459)
-  return <Item ref={ref} {...props} />;
-});
 
 const dashboardGridItemStyles = {
   item: (context: UseEuiTheme) =>

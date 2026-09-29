@@ -6,6 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import {
+  DASHBOARD_SO_TYPE,
+  DISCOVER_SESSION_SO_TYPE,
+  LENS_SO_TYPE,
+  MAP_SO_TYPE,
+} from '../../../../../common/constants/attachments';
 
 export const TITLE = i18n.translate('xpack.cases.savedObjectAttachmentsTable.title', {
   defaultMessage: 'Title',
@@ -17,6 +23,10 @@ export const DATE_ADDED = i18n.translate('xpack.cases.savedObjectAttachmentsTabl
 
 export const ATTACHED_BY = i18n.translate('xpack.cases.savedObjectAttachmentsTable.attachedBy', {
   defaultMessage: 'Attached by',
+});
+
+export const ACTIONS = i18n.translate('xpack.cases.savedObjectAttachmentsTable.actions', {
+  defaultMessage: 'Actions',
 });
 
 export const NO_ITEMS = i18n.translate('xpack.cases.savedObjectAttachmentsTable.noItems', {
@@ -73,12 +83,54 @@ export const FETCH_ERROR_TITLE = i18n.translate(
   }
 );
 
-export const ATTACH_SUCCESS_TITLE = i18n.translate(
-  'xpack.cases.caseView.attach.savedObjectModal.attachSuccessTitle',
-  {
-    defaultMessage: 'Attached saved object to case',
-  }
+const ATTACH_TYPE_LABEL_DASHBOARD = i18n.translate(
+  'xpack.cases.caseView.attach.savedObjectModal.typeLabel.dashboard',
+  { defaultMessage: 'dashboard' }
 );
+
+const ATTACH_TYPE_LABEL_MAP = i18n.translate(
+  'xpack.cases.caseView.attach.savedObjectModal.typeLabel.map',
+  { defaultMessage: 'map' }
+);
+
+const ATTACH_TYPE_LABEL_LENS = i18n.translate(
+  'xpack.cases.caseView.attach.savedObjectModal.typeLabel.visualization',
+  { defaultMessage: 'visualization' }
+);
+
+const ATTACH_TYPE_LABEL_DISCOVER = i18n.translate(
+  'xpack.cases.caseView.attach.savedObjectModal.typeLabel.discoverSession',
+  { defaultMessage: 'Discover session' }
+);
+
+const getAttachTypeLabel = (soType: string): string => {
+  switch (soType) {
+    case DASHBOARD_SO_TYPE:
+      return ATTACH_TYPE_LABEL_DASHBOARD;
+    case MAP_SO_TYPE:
+      return ATTACH_TYPE_LABEL_MAP;
+    case LENS_SO_TYPE:
+      return ATTACH_TYPE_LABEL_LENS;
+    case DISCOVER_SESSION_SO_TYPE:
+      return ATTACH_TYPE_LABEL_DISCOVER;
+    default:
+      return soType;
+  }
+};
+
+export const ATTACH_SUCCESS_TITLE = ({
+  soType,
+  objectTitle,
+}: {
+  soType: string;
+  objectTitle: string;
+}): string => {
+  const typeLabel = getAttachTypeLabel(soType);
+  return i18n.translate('xpack.cases.caseView.attach.savedObjectModal.attachSuccessAddedToCase', {
+    defaultMessage: 'Added {typeLabel} {objectTitle} to case',
+    values: { typeLabel, objectTitle },
+  });
+};
 
 export const ATTACH_ACTION = i18n.translate(
   'xpack.cases.caseView.attach.savedObjectModal.attachAction',

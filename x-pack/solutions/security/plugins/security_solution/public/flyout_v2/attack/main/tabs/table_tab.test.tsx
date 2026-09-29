@@ -19,6 +19,10 @@ jest.mock('../../../../data_view_manager/hooks/use_browser_fields', () => ({
   useBrowserFields: () => ({}),
 }));
 
+jest.mock('../../../../data_view_manager/hooks/use_data_view', () => ({
+  useDataView: () => ({ dataView: {}, status: 'ready' }),
+}));
+
 jest.mock('../../../document/main/utils/get_timeline_events_details_from_record', () => ({
   getTimelineEventsDetailsFromRecord: () => [],
 }));

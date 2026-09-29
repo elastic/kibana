@@ -7,88 +7,50 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiBreadcrumb, EuiSelectableOption, UseEuiTheme } from '@elastic/eui';
+import type { EuiBreadcrumb, EuiSelectableOption } from '@elastic/eui';
 import {
-  EuiBetaBadge,
   EuiBreadcrumbs,
-  EuiButton,
-  EuiButtonEmpty,
-  EuiButtonIcon,
+  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  euiFontSize,
-  EuiHighlight,
-  EuiIcon,
   EuiSelectable,
-  EuiText,
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { getBaseConnectorType } from '@kbn/workflows-ui';
+import { componentStyles } from './actions_menu.styles';
+import { getOptionActionId, renderActionOption } from './actions_menu_option';
 import { ActionsMenuPreviewPanel } from './actions_menu_preview_panel';
-import { ActionsMenuAiIcon, aiIconTileCss } from './ai_icon_tile';
 import { useKibana } from '../../../hooks/use_kibana';
-import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
-import { flattenOptions, getActionOptions, getIconGlyphColor } from '../lib/get_action_options';
-import { STEPS_PREFIX, useDisplayOptions } from '../lib/use_display_options';
+import { flattenOptions, getActionOptions } from '../lib/get_action_options';
+import {
+  getActionMatchRank,
+  isActionSearchMatch,
+  STEPS_PREFIX,
+  useDisplayOptions,
+} from '../lib/use_display_options';
 import {
   type ActionOptionData,
   type EditorCommand,
   getMenuItemData,
-  type IconVariant,
   isActionConnectorGroup,
-  isActionConnectorOption,
   isActionGroup,
-  isActionOption,
   type JumpToStepEntry,
 } from '../types';
 
 export type { EditorCommand, JumpToStepEntry };
 
 const SEARCH_INPUT_NAME = 'actions-menu-search';
+const SELECTABLE_ID = 'actions-menu-selectable';
+const SEARCH_VIRTUALIZATION_THRESHOLD = 30;
 
-const REQUEST_ACTION_URL = 'https://github.com/elastic/workflows';
-
-const LIST_SLIDE_MS = 220;
-
-const KEYBOARD_ACTIVE_CLASS = 'actionsMenu-keyboardActive';
-
-/** Post-navigation keyboard focus target for the left list. */
 type PendingListFocus = 'first' | 'none' | { optionId: string };
 
-function getActionableDisplayOptions(options: EuiSelectableOption[]): EuiSelectableOption[] {
+function getActionableDisplayOptions<T extends EuiSelectableOption>(options: T[]): T[] {
   return options.filter((option) => !option.isGroupLabel && !option.disabled);
-}
-
-function getOptionActionId(option: EuiSelectableOption): string | undefined {
-  const itemData = getMenuItemData(option);
-  if (itemData?.kind === 'action') {
-    return itemData.action.id;
-  }
-  return (option as { id?: string }).id;
-}
-
-function getSelectableOptionKey(option: EuiSelectableOption): string | undefined {
-  const itemData = getMenuItemData(option);
-  if (!itemData) {
-    const id = getOptionActionId(option);
-    return id ? `action:${id}` : undefined;
-  }
-  switch (itemData.kind) {
-    case 'action':
-      return `action:${itemData.action.id}`;
-    case 'command':
-      return `command:${itemData.command.id}`;
-    case 'jump':
-      return `jump:${itemData.entry.id}`;
-    case 'nav':
-      return `nav:${itemData.target}`;
-  }
 }
 
 function isCategoryOption(option: EuiSelectableOption): boolean {
@@ -98,22 +60,16 @@ function isCategoryOption(option: EuiSelectableOption): boolean {
   return isActionGroup(action) || isActionConnectorGroup(action);
 }
 
-function getNavDirection(fromPath: string[], toPath: string[]): 'forward' | 'back' {
-  const isPrefix = fromPath.length <= toPath.length && fromPath.every((id, i) => id === toPath[i]);
-  if (isPrefix) {
-    return 'forward';
+function getOptionsAtPath(rootOptions: ActionOptionData[], path: string[]): ActionOptionData[] {
+  let options = rootOptions;
+  for (const id of path) {
+    const option = options.find((item) => item.id === id);
+    if (!option || !isActionGroup(option)) {
+      return [];
+    }
+    options = option.options;
   }
-  const isAncestor = toPath.length < fromPath.length && toPath.every((id, i) => id === fromPath[i]);
-  if (isAncestor) {
-    return 'back';
-  }
-  return toPath.length >= fromPath.length ? 'forward' : 'back';
-}
-
-function prefersReducedMotion(): boolean {
-  return (
-    typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  );
+  return options;
 }
 
 export interface ActionsMenuProps {
@@ -122,27 +78,6 @@ export interface ActionsMenuProps {
   jumpToStepEntries?: JumpToStepEntry[];
   onCommandSelected?: (commandId: string) => void;
   onJumpToStep?: (lineNumber: number) => void;
-  onClose?: () => void;
-}
-
-function getIconOuterStyle(
-  variant: IconVariant | undefined,
-  styles: ReturnType<typeof useMemoCss<typeof componentStyles>>
-) {
-  switch (variant) {
-    case 'trigger':
-      return styles.iconOuterTrigger;
-    case 'external':
-    case 'neutral':
-      return styles.iconOuterAppLogo;
-    case 'flowControl':
-      return styles.iconOuterFlowControl;
-    case 'dataTransformation':
-      return styles.iconOuterDataTransformation;
-    case 'platform':
-    default:
-      return styles.iconOuterPlatform;
-  }
 }
 
 function resolvePathLabels(
@@ -170,7 +105,6 @@ export function ActionsMenu({
   jumpToStepEntries,
   onCommandSelected,
   onJumpToStep,
-  onClose,
 }: ActionsMenuProps) {
   const styles = useMemoCss(componentStyles);
   const [searchTerm, setSearchTerm] = useState<string>('');
@@ -178,9 +112,6 @@ export function ActionsMenu({
   const { workflowsExtensions } = useKibana().services;
   const searchInputRef = useRef<HTMLInputElement | null>(null);
   const menuContainerRef = useRef<HTMLDivElement | null>(null);
-  const listViewportRef = useRef<HTMLDivElement | null>(null);
-  const listPaneRef = useRef<HTMLDivElement | null>(null);
-  const isSlidingRef = useRef(false);
   const pendingListFocusRef = useRef<PendingListFocus | null>(null);
   const keyboardIndexRef = useRef<number | null>(null);
   const defaultOptions = useMemo(
@@ -189,12 +120,10 @@ export function ActionsMenu({
   );
   const flatOptions = useMemo(() => flattenOptions(defaultOptions), [defaultOptions]);
 
-  const [options, setOptions] = useState<ActionOptionData[]>(defaultOptions);
   const [currentPath, setCurrentPath] = useState<Array<string>>([]);
   const [hoveredOption, setHoveredOption] = useState<ActionOptionData | null>(null);
   const [pinnedOption, setPinnedOption] = useState<ActionOptionData | null>(null);
   const [hoveredJumpEntry, setHoveredJumpEntry] = useState<JumpToStepEntry | null>(null);
-  /** Index into actionable (non-label) display options; null = nothing keyboard-selected. */
   const [keyboardIndex, setKeyboardIndex] = useState<number | null>(null);
   keyboardIndexRef.current = keyboardIndex;
 
@@ -208,12 +137,10 @@ export function ActionsMenu({
     setHoveredJumpEntry(null);
   }, []);
 
-  // Focus search when the menu first mounts; arrow keys then own list selection.
   useEffect(() => {
     focusSearch();
   }, [focusSearch]);
 
-  /** Prevent clicks in the menu chrome from stealing focus away from search. */
   const keepSearchFocused = useCallback((e: React.MouseEvent) => {
     const target = e.target as HTMLElement;
     if (target.closest(`input[name="${SEARCH_INPUT_NAME}"]`)) {
@@ -222,22 +149,21 @@ export function ActionsMenu({
     e.preventDefault();
   }, []);
 
-  useEffect(() => {
-    if (currentPath.length === 0) {
-      setOptions(defaultOptions);
-    } else {
-      let nextOptions = defaultOptions;
-      for (const id of currentPath) {
-        const next = nextOptions.find((o) => o.id === id);
-        if (next && isActionGroup(next)) {
-          nextOptions = next.options;
-        } else {
-          nextOptions = [];
-        }
-      }
-      setOptions(nextOptions);
+  const options = useMemo(() => {
+    if (!searchTerm.startsWith(STEPS_PREFIX)) {
+      return getOptionsAtPath(defaultOptions, currentPath);
     }
-  }, [defaultOptions, currentPath]);
+    const query = searchTerm.slice(STEPS_PREFIX.length).trim().toLowerCase();
+    if (!query) {
+      return flatOptions;
+    }
+    return flatOptions
+      .filter((option) => isActionSearchMatch(option, query))
+      .sort((a, b) => {
+        const rankDiff = getActionMatchRank(a, query) - getActionMatchRank(b, query);
+        return rankDiff !== 0 ? rankDiff : a.label.localeCompare(b.label);
+      });
+  }, [currentPath, defaultOptions, flatOptions, searchTerm]);
 
   const displayOptions = useDisplayOptions({
     options,
@@ -313,13 +239,6 @@ export function ActionsMenu({
     setKeyboardIndexAndPreview(idx >= 0 ? idx : null);
   }, [displayOptions, currentPath, setKeyboardIndexAndPreview]);
 
-  // Keep the keyboard-active row visible while wrapping through long lists.
-  useEffect(() => {
-    if (keyboardIndex == null) return;
-    const active = menuContainerRef.current?.querySelector(`.${KEYBOARD_ACTIVE_CLASS}`);
-    active?.closest('.euiSelectableListItem')?.scrollIntoView({ block: 'nearest' });
-  }, [keyboardIndex, currentPath]);
-
   const isSearching =
     searchTerm.trim().length > 0 &&
     !searchTerm.trimStart().startsWith('#') &&
@@ -333,15 +252,16 @@ export function ActionsMenu({
   const handleListMouseMove = useCallback(
     (e: React.MouseEvent<HTMLElement>) => {
       const el = e.target as HTMLElement;
-
-      // Mouse hover takes over highlight + preview from keyboard selection.
-      if (keyboardIndexRef.current != null) {
-        setKeyboardIndex(null);
-      }
+      const actionableOptions = actionableDisplayOptionsRef.current;
 
       const jumpTarget = el.closest('[data-jump-id]');
       if (jumpTarget) {
         const jumpId = jumpTarget.getAttribute('data-jump-id');
+        const index = actionableOptions.findIndex((option) => {
+          const itemData = getMenuItemData(option);
+          return itemData?.kind === 'jump' && itemData.entry.id === jumpId;
+        });
+        setKeyboardIndex(index >= 0 ? index : null);
         const entry = jumpToStepEntries?.find((j) => j.id === jumpId);
         if (entry && entry.id !== hoveredJumpEntry?.id) {
           setHoveredJumpEntry(entry);
@@ -350,8 +270,14 @@ export function ActionsMenu({
         return;
       }
 
-      // Commands have no right-panel preview — keep the last preview as-is.
-      if (el.closest('[data-command-id]')) {
+      const commandTarget = el.closest('[data-command-id]');
+      if (commandTarget) {
+        const commandId = commandTarget.getAttribute('data-command-id');
+        const index = actionableOptions.findIndex((option) => {
+          const itemData = getMenuItemData(option);
+          return itemData?.kind === 'command' && itemData.command.id === commandId;
+        });
+        setKeyboardIndex(index >= 0 ? index : null);
         return;
       }
 
@@ -359,6 +285,8 @@ export function ActionsMenu({
       if (!optionTarget) return;
       const optionId = optionTarget.getAttribute('data-option-id');
       if (!optionId) return;
+      const index = actionableOptions.findIndex((option) => getOptionActionId(option) === optionId);
+      setKeyboardIndex(index >= 0 ? index : null);
       const found = flatOptions.find((o) => o.id === optionId);
       if (found && found.id !== hoveredOption?.id) {
         setHoveredOption(found);
@@ -371,90 +299,13 @@ export function ActionsMenu({
   const navigateToPath = useCallback(
     (nextPath: string[], pendingFocus: PendingListFocus = 'none') => {
       pendingListFocusRef.current = pendingFocus;
-      const applyNavigation = () => {
-        let nextOptions: ActionOptionData[] = defaultOptions;
-        for (const id of nextPath) {
-          const nextOption = nextOptions.find((option) => option.id === id);
-          if (nextOption && isActionGroup(nextOption)) {
-            nextOptions = nextOption.options;
-          } else {
-            nextOptions = [];
-          }
-        }
-        setCurrentPath(nextPath);
-        setOptions(nextOptions);
-        setPinnedOption(null);
-        setHoveredOption(null);
-        setHoveredJumpEntry(null);
-        // Clear now; pending focus effect re-selects after the list re-renders.
-        setKeyboardIndex(null);
-      };
-
-      const pathUnchanged =
-        nextPath.length === currentPath.length && nextPath.every((id, i) => id === currentPath[i]);
-      if (pathUnchanged) {
-        applyNavigation();
-        return;
-      }
-
-      const viewport = listViewportRef.current;
-      const pane = listPaneRef.current;
-      // Skip when reduced-motion is on, a slide is in flight, or layout isn't ready (e.g. jsdom)
-      if (
-        !viewport ||
-        !pane ||
-        prefersReducedMotion() ||
-        isSlidingRef.current ||
-        viewport.clientWidth === 0
-      ) {
-        applyNavigation();
-        return;
-      }
-
-      const direction = getNavDirection(currentPath, nextPath);
-      isSlidingRef.current = true;
-
-      const outgoing = pane.cloneNode(true) as HTMLElement;
-      outgoing.setAttribute('aria-hidden', 'true');
-      outgoing.style.position = 'absolute';
-      outgoing.style.inset = '0';
-      outgoing.style.width = '100%';
-      outgoing.style.height = '100%';
-      outgoing.style.zIndex = '1';
-      outgoing.style.pointerEvents = 'none';
-      outgoing.style.backgroundColor = euiTheme.colors.backgroundBasePlain;
-      viewport.appendChild(outgoing);
-
-      // Park the incoming pane off-screen before React swaps the list content
-      pane.style.transition = 'none';
-      pane.style.transform = direction === 'forward' ? 'translateX(100%)' : 'translateX(-100%)';
-
-      applyNavigation();
-
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          const transition = `transform ${LIST_SLIDE_MS}ms cubic-bezier(0.25, 0.1, 0.25, 1)`;
-          outgoing.style.transition = transition;
-          pane.style.transition = transition;
-          outgoing.style.transform =
-            direction === 'forward' ? 'translateX(-100%)' : 'translateX(100%)';
-          pane.style.transform = 'translateX(0)';
-
-          let cleaned = false;
-          const cleanup = () => {
-            if (cleaned) return;
-            cleaned = true;
-            outgoing.remove();
-            pane.style.transition = '';
-            pane.style.transform = '';
-            isSlidingRef.current = false;
-          };
-          outgoing.addEventListener('transitionend', cleanup, { once: true });
-          window.setTimeout(cleanup, LIST_SLIDE_MS + 80);
-        });
-      });
+      setCurrentPath(nextPath);
+      setPinnedOption(null);
+      setHoveredOption(null);
+      setHoveredJumpEntry(null);
+      setKeyboardIndex(null);
     },
-    [currentPath, defaultOptions, euiTheme.colors.backgroundBasePlain]
+    []
   );
 
   const handleStepOrGroupSelected = useCallback(
@@ -462,7 +313,6 @@ export function ActionsMenu({
       if (isActionGroup(action)) {
         const nextPath = action.pathIds ?? [...currentPath, action.id];
         setSearchTerm('');
-        // Mouse/click browse: no keyboard selection at the new level.
         navigateToPath([...nextPath], 'none');
       } else {
         setPinnedOption(null);
@@ -479,271 +329,6 @@ export function ActionsMenu({
     },
     [onActionSelected]
   );
-
-  const handlePinPreview = useCallback((action: ActionOptionData, e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setPinnedOption(action);
-    setHoveredOption(action);
-    setHoveredJumpEntry(null);
-  }, []);
-
-  const handleAddFromRow = useCallback(
-    (action: ActionOptionData, e: React.MouseEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-      handleAddStep(action);
-    },
-    [handleAddStep]
-  );
-
-  const renderActionOption = (rawOption: EuiSelectableOption, searchValue: string) => {
-    const itemData = getMenuItemData(rawOption);
-    // Prefer controlled searchTerm so highlights stay correct in search mode
-    // even if EuiSelectable's renderOption search arg is stale/empty.
-    const rawSearch = (searchTerm || searchValue).trim();
-    const effectiveSearch = rawSearch.startsWith(STEPS_PREFIX)
-      ? rawSearch.slice(STEPS_PREFIX.length).trim()
-      : rawSearch.startsWith('#')
-      ? rawSearch.slice(1).trim()
-      : rawSearch;
-
-    const keyboardOption =
-      keyboardIndex != null ? actionableDisplayOptions[keyboardIndex] : undefined;
-    const isKeyboardActive =
-      keyboardOption != null &&
-      getSelectableOptionKey(keyboardOption) != null &&
-      getSelectableOptionKey(keyboardOption) === getSelectableOptionKey(rawOption);
-    const keyboardActiveClassName = isKeyboardActive ? KEYBOARD_ACTIVE_CLASS : undefined;
-
-    if (itemData?.kind === 'command') {
-      const { command } = itemData;
-      return (
-        <div
-          css={styles.actionOptionWrapper}
-          className={keyboardActiveClassName}
-          data-command-id={command.id}
-        >
-          {' '}
-          <EuiFlexGroup
-            alignItems="center"
-            css={styles.actionOption}
-            gutterSize="none"
-            responsive={false}
-          >
-            <EuiFlexItem grow={false} css={[styles.iconOuter, styles.iconOuterCommand]}>
-              <span css={styles.actionIconInner}>
-                <EuiIcon
-                  type={command.iconType}
-                  size="m"
-                  color={euiTheme.colors.textParagraph}
-                  aria-hidden={true}
-                />
-              </span>
-            </EuiFlexItem>
-            <EuiFlexItem css={styles.actionInfo}>
-              <EuiFlexGroup direction="column" gutterSize="none">
-                <EuiFlexItem>
-                  <EuiTitle size="xxxs" css={styles.actionTitle}>
-                    <h6>
-                      <EuiHighlight search={effectiveSearch} highlightAll>
-                        {rawOption.label}
-                      </EuiHighlight>
-                    </h6>
-                  </EuiTitle>
-                </EuiFlexItem>
-                {command.description && (
-                  <EuiFlexItem>
-                    <EuiText size="xs" className="eui-displayBlock" css={styles.actionDescription}>
-                      <EuiHighlight search={effectiveSearch} highlightAll>
-                        {command.description}
-                      </EuiHighlight>
-                    </EuiText>
-                  </EuiFlexItem>
-                )}
-              </EuiFlexGroup>
-            </EuiFlexItem>
-            {command.shortcut && command.shortcut.length > 0 && (
-              <EuiFlexItem grow={false} css={styles.shortcutContainer}>
-                {command.shortcut.map((key) => (
-                  <kbd key={key} css={styles.shortcutKey}>
-                    {key}
-                  </kbd>
-                ))}
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        </div>
-      );
-    }
-
-    if (itemData?.kind === 'jump') {
-      return (
-        <div
-          css={styles.compactOptionWrapper}
-          className={keyboardActiveClassName}
-          data-jump-id={itemData.entry.id}
-        >
-          {' '}
-          <EuiText size="s">
-            <EuiHighlight search={effectiveSearch} highlightAll>
-              {rawOption.label}
-            </EuiHighlight>
-          </EuiText>
-        </div>
-      );
-    }
-
-    if (itemData?.kind === 'nav') {
-      return (
-        <div css={styles.compactOptionWrapper} className={keyboardActiveClassName}>
-          <EuiFlexGroup
-            alignItems="center"
-            justifyContent="spaceBetween"
-            gutterSize="xs"
-            css={styles.viewAllLink}
-          >
-            <EuiFlexItem grow={false}>
-              <EuiText size="xs" color="primary">
-                {rawOption.label}
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiIcon type="arrowRight" size="s" color="primary" aria-hidden={true} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </div>
-      );
-    }
-
-    const action =
-      itemData?.kind === 'action' ? itemData.action : (rawOption as unknown as ActionOptionData);
-    const shouldUseGroupStyle = isActionGroup(action) || isActionConnectorGroup(action);
-    const glyphColor =
-      getIconGlyphColor(action.iconVariant, euiTheme) ??
-      ('iconColor' in action ? action.iconColor : undefined);
-
-    return (
-      <div
-        css={styles.actionOptionWrapper}
-        className={['actionOptionWrapper', keyboardActiveClassName].filter(Boolean).join(' ')}
-        data-option-id={action.id}
-      >
-        <EuiFlexGroup alignItems="center" css={styles.actionOption} gutterSize="none">
-          <EuiFlexItem
-            grow={false}
-            css={[styles.iconOuter, getIconOuterStyle(action.iconVariant, styles)]}
-          >
-            <span css={shouldUseGroupStyle ? styles.groupIconInner : styles.actionIconInner}>
-              {isActionConnectorGroup(action) || isActionConnectorOption(action) ? (
-                // Prefer an explicit menu icon (e.g. sparkles for AI) over the connector glyph
-                'iconType' in action && action.iconType === 'sparkles' ? (
-                  <ActionsMenuAiIcon />
-                ) : (
-                  <StepIcon
-                    stepType={getBaseConnectorType(action.connectorType)}
-                    executionStatus={undefined}
-                  />
-                )
-              ) : isActionGroup(action) || isActionOption(action) ? (
-                action.iconType === 'sparkles' ? (
-                  <ActionsMenuAiIcon />
-                ) : (
-                  <EuiIcon type={action.iconType} size="m" color={glyphColor} aria-hidden={true} />
-                )
-              ) : null}
-            </span>
-          </EuiFlexItem>
-          <EuiFlexGroup direction="column" gutterSize="none" css={styles.actionInfo}>
-            <EuiFlexItem>
-              <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="none">
-                <EuiFlexGroup alignItems="center" gutterSize="s">
-                  <EuiTitle size="xxxs" css={styles.actionTitle}>
-                    <h6>
-                      <EuiHighlight search={effectiveSearch} highlightAll>
-                        {action.label}
-                      </EuiHighlight>
-                    </h6>
-                  </EuiTitle>
-                  {action.stability === 'tech_preview' && (
-                    <EuiBetaBadge
-                      iconType="flask"
-                      label={i18n.translate('workflows.actionsMenu.techPreviewBadge', {
-                        defaultMessage: 'Tech preview',
-                      })}
-                      size="s"
-                      css={styles.techPreviewBadge}
-                    />
-                  )}
-                  {action.stability === 'beta' && (
-                    <EuiBetaBadge
-                      label={i18n.translate('workflows.actionsMenu.betaBadge', {
-                        defaultMessage: 'Beta',
-                      })}
-                      size="s"
-                      css={styles.techPreviewBadge}
-                    />
-                  )}
-                </EuiFlexGroup>
-                <EuiText color="subdued" size="xs">
-                  {action.instancesLabel}
-                </EuiText>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiText size="xs" className="eui-displayBlock" css={styles.actionDescription}>
-                <EuiHighlight search={effectiveSearch} highlightAll>
-                  {action.description || ''}
-                </EuiHighlight>
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          {shouldUseGroupStyle ? (
-            <EuiFlexItem grow={false} css={styles.arrowContainer}>
-              <EuiIcon type="arrowRight" size="s" css={styles.arrow} aria-hidden={true} />
-            </EuiFlexItem>
-          ) : (
-            <span className="rowActions" css={styles.rowActions}>
-              <EuiButtonIcon
-                iconType="info"
-                size="m"
-                iconSize="m"
-                color="text"
-                display="empty"
-                css={styles.rowActionButton}
-                aria-label={i18n.translate('workflows.actionsMenu.viewDetails', {
-                  defaultMessage: 'View details',
-                })}
-                data-test-subj="actionsMenuItemInfo"
-                onClick={(e: React.MouseEvent) => handlePinPreview(action, e)}
-                onMouseDown={(e: React.MouseEvent) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                }}
-              />
-              <EuiButtonIcon
-                iconType="plusInCircle"
-                size="m"
-                iconSize="m"
-                color="text"
-                display="base"
-                css={styles.rowActionButton}
-                aria-label={i18n.translate('workflows.actionsMenu.addStep', {
-                  defaultMessage: 'Add step',
-                })}
-                data-test-subj="actionsMenuItemAdd"
-                onClick={(e: React.MouseEvent) => handleAddFromRow(action, e)}
-                onMouseDown={(e: React.MouseEvent) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                }}
-              />
-            </span>
-          )}
-        </EuiFlexGroup>
-      </div>
-    );
-  };
 
   const handleChange = (
     _updatedOptions: EuiSelectableOption[],
@@ -806,34 +391,12 @@ export function ActionsMenu({
     if (index == null) return;
     const option = actionableDisplayOptionsRef.current[index];
     if (!option) return;
-    // Enter on a category drills in and selects the first child (keyboard path).
     if (isCategoryOption(option)) {
       enterCategoryFromKeyboard();
       return;
     }
     handleChangeRef.current([], {} as React.BaseSyntheticEvent, option);
   }, [enterCategoryFromKeyboard]);
-
-  /** Lower rank = higher priority in search results (Steps: mode only). */
-  const MAX_ACTION_MATCH_RANK = 5;
-
-  const getActionMatchRank = (option: ActionOptionData, normalizedTerm: string): number => {
-    if (!normalizedTerm) return 0;
-    const id = option.id.toLowerCase();
-    const label = option.label.toLowerCase();
-    const description = option.description?.toLowerCase() ?? '';
-
-    if (id === normalizedTerm) return 0;
-    if (label === normalizedTerm) return 1;
-    if (description === normalizedTerm) return 2;
-    if (id.includes(normalizedTerm)) return 3;
-    if (label.includes(normalizedTerm)) return 4;
-    if (description.includes(normalizedTerm)) return 5;
-    return MAX_ACTION_MATCH_RANK + 1;
-  };
-
-  const isActionSearchMatch = (option: ActionOptionData, normalizedTerm: string) =>
-    getActionMatchRank(option, normalizedTerm) <= MAX_ACTION_MATCH_RANK;
 
   const optionMatcher = () => true;
 
@@ -847,33 +410,6 @@ export function ActionsMenu({
     if (searchValue.length > 0) {
       setCurrentPath([]);
     }
-
-    // Steps: prefix keeps a flat, ranked list in `options` for the unlimited results view.
-    if (searchValue.startsWith(STEPS_PREFIX)) {
-      const query = searchValue.slice(STEPS_PREFIX.length).trim().toLowerCase();
-      if (query.length === 0) {
-        setOptions(flatOptions);
-      } else {
-        const matches = flatOptions
-          .filter((option) => isActionSearchMatch(option, query))
-          .sort((a, b) => {
-            const rankDiff = getActionMatchRank(a, query) - getActionMatchRank(b, query);
-            return rankDiff !== 0 ? rankDiff : a.label.localeCompare(b.label);
-          });
-        setOptions(matches);
-      }
-      return;
-    }
-
-    if (searchValue.trimStart().startsWith('#')) {
-      return;
-    }
-
-    // Normal search mode builds sectioned results from categoryTree in useDisplayOptions.
-    // Reset browse-level options to the root tree when clearing search.
-    if (searchValue.length === 0) {
-      setOptions(defaultOptions);
-    }
   };
 
   const handleSearchChangeRef = useRef(handleSearchChange);
@@ -882,7 +418,6 @@ export function ActionsMenu({
   const setKeyboardIndexAndPreviewRef = useRef(setKeyboardIndexAndPreview);
   setKeyboardIndexAndPreviewRef.current = setKeyboardIndexAndPreview;
 
-  // List keyboard navigation + typing returns focus to search.
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       const input = searchInputRef.current;
@@ -891,8 +426,11 @@ export function ActionsMenu({
 
       const menuEl = menuContainerRef.current;
       if (menuEl && !menuEl.contains(document.activeElement) && document.activeElement !== input) {
-        // Ignore keys when focus is completely outside the menu.
         if (!menuEl.contains(e.target as Node)) return;
+      }
+      const eventTarget = e.target as HTMLElement;
+      if (eventTarget !== input && eventTarget.closest('button, a, [role="tab"]')) {
+        return;
       }
 
       const actionable = actionableDisplayOptionsRef.current;
@@ -917,7 +455,7 @@ export function ActionsMenu({
       }
 
       if (e.key === 'ArrowRight') {
-        if (!inListNavMode) return; // caret movement in search
+        if (!inListNavMode) return;
         e.preventDefault();
         e.stopPropagation();
         enterCategoryFromKeyboard();
@@ -925,7 +463,7 @@ export function ActionsMenu({
       }
 
       if (e.key === 'ArrowLeft') {
-        if (!inListNavMode) return; // caret movement in search
+        if (!inListNavMode) return;
         e.preventDefault();
         e.stopPropagation();
         leaveCategoryFromKeyboard();
@@ -939,10 +477,14 @@ export function ActionsMenu({
         return;
       }
 
-      // Typing while list-focused returns to search and clears selection.
-      if (isSearchFocused && !inListNavMode) return;
-
       const isPrintable = e.key.length === 1;
+      if (isSearchFocused) {
+        if (inListNavMode && (isPrintable || e.key === 'Backspace' || e.key === 'Delete')) {
+          clearKeyboardSelection();
+        }
+        return;
+      }
+
       if (!isPrintable && e.key !== 'Backspace' && e.key !== 'Delete') return;
 
       e.preventDefault();
@@ -968,11 +510,6 @@ export function ActionsMenu({
     focusSearch,
     leaveCategoryFromKeyboard,
   ]);
-
-  const displayOptionsNoTooltip = useMemo(
-    () => displayOptions.map((o) => ({ ...o, toolTipContent: '' })),
-    [displayOptions]
-  );
 
   const pathLabels = useMemo(
     () => resolvePathLabels(currentPath, defaultOptions),
@@ -1034,14 +571,27 @@ export function ActionsMenu({
   }, [isSearching, searchTerm, currentPath, pathLabels, navigateToPath]);
 
   const showBreadcrumbs = breadcrumbs.length > 0;
+  const activeOption = keyboardIndex == null ? undefined : actionableDisplayOptions[keyboardIndex];
+  const activeOptionIndex = activeOption ? displayOptions.indexOf(activeOption) : undefined;
+  const activeOptionId =
+    activeOptionIndex === undefined
+      ? undefined
+      : `${SELECTABLE_ID}_listbox_option-${activeOptionIndex}`;
+  useEffect(() => {
+    if (!activeOptionId) return;
+    document.getElementById(activeOptionId)?.scrollIntoView({ block: 'nearest' });
+  }, [activeOptionId]);
+  const isSearchVirtualized =
+    searchTerm.length > 0 && displayOptions.length > SEARCH_VIRTUALIZATION_THRESHOLD;
 
   return (
     <EuiSelectable
+      id={SELECTABLE_ID}
       aria-label={i18n.translate('workflows.actionsMenu.ariaLabel', {
         defaultMessage: 'Actions menu',
       })}
       searchable
-      options={displayOptionsNoTooltip}
+      options={displayOptions}
       onChange={handleChange}
       optionMatcher={optionMatcher}
       searchProps={{
@@ -1054,9 +604,11 @@ export function ActionsMenu({
         onChange: handleSearchChange,
         compressed: true,
         isClearable: true,
+        fullWidth: true,
         inputRef: (node: HTMLInputElement | null) => {
           searchInputRef.current = node;
         },
+        'aria-activedescendant': activeOptionId,
         onBlur: (e: React.FocusEvent<HTMLInputElement>) => {
           const next = e.relatedTarget as Node | null;
           const menuEl = menuContainerRef.current;
@@ -1077,102 +629,92 @@ export function ActionsMenu({
       }}
       listProps={{
         showIcons: false,
+        activeOptionIndex,
         paddingSize: 'none',
         onFocusBadge: false,
-        isVirtualized: searchTerm.startsWith(STEPS_PREFIX),
-        ...(searchTerm.startsWith(STEPS_PREFIX) && { rowHeight: 64 }),
+        isVirtualized: isSearchVirtualized,
+        ...(isSearchVirtualized && { rowHeight: 64 }),
       }}
-      renderOption={renderActionOption}
-      css={styles.selectable}
+      renderOption={(rawOption, searchValue) =>
+        renderActionOption({
+          rawOption,
+          searchValue,
+          searchTerm,
+          keyboardIndex,
+          actionableDisplayOptions,
+          styles,
+          euiTheme,
+        })
+      }
+      css={styles.fill}
       singleSelection
+      height="full"
     >
       {(list, search) => (
-        <div ref={menuContainerRef} css={styles.container} onMouseDown={keepSearchFocused}>
-          {/* Full-width header: title + search */}
-          <div css={styles.header}>
-            <div css={styles.titleRow}>
+        <div ref={menuContainerRef} css={styles.fill}>
+          <EuiFlexGroup direction="column" gutterSize="s" responsive={false} css={styles.header}>
+            <EuiFlexItem grow={false}>
               <EuiTitle size="xxs">
-                <h3 css={styles.title}>
+                <h3>
                   <FormattedMessage
                     id="workflows.actionsMenu.title"
                     defaultMessage="Actions menu"
                   />
                 </h3>
               </EuiTitle>
-              {onClose && (
-                <EuiButtonEmpty
-                  onClick={onClose}
-                  iconType="cross"
-                  size="xs"
-                  flush="right"
-                  color="text"
-                  aria-label={i18n.translate('workflows.actionsMenu.close', {
-                    defaultMessage: 'Close actions menu',
-                  })}
-                  css={styles.closeButton}
-                />
-              )}
-            </div>
-            <div css={styles.searchRow}>{search}</div>
-          </div>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>{search}</EuiFlexItem>
+          </EuiFlexGroup>
 
-          <EuiFlexGroup gutterSize="none" css={styles.body}>
-            {/* Left column — list */}
-            <EuiFlexItem css={styles.leftColumn} onMouseMove={handleListMouseMove}>
-              {showBreadcrumbs && (
-                <div css={styles.breadcrumbRow}>
-                  <EuiBreadcrumbs
-                    breadcrumbs={breadcrumbs}
-                    truncate={false}
-                    max={4}
-                    aria-label={i18n.translate('workflows.actionsMenu.breadcrumb.ariaLabel', {
-                      defaultMessage: 'Actions menu navigation',
-                    })}
+          <EuiFlexGroup gutterSize="none" css={styles.body} responsive={false}>
+            <EuiFlexItem
+              css={styles.leftColumn}
+              onMouseDown={keepSearchFocused}
+              onMouseMove={handleListMouseMove}
+            >
+              <EuiFlexGroup
+                direction="column"
+                gutterSize="none"
+                css={styles.fill}
+                responsive={false}
+              >
+                {showBreadcrumbs && (
+                  <EuiFlexItem grow={false} css={styles.breadcrumbRow}>
+                    <EuiBreadcrumbs
+                      breadcrumbs={breadcrumbs}
+                      truncate={false}
+                      max={4}
+                      aria-label={i18n.translate('workflows.actionsMenu.breadcrumb.ariaLabel', {
+                        defaultMessage: 'Actions menu navigation',
+                      })}
+                    />
+                  </EuiFlexItem>
+                )}
+                {showNoResults ? (
+                  <EuiEmptyPrompt
+                    paddingSize="m"
+                    titleSize="xs"
+                    body={
+                      <FormattedMessage
+                        id="workflows.actionsMenu.noResults"
+                        defaultMessage="{query} doesn't match any options."
+                        values={{ query: searchTerm.trim() }}
+                      />
+                    }
                   />
-                </div>
-              )}
-              {showNoResults ? (
-                <div css={styles.noResults}>
-                  <EuiText size="s" color="subdued" textAlign="center">
-                    <FormattedMessage
-                      id="workflows.actionsMenu.noResults"
-                      defaultMessage="{query} doesn't match any options."
-                      values={{ query: searchTerm.trim() }}
-                    />
-                  </EuiText>
-                  <EuiButton
-                    size="s"
-                    href={REQUEST_ACTION_URL}
-                    target="_blank"
-                    iconType="popout"
-                    iconSide="right"
-                    color="primary"
-                  >
-                    <FormattedMessage
-                      id="workflows.actionsMenu.requestAction"
-                      defaultMessage="Request an action"
-                    />
-                  </EuiButton>
-                </div>
-              ) : (
-                <div ref={listViewportRef} css={styles.listViewport}>
-                  <div ref={listPaneRef} css={styles.listPane}>
-                    {list}
-                  </div>
-                </div>
-              )}
+                ) : (
+                  <EuiFlexItem css={styles.listFill}>{list}</EuiFlexItem>
+                )}
+              </EuiFlexGroup>
             </EuiFlexItem>
 
-            {/* Right column — preview */}
-            <EuiFlexItem css={styles.rightColumn}>
+            <EuiFlexItem css={styles.rightColumn} data-test-subj="actionsMenuPreview">
               <ActionsMenuPreviewPanel
                 hoveredOption={previewOption}
                 hoveredJumpEntry={hoveredJumpEntry}
                 onStepSelected={handleStepOrGroupSelected}
                 onAddStep={handleAddStep}
                 onPinPreview={(action, parentSection) => {
-                  // From a category preview: open that category on the left so the
-                  // list matches the right panel, then pin this step's detail.
                   if (
                     parentSection &&
                     (isActionGroup(parentSection) || isActionConnectorGroup(parentSection))
@@ -1198,354 +740,3 @@ export function ActionsMenu({
     </EuiSelectable>
   );
 }
-
-const componentStyles = {
-  container: css({
-    display: 'flex',
-    flexDirection: 'column',
-    width: '100%',
-  }),
-  header: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      flexShrink: 0,
-      padding: `16px ${euiTheme.size.base} 12px`,
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '10px',
-      borderBottom: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
-    }),
-  titleRow: css({
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  }),
-  closeButton: css({
-    marginRight: '-4px',
-  }),
-  title: css({
-    margin: 0,
-    fontSize: '12.25px',
-    lineHeight: '20px',
-  }),
-  searchRow: css({
-    '& .euiFieldSearch': {
-      width: '100%',
-    },
-  }),
-  body: css({
-    height: 'min(520px, calc(100vh - 160px))',
-    overflow: 'hidden',
-  }),
-  leftColumn: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      flex: '0 0 50%',
-      display: 'flex',
-      flexDirection: 'column',
-      overflow: 'hidden',
-      borderRight: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
-    }),
-  listViewport: css({
-    flex: 1,
-    minHeight: 0,
-    position: 'relative',
-    overflow: 'hidden',
-  }),
-  listPane: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      height: '100%',
-      width: '100%',
-      display: 'flex',
-      flexDirection: 'column',
-      backgroundColor: euiTheme.colors.backgroundBasePlain,
-      willChange: 'transform',
-      '& > *': {
-        flex: 1,
-        minHeight: 0,
-      },
-    }),
-  breadcrumbRow: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      flexShrink: 0,
-      // Overlap the header border so subpixel centering (panel translate) can't leave a hairline
-      marginTop: -1,
-      padding: `8px 16px`,
-      borderBottom: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
-      backgroundColor: euiTheme.colors.backgroundBasePlain,
-      position: 'relative',
-      zIndex: 1,
-      fontSize: '12px',
-      '& .euiBreadcrumb, & .euiBreadcrumb__content, & .euiBreadcrumbs__list': {
-        fontSize: '12px',
-      },
-    }),
-  noResults: css({
-    flex: 1,
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: '16px',
-    padding: '24px',
-  }),
-  rightColumn: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      flex: 1,
-      overflow: 'hidden',
-      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-    }),
-  selectable: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      flex: 1,
-      minHeight: 0,
-      display: 'flex',
-      flexDirection: 'column',
-      backgroundColor: euiTheme.colors.backgroundBasePlain,
-      '& .euiSelectableListItem': {
-        padding: 0,
-        borderRadius: 0,
-        borderBottom: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
-      },
-      '& .euiSelectableListItem:last-child': {
-        borderBottom: 'none',
-      },
-      '& .euiSelectableList': {
-        flex: 1,
-        height: '100%',
-        maxHeight: 'none',
-        overflowY: 'auto',
-        padding: 0,
-      },
-      '& .euiSelectableList__list': {
-        // Kill EUI scroll-shadow inset so the first row sits flush under breadcrumbs
-        paddingTop: '0 !important',
-        maskImage: 'none',
-        WebkitMaskImage: 'none',
-        '&::before, &::after': {
-          content: 'none !important',
-          display: 'none !important',
-        },
-        // Breathing room under the search header when a section label leads the list
-        '& > ul:has(> .euiSelectableList__groupLabel:first-child)': {
-          paddingTop: '16px',
-        },
-      },
-      '& .euiSelectableList__groupLabel': {
-        position: 'sticky',
-        top: 0,
-        zIndex: 2,
-        padding: `6px 12px 6px 16px`,
-        fontSize: '12.25px',
-        fontWeight: 700,
-        color: euiTheme.colors.textParagraph,
-        borderBottom: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
-        // Opaque so list rows don't show through while the header is stuck
-        backgroundColor: euiTheme.colors.backgroundBasePlain,
-        // EUI draws a top rule via ::before on later section labels — remove it
-        '&::before': {
-          content: 'none',
-          display: 'none',
-        },
-      },
-      // Exactly 24px from the previous item to the next section label text
-      // (EUI also adds extra padding-top on later labels — zero that out).
-      '& .euiSelectableList__groupLabel ~ .euiSelectableList__groupLabel': {
-        marginTop: '24px',
-        paddingTop: 0,
-      },
-      '& .euiSelectableListItem__content': {
-        gap: 0,
-        borderRadius: 0,
-      },
-      '& .euiSelectableListItem__text': {
-        padding: 0,
-        borderRadius: 0,
-        // Never underline option text — EUI focus/hover styles add it by default
-        textDecoration: 'none !important',
-      },
-      // EuiListItemLayout defaults to a small radius; keep category rows square.
-      '& .euiListItemLayout': {
-        borderRadius: 0,
-      },
-      // EUI keeps a focused row after mouseDown; suppress that so only hover OR our
-      // keyboard-active row shows the highlight (one at a time).
-      '& .euiSelectableListItem.euiSelectableListItem-isFocused:not(:hover):not(:has(.actionsMenu-keyboardActive)), & .euiSelectableListItem[aria-selected="true"]:not(:hover):not(:has(.actionsMenu-keyboardActive))':
-        {
-          backgroundColor: `${euiTheme.colors.backgroundBasePlain} !important`,
-          color: 'inherit',
-        },
-      '& .euiSelectableListItem:hover, & .euiSelectableListItem:has(.actionsMenu-keyboardActive)': {
-        backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-        color: 'inherit',
-      },
-      // Info / plus affordances only on hovered or keyboard-active leaf rows
-      '& .euiSelectableListItem .rowActions': {
-        opacity: 0,
-        pointerEvents: 'none',
-      },
-      '& .euiSelectableListItem:hover .rowActions, & .euiSelectableListItem:has(.actionsMenu-keyboardActive) .rowActions':
-        {
-          opacity: 1,
-          pointerEvents: 'auto',
-        },
-    }),
-  actionOptionWrapper: css({
-    width: '100%',
-    padding: `12px 16px`,
-  }),
-  compactOptionWrapper: css({
-    width: '100%',
-    padding: `12px 16px`,
-  }),
-  actionOption: css({
-    gap: '11px',
-  }),
-  actionInfo: css({
-    flex: 1,
-    minWidth: 0,
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '2px',
-  }),
-  // Icon tile — 40x40, 8px radius
-  iconOuter: css({
-    width: '40px',
-    height: '40px',
-    flexShrink: 0,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: '8px',
-    boxSizing: 'border-box',
-  }),
-  // AI — Primary→Assistance gradients (same recipe as AiButton / AI Agent)
-  iconOuterPlatform: aiIconTileCss,
-  // Triggers — Backgrounds/Base/Accent + Borders/Base/Accent (Text/Accent on glyph)
-  iconOuterTrigger: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      backgroundColor: euiTheme.colors.backgroundBaseAccent,
-      border: `1px solid ${euiTheme.colors.borderBaseAccent}`,
-    }),
-  // ES / Kibana / External — match External systems & apps
-  // Backgrounds/Base/Subdued + Borders/Base/Plain (Text/Paragraph on glyph)
-  iconOuterAppLogo: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-      border: `1px solid ${euiTheme.colors.borderBasePlain}`,
-    }),
-  // Commands — same as External systems & apps
-  iconOuterCommand: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-      border: `1px solid ${euiTheme.colors.borderBasePlain}`,
-    }),
-  // Data transformation — Backgrounds/Base/Warning + Borders/Base/Warning
-  iconOuterDataTransformation: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      backgroundColor: euiTheme.colors.backgroundBaseWarning,
-      border: `1px solid ${euiTheme.colors.borderBaseWarning}`,
-    }),
-  // Flow control — Backgrounds/Base/Accent secondary + Borders/Base/Accent secondary
-  iconOuterFlowControl: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      backgroundColor: euiTheme.colors.backgroundBaseAccentSecondary,
-      border: `1px solid ${euiTheme.colors.borderBaseAccentSecondary}`,
-    }),
-  groupIconInner: css({
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '16px',
-    height: '16px',
-  }),
-  actionIconInner: css({
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '16px',
-    height: '16px',
-  }),
-  arrowContainer: css({
-    flexShrink: 0,
-    display: 'flex',
-    alignItems: 'center',
-  }),
-  arrow: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      color: euiTheme.colors.textSubdued,
-    }),
-  rowActions: css({
-    flexShrink: 0,
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: '4px',
-  }),
-  // 32×32 icon buttons — Info empty; Add uses display="base" (border) for hierarchy
-  rowActionButton: css({
-    inlineSize: '32px',
-    blockSize: '32px',
-    width: '32px',
-    height: '32px',
-  }),
-  viewAllLink: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      cursor: 'pointer',
-      width: '100%',
-      color: euiTheme.colors.primaryText,
-      '& .euiIcon': {
-        color: euiTheme.colors.primaryText,
-      },
-    }),
-  actionTitle: (euiThemeContext: UseEuiTheme) =>
-    css({
-      lineHeight: euiFontSize(euiThemeContext, 's').lineHeight,
-      '&::first-letter': {
-        textTransform: 'capitalize',
-      },
-      '& h6': {
-        fontSize: '12.25px',
-        fontWeight: 700,
-      },
-    }),
-  actionDescription: (euiThemeContext: UseEuiTheme) =>
-    css({
-      lineHeight: euiFontSize(euiThemeContext, 's').lineHeight,
-      fontSize: '12px',
-      color: euiThemeContext.euiTheme.colors.textSubdued,
-      overflow: 'hidden',
-      textOverflow: 'ellipsis',
-      whiteSpace: 'nowrap',
-      display: 'block',
-    }),
-  techPreviewBadge: css({
-    marginBottom: '-4px',
-  }),
-  shortcutContainer: css({
-    display: 'flex',
-    flexDirection: 'row',
-    flexWrap: 'nowrap',
-    alignItems: 'center',
-    gap: 2,
-    flexShrink: 0,
-  }),
-  // Match Keyboard shortcuts panel / Actions menu button kbd chips
-  shortcutKey: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      display: 'inline-flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      minWidth: 20,
-      textAlign: 'center',
-      padding: `${euiTheme.size.xxs} ${euiTheme.size.xs}`,
-      borderRadius: euiTheme.border.radius.small,
-      border: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued}`,
-      backgroundColor: 'transparent',
-      color: euiTheme.colors.textSubdued,
-      fontFamily: euiTheme.font.familyCode,
-      fontSize: '12px',
-      fontWeight: euiTheme.font.weight.medium,
-      lineHeight: 1,
-      whiteSpace: 'nowrap',
-      boxSizing: 'border-box',
-    }),
-};

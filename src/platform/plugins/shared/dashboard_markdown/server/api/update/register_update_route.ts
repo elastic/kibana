@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
-import { writeErrorHandler } from '@kbn/as-code-utils';
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { Logger, RequestHandlerContext } from '@kbn/core/server';
+import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
+import { writeErrorHandler } from '@kbn/as-code-utils';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
 import { PUBLIC_API_VERSION, commonRouteConfig } from '../constants';
@@ -43,15 +43,15 @@ If no item exists with the specified ID, a new one is created.`,
       },
       validate: {
         request: {
-          params: schema.object({
-            // Can not validate id at route level
-            // existing markdown panels may have invalid "as code" ids
-            id: schema.string({
-              meta: {
+          params: z
+            .object({
+              // Can not validate id at route level
+              // existing markdown panels may have invalid "as code" ids
+              id: z.string().meta({
                 description: 'The unique ID of the markdown library item to be created or updated.',
-              },
-            }),
-          }),
+              }),
+            })
+            .strict(),
           body: updateRequestBodySchema,
         },
         response: {
@@ -73,7 +73,7 @@ If no item exists with the specified ID, a new one is created.`,
       },
     },
     async (ctx, req, res) =>
-      telemetryHandler(req, usageCounter, async () => {
+      telemetryHandler(req, { usageCounter }, async () => {
         try {
           const { body, operation } = await update(ctx, req.params.id, req.body);
           if (operation === 'create') {

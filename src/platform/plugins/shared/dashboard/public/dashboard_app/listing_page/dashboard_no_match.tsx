@@ -10,10 +10,10 @@
 import React, { useEffect } from 'react';
 import type { RouteComponentProps } from 'react-router-dom';
 
-import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { LANDING_PAGE_PATH } from '../../../common/page_bundle_constants';
 import { coreServices, urlForwardingService } from '../../services/kibana_services';
@@ -38,8 +38,10 @@ export const DashboardNoMatch = ({ history }: { history: RouteComponentProps['hi
       bannerId = coreServices.overlays.banners.replace(
         bannerId,
         toMountPoint(
-          <EuiCallOut announceOnMount color="warning" iconType="info" title={bannerMessage}>
-            <p>
+          <KbnWarningCallout
+            announceOnMount
+            title={bannerMessage}
+            text={
               <FormattedMessage
                 id="dashboard.noMatchRoute.bannerText"
                 defaultMessage="Dashboard application doesn't recognize this route: {route}."
@@ -47,8 +49,8 @@ export const DashboardNoMatch = ({ history }: { history: RouteComponentProps['hi
                   route: history.location.pathname,
                 }}
               />
-            </p>
-          </EuiCallOut>,
+            }
+          />,
           coreServices
         )
       );

@@ -165,6 +165,44 @@ interface RelationshipIntegrationBase {
    * log-based maintainer behavior.
    */
   disableLookbackWindow?: boolean;
+  /**
+   * Clear this config's `relationshipKey` on all entities from `entitySource`
+   * before processing any page, so the run repopulates from a clean slate.
+   *
+   * ONLY for sources that emit a COMPLETE snapshot of the relationship set each
+   * cycle (e.g. Workday's 24h user inventory). On an event-stream source
+   * (`accesses`, `communicates_with`) absence means "not seen in this window",
+   * never "no longer true" — clearing there would erase real observations.
+   *
+   * Safe only while a source's actors are namespace-partitioned into their own
+   * entity documents; otherwise this would delete another source's contribution
+   * to the same `ids` array.
+   */
+  resetRelationshipsBeforeRun?: { entitySource: string };
+  /**
+   * Declares that every document this integration reads describes a *host-scoped*
+   * (non-IDP) user — an identity meaningful only within one host, keyed by
+   * `user.name` + `host.id` — and always carries `host.id`. This is an assertion
+   * about the *data*, not a build directive, but it lets Step 2 skip work that
+   * only exists to handle the general case:
+   *
+   * - the actor EUID comes from `euid.experimental.getHostScopedUserEuidEsql()`, which emits
+   *   the namespace directly instead of deriving `entity.namespace` (a 7-arm
+   *   CASE/COALESCE tree over `event.module`, `event.dataset`,
+   *   `data_stream.dataset`, `cloud.provider` and `event.kind`);
+   * - the target EUID and its existence gate read `host.id` alone, skipping the
+   *   `host.name` / `host.hostname` fallback chain.
+   *
+   * Net effect is ~2 EVAL columns per row instead of ~35 — measured ~26× faster
+   * on logs-system.auth (~700M docs, 30d lookback).
+   *
+   * Both claims must hold. `system_auth` and `system_security` qualify (SSH and
+   * Windows logon events are host-scoped and always carry `host.id`). Setting
+   * this where IDP-issued users can appear silently produces EUIDs that do not
+   * match the entity store, 404-ing every write; setting it where `host.id` can
+   * be absent silently drops those documents.
+   */
+  hostScopedUsersOnly?: true;
 }
 
 /**
@@ -255,7 +293,23 @@ export interface BucketedRelationshipIntegrationConfig
 export interface OverrideRelationshipIntegrationConfig extends RelationshipIntegrationBase {
   kind: 'override';
   relationshipKey: EntityRelationshipKey;
-  esqlQueryOverride: (namespace: string) => string;
+  /**
+   * `pageActorValues` is passed only when `scopeToPageActorValues` is set; the
+   * query must then reference exactly one positional `?` param per value.
+   */
+  esqlQueryOverride: (namespace: string, pageActorValues?: readonly string[]) => string;
+  /**
+   * When true, the engine passes the page's distinct actor values (every non-null
+   * `customActor.fields` value across the page's buckets, see `getPageActorValues`)
+   * to `esqlQueryOverride` and binds the same array, in order, as ES|QL positional
+   * params.
+   *
+   * For overrides whose Step 2 can emit actors that are not page buckets: the
+   * page filter is an OR across actor fields, so a document matched through one
+   * field also contributes its other fields' values. Filtering the grouped rows
+   * to the page's values bounds the row count by the page instead of by the data.
+   */
+  scopeToPageActorValues?: true;
 }
 
 /**
@@ -317,3 +371,15 @@ export interface EntityRelationshipRecord {
    */
   relationships: Record<string, string[]>;
 }
+
+/**
+ * Union of all known relationship maintainer identifiers. Passed into
+ * `runRelationshipMaintainer` as a required `maintainerName` field so that
+ * per-integration completion logs carry an unambiguous maintainer label.
+ */
+export type RelationshipMaintainerName =
+  | 'communicates_with'
+  | 'accesses_frequently_and_infrequently'
+  | 'administers'
+  | 'supervises'
+  | 'owns';

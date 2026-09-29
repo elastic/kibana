@@ -85,15 +85,6 @@ describe(
   'Rule Migrations - Microsoft Sentinel watchlist workflow',
   {
     tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
-    env: {
-      ftrConfig: {
-        kbnServerArgs: [
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-            'sentinelRulesMigration',
-          ])}`,
-        ],
-      },
-    },
   },
   () => {
     before(() => {

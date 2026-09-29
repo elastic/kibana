@@ -8,7 +8,7 @@
 import type { Type } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { ALERT_SEVERITY_VALUES, type AlertSeverity } from '@kbn/rule-data-utils';
-import { ISO_DATE_REGEX } from '../../../../schedule/constants';
+import { ISO_DATE_REGEX } from '@kbn/response-ops-schedule-schema';
 import {
   MAX_ID_LENGTH,
   MAX_SNOOZED_INSTANCE_CONDITIONS,

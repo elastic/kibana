@@ -9,14 +9,14 @@ This page lists the fastest ways to debug Scout tests locally and in CI.
 ## Local runs [scout-debugging-local]
 
 - If your tests use the `log` fixture, messages are printed in local console output.
-- For more verbose output, set `SCOUT_LOG_LEVEL=debug`.
+- For more verbose output, set `SCOUT_LOG_LEVEL=debug`. See [Logging](./logging.md) for the full picture, including how to inspect Kibana/ES/browser/UIAM logs for serverless projects in MKI.
 
 ### Open the HTML report [open-the-scout-report]
 
 After a run, Playwright generates an HTML report. The console output includes the report path. To open the latest report:
 
 ```bash
-node scripts/playwright show-report <plugin-path>/test/scout/ui/output/reports
+node scripts/playwright show-report <plugin-path>/test/scout/ui/.scout/reports
 ```
 
 ::::::{note}

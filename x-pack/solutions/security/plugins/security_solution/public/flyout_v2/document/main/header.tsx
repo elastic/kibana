@@ -8,6 +8,7 @@
 import type { FC } from 'react';
 import React, { memo, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
 import { EVENT_KIND } from '@kbn/rule-data-utils';
@@ -20,10 +21,24 @@ import { Notes } from '../../shared/components/notes';
 import { DocumentSeverity } from './components/severity';
 import { Timestamp } from '../../shared/components/timestamp';
 import { RiskScore } from './components/risk_score';
-import { ALERT_SUMMARY_PANEL_TEST_ID } from '../../shared/components/test_ids';
+import {
+  ALERT_SUMMARY_PANEL_TEST_ID,
+  DOCUMENT_FLYOUT_HEADER_SHARE_BUTTON_TEST_ID,
+} from '../../shared/components/test_ids';
 import type { CellActionRenderer } from '../../shared/components/cell_actions';
 import { noopCellActionRenderer } from '../../shared/components/cell_actions';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
+import { ShareUrlIconButton } from '../../shared/components/share_url_icon_button';
+import { FlyoutHeaderActions } from '../../shared/components/flyout_header_actions';
+import { useGetFlyoutLink } from '../../../flyout/document_details/right/hooks/use_get_flyout_link';
+import { isRulePreviewDocument } from '../../shared/utils/is_rule_preview_document';
+
+const SHARE_ALERT_LABEL = i18n.translate(
+  'xpack.securitySolution.flyoutV2.document.header.shareAlertLabel',
+  {
+    defaultMessage: 'Copy link to alert',
+  }
+);
 
 export interface HeaderProps {
   /**
@@ -56,9 +71,24 @@ export const Header: FC<HeaderProps> = memo(
       () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
       [hit]
     );
+    const isRulePreview = useMemo(() => isRulePreviewDocument(hit), [hit]);
+
+    const alertDetailsLink = useGetFlyoutLink({
+      eventId: hit.raw._id ?? '',
+      indexName: hit.raw._index ?? '',
+      timestamp: String(hit.flattened?.['@timestamp'] ?? ''),
+    });
 
     return (
       <>
+        <FlyoutHeaderActions>
+          <ShareUrlIconButton
+            url={isAlert ? alertDetailsLink : null}
+            tooltip={SHARE_ALERT_LABEL}
+            ariaLabel={SHARE_ALERT_LABEL}
+            dataTestSubj={DOCUMENT_FLYOUT_HEADER_SHARE_BUTTON_TEST_ID}
+          />
+        </FlyoutHeaderActions>
         <DocumentSeverity hit={hit}>
           <EuiSpacer size="s" />
         </DocumentSeverity>
@@ -67,7 +97,7 @@ export const Header: FC<HeaderProps> = memo(
         </EuiText>
         <EuiSpacer size="xs" />
 
-        <Title hit={hit} hideLink={!canReadRules} />
+        <Title hit={hit} hideLink={!canReadRules || isRulePreview} />
         {isAlert && (
           <>
             <EuiSpacer size="m" />
@@ -93,12 +123,20 @@ export const Header: FC<HeaderProps> = memo(
                 </EuiFlexGroup>
               </EuiFlexItem>
               <EuiFlexItem css={flyoutHeaderBlockStyles}>
-                <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
+                <EuiFlexGroup direction="row" gutterSize="s" responsive={false} alignItems="center">
                   <EuiFlexItem>
-                    <Assignees hit={hit} onAlertUpdated={onAlertUpdated} />
+                    <Assignees
+                      hit={hit}
+                      onAlertUpdated={onAlertUpdated}
+                      showAssignees={!isRulePreview}
+                    />
                   </EuiFlexItem>
                   <EuiFlexItem>
-                    <Notes documentId={hit.raw._id ?? ''} onShowNotes={onShowNotes} />
+                    <Notes
+                      documentId={hit.raw._id ?? ''}
+                      onShowNotes={onShowNotes}
+                      disabled={isRulePreview}
+                    />
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>

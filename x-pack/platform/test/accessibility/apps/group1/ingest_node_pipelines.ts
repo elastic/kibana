@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { Client } from '@elastic/elasticsearch';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { deleteAllPipelines, putSamplePipeline } from './helpers';
 export default function ({ getService, getPageObjects }: any) {
   const { common } = getPageObjects(['common']);
@@ -51,7 +52,7 @@ export default function ({ getService, getPageObjects }: any) {
     it('Create Pipeline Wizard', async () => {
       await common.navigateToUrl('ingestPipelines', 'create', { shouldUseHashForSubUrl: false });
       await retry.waitFor('Create pipeline page one to be visible', async () => {
-        return testSubjects.isDisplayed('pageTitle') ? true : false;
+        return testSubjects.isDisplayed(APP_HEADER_TEST_SUBJECTS.title);
       });
       await a11y.testAppSnapshot();
       await testSubjects.click('addProcessorButton');

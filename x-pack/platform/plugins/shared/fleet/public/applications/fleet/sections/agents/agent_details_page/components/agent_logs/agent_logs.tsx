@@ -12,9 +12,9 @@ import {
   EuiSuperDatePicker,
   EuiFilterGroup,
   EuiPanel,
-  EuiCallOut,
   EuiLink,
 } from '@elastic/eui';
+import { KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { fromKueryExpression } from '@kbn/es-query';
 import semverGte from 'semver/functions/gte';
@@ -66,39 +66,38 @@ const AgentPolicyLogsNotEnabledCallout: React.FunctionComponent<{ agentPolicy: A
 
   return (
     <EuiFlexItem>
-      <EuiCallOut
+      <KbnInfoCallout
         size="m"
-        color="primary"
-        iconType="info"
         title={
           <FormattedMessage
             id="xpack.fleet.agentLogs.logDisabledCallOutTitle"
             defaultMessage="Log collection is disabled"
           />
         }
-      >
-        {agentPolicy.is_managed ? null : (
-          <FormattedMessage
-            id="xpack.fleet.agentLogs.logDisabledCallOutDescription"
-            defaultMessage="Update the agent's policy {settingsLink} to enable logs collection."
-            values={{
-              settingsLink: (
-                <EuiLink
-                  href={getHref('policy_details', {
-                    policyId: agentPolicy.id,
-                    tabId: 'settings',
-                  })}
-                >
-                  <FormattedMessage
-                    id="xpack.fleet.agentLogs.settingsLink"
-                    defaultMessage="settings"
-                  />
-                </EuiLink>
-              ),
-            }}
-          />
-        )}
-      </EuiCallOut>
+        text={
+          agentPolicy.is_managed ? undefined : (
+            <FormattedMessage
+              id="xpack.fleet.agentLogs.logDisabledCallOutDescription"
+              defaultMessage="Update the agent's policy {settingsLink} to enable logs collection."
+              values={{
+                settingsLink: (
+                  <EuiLink
+                    href={getHref('policy_details', {
+                      policyId: agentPolicy.id,
+                      tabId: 'settings',
+                    })}
+                  >
+                    <FormattedMessage
+                      id="xpack.fleet.agentLogs.settingsLink"
+                      defaultMessage="settings"
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
+          )
+        }
+      />
     </EuiFlexItem>
   );
 };
@@ -206,10 +205,9 @@ export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(
 
     if (!isLogFeatureAvailable) {
       return (
-        <EuiCallOut
+        <KbnWarningCallout
           announceOnMount
           size="m"
-          color="warning"
           title={
             <FormattedMessage
               id="xpack.fleet.agentLogs.oldAgentWarningTitle"

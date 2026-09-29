@@ -10,21 +10,18 @@
 import React, { useCallback, useMemo } from 'react';
 import { useObservable } from '@kbn/use-observable';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
-import type { MetricsGridSettings } from '@kbn/unified-chart-section-viewer';
+import type { MetricsGridSettings } from '@kbn/discover-utils';
 import { UnifiedMetricsExperienceGrid } from '@kbn/unified-chart-section-viewer';
-import {
-  internalStateActions,
-  useAppStateSelector,
-  useCurrentTabAction,
-  useInternalStateDispatch,
-} from '../../../../../application/main/state_management/redux';
+import type { MetricsSort } from '@kbn/unified-chart-section-viewer';
+import { useAppStateSelector } from '../../../../../application/main/state_management/redux';
 import { useDiscoverServices } from '../../../../../hooks/use_discover_services';
 import type { DiscoverAppState } from '../../../../../application/main/state_management/redux';
 import type { DataSourceProfileProvider } from '../../../../profiles';
 import type { ContextAwarenessToolkitActions } from '../../../../toolkit';
-import type { ProfileStateAdapter } from '../../../../profile_state';
-import { METRICS_GRID_SETTINGS_STATE_DEF } from '../profile_state';
+import type { ProfileStateAdapter } from '../../../..';
+import { METRICS_STATE_DEF, type MetricsState } from '../../../../../../common/context_awareness';
 import { METRICS_DATA_SOURCE_PROFILE_ID } from '../profile';
+import { RecentMetricsStorage } from './recent_metrics_storage';
 /**
  * Wrapper component that reads breakdownField from Discover's app state
  * and passes it to UnifiedMetricsExperienceGrid for syncing with dimensions selector.
@@ -32,33 +29,71 @@ import { METRICS_DATA_SOURCE_PROFILE_ID } from '../profile';
 const MetricsExperienceGridWrapper = (
   props: ChartSectionProps & {
     actions: ContextAwarenessToolkitActions;
-    gridSettingsStateAdapter: ProfileStateAdapter<MetricsGridSettings>;
+    metricsStateAdapter: ProfileStateAdapter<MetricsState>;
   }
 ) => {
-  const { gridSettingsStateAdapter } = props;
+  const { metricsStateAdapter } = props;
   const breakdownField = useAppStateSelector((state: DiscoverAppState) => state.breakdownField);
-  const dispatch = useInternalStateDispatch();
-  const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
-  const { discoverShared, dataViews, notifications, docLinks, logger, core } =
+  const { discoverShared, dataViews, notifications, docLinks, logger, core, storage } =
     useDiscoverServices();
 
-  const gridSettings = useObservable(
-    gridSettingsStateAdapter.getState$(),
-    gridSettingsStateAdapter.getState()
+  const metricsState = useObservable(
+    metricsStateAdapter.getState$(),
+    metricsStateAdapter.getState()
+  );
+
+  const gridSettings = useMemo<MetricsGridSettings>(
+    () => ({
+      counterAggregation: metricsState.counterAggregation,
+      gaugeAggregation: metricsState.gaugeAggregation,
+      histogramPercentile: metricsState.histogramPercentile,
+      dimensions: metricsState.dimensions,
+      searchTerm: metricsState.searchTerm,
+    }),
+    [
+      metricsState.counterAggregation,
+      metricsState.gaugeAggregation,
+      metricsState.histogramPercentile,
+      metricsState.dimensions,
+      metricsState.searchTerm,
+    ]
   );
 
   const onGridSettingsChange = useCallback(
     (update: Partial<MetricsGridSettings>) => {
-      gridSettingsStateAdapter.updateState(update);
+      metricsStateAdapter.updateState(update);
     },
-    [gridSettingsStateAdapter]
+    [metricsStateAdapter]
   );
 
-  const onBreakdownFieldChange = useCallback(
-    (nextBreakdownField?: string) => {
-      dispatch(updateAppState({ appState: { breakdownField: nextBreakdownField } }));
+  const metricsSort = useMemo<MetricsSort>(
+    () => ({
+      sortField: metricsState.sortField,
+      sortDirection: metricsState.sortDirection,
+    }),
+    [metricsState.sortField, metricsState.sortDirection]
+  );
+
+  const onMetricsSortChange = useCallback(
+    (next: MetricsSort) => {
+      metricsStateAdapter.updateState(next);
     },
-    [dispatch, updateAppState]
+    [metricsStateAdapter]
+  );
+
+  const recentMetricsStorage = useMemo(
+    () => new RecentMetricsStorage(core.http.basePath.get(), storage),
+    [core.http.basePath, storage]
+  );
+
+  const getRecentlyExploredMetrics = useCallback(
+    () => recentMetricsStorage.get(),
+    [recentMetricsStorage]
+  );
+
+  const onMetricExplored = useCallback(
+    (metricUniqueKey: string) => recentMetricsStorage.add(metricUniqueKey),
+    [recentMetricsStorage]
   );
 
   const externalServices = useMemo(
@@ -79,10 +114,13 @@ const MetricsExperienceGridWrapper = (
       actions={props.actions}
       profileId={METRICS_DATA_SOURCE_PROFILE_ID}
       breakdownField={breakdownField}
-      onBreakdownFieldChange={onBreakdownFieldChange}
       externalServices={externalServices}
       gridSettings={gridSettings}
       onGridSettingsChange={onGridSettingsChange}
+      metricsSort={metricsSort}
+      onMetricsSortChange={onMetricsSortChange}
+      getRecentlyExploredMetrics={getRecentlyExploredMetrics}
+      onMetricExplored={onMetricExplored}
     />
   );
 };
@@ -91,7 +129,7 @@ export const createChartSection =
   (): DataSourceProfileProvider['profile']['getChartSectionConfiguration'] =>
   (prev, { toolkit }) =>
   () => {
-    const gridSettingsStateAdapter = toolkit.getStateAdapter(METRICS_GRID_SETTINGS_STATE_DEF);
+    const metricsStateAdapter = toolkit.getStateAdapter(METRICS_STATE_DEF);
     return {
       ...prev(),
       renderChartSection: (props) => {
@@ -99,7 +137,7 @@ export const createChartSection =
           <MetricsExperienceGridWrapper
             {...props}
             actions={toolkit.actions}
-            gridSettingsStateAdapter={gridSettingsStateAdapter}
+            metricsStateAdapter={metricsStateAdapter}
           />
         );
       },

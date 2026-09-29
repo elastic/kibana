@@ -158,6 +158,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
         isServerless={config.isServerless}
         enableSizeAndDocCount={config.enableSizeAndDocCount}
         enableDataStreamStats={config.enableDataStreamStats}
+        enableIndexMode={config.enableIndexMode}
         locator={locator}
         navigateToUrl={core.application.navigateToUrl}
         ilmPolicies={ilmPolicies}

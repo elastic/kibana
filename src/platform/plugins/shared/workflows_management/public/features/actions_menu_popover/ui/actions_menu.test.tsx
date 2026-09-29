@@ -56,7 +56,6 @@ const mockOptions: ActionOptionData[] = [mockGroup, mockFlowControlOption];
 
 jest.mock('../lib/get_action_options', () => ({
   getActionOptions: jest.fn(() => mockOptions),
-  usesInverseIconColor: jest.fn(() => false),
   getIconGlyphColor: jest.fn(() => undefined),
   flattenOptions: jest.fn((options: ActionOptionData[]) => {
     const flat: ActionOptionData[] = [];
@@ -179,6 +178,17 @@ describe('ActionsMenu', () => {
     expect(searchInput).toBeInTheDocument();
   });
 
+  it('allows text selection in the preview pane', () => {
+    const { container } = renderComponent();
+    const previewPane = container.querySelector('[data-test-subj="actionsMenuPreview"]');
+
+    expect(previewPane).not.toBeNull();
+    if (!previewPane) {
+      throw new Error('Preview pane not found');
+    }
+    expect(fireEvent.mouseDown(previewPane)).toBe(true);
+  });
+
   describe('keyboard navigation', () => {
     beforeEach(() => {
       Element.prototype.scrollIntoView = jest.fn();
@@ -196,10 +206,37 @@ describe('ActionsMenu', () => {
 
       fireEvent.keyDown(searchInput, { key: 'ArrowDown' });
       expect(getKeyboardActiveLabel()).toContain('Triggers');
+      const activeDescendantId = searchInput.getAttribute('aria-activedescendant');
+      expect(activeDescendantId).not.toBeNull();
+      expect(document.getElementById(activeDescendantId ?? '')).toHaveTextContent('Triggers');
 
       fireEvent.keyDown(searchInput, { key: 'ArrowUp' });
       // Wrap: from first Up goes to last actionable root item
       expect(getKeyboardActiveLabel()).toContain('If Condition');
+    });
+
+    it('scrolls each newly active option into view', () => {
+      renderComponent();
+      const searchInput = screen.getByPlaceholderText('Search step, command or # to go to a step');
+      const scrollIntoView = Element.prototype.scrollIntoView as jest.Mock;
+      const expectActiveOptionScrolled = () => {
+        const activeOption = document.getElementById(
+          searchInput.getAttribute('aria-activedescendant') ?? ''
+        );
+        expect(scrollIntoView.mock.contexts[scrollIntoView.mock.contexts.length - 1]).toBe(
+          activeOption
+        );
+      };
+      searchInput.focus();
+
+      fireEvent.keyDown(searchInput, { key: 'ArrowDown' });
+      expectActiveOptionScrolled();
+
+      fireEvent.keyDown(searchInput, { key: 'ArrowDown' });
+      expectActiveOptionScrolled();
+
+      fireEvent.keyDown(searchInput, { key: 'ArrowUp' });
+      expectActiveOptionScrolled();
     });
 
     it('wraps from the last item back to the first on ArrowDown', () => {
@@ -288,6 +325,21 @@ describe('ActionsMenu', () => {
       );
     });
 
+    it('activates the option hovered after keyboard navigation', () => {
+      const onActionSelected = jest.fn();
+      renderComponent({ onActionSelected });
+      const searchInput = screen.getByPlaceholderText('Search step, command or # to go to a step');
+      searchInput.focus();
+
+      fireEvent.keyDown(searchInput, { key: 'ArrowDown' });
+      fireEvent.mouseMove(screen.getByText('If Condition'));
+      fireEvent.keyDown(searchInput, { key: 'Enter' });
+
+      expect(onActionSelected).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'if', label: 'If Condition' })
+      );
+    });
+
     it('returns to search and clears selection when typing', () => {
       renderComponent();
       const searchInput = screen.getByPlaceholderText(
@@ -298,11 +350,30 @@ describe('ActionsMenu', () => {
       fireEvent.keyDown(searchInput, { key: 'ArrowDown' });
       expect(getKeyboardActiveLabel()).toContain('Triggers');
 
-      fireEvent.keyDown(searchInput, { key: 'a' });
+      expect(fireEvent.keyDown(searchInput, { key: 'a' })).toBe(true);
+      fireEvent.change(searchInput, { target: { value: 'a' } });
 
       expect(getKeyboardActiveLabel()).toBeNull();
       expect(document.activeElement).toBe(searchInput);
-      expect(searchInput.value).toContain('a');
+      expect(searchInput.value).toBe('a');
+    });
+
+    it('preserves native search editing after list navigation', () => {
+      renderComponent();
+      const searchInput = screen.getByPlaceholderText(
+        'Search step, command or # to go to a step'
+      ) as HTMLInputElement;
+      fireEvent.change(searchInput, { target: { value: 'tr' } });
+      searchInput.focus();
+      searchInput.setSelectionRange(1, 1);
+
+      fireEvent.keyDown(searchInput, { key: 'ArrowDown' });
+      expect(getKeyboardActiveLabel()).not.toBeNull();
+
+      expect(fireEvent.keyDown(searchInput, { key: 'Backspace' })).toBe(true);
+      expect(getKeyboardActiveLabel()).toBeNull();
+      expect(searchInput.value).toBe('tr');
+      expect(searchInput.selectionStart).toBe(1);
     });
   });
 });

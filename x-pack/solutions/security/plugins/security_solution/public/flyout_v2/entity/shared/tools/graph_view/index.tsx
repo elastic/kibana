@@ -8,16 +8,13 @@
 import React, { memo, useCallback } from 'react';
 import { EuiFlyoutBody, EuiFlyoutHeader } from '@elastic/eui';
 import { noop } from 'lodash/fp';
-import { useHistory } from 'react-router-dom';
-import { useStore } from 'react-redux-v7';
 import {
   GraphGroupedNodePreviewPanel,
   type GraphGroupedNodePreviewPanelProps,
 } from '@kbn/cloud-security-posture-graph';
 import { FlowTargetSourceDest } from '../../../../../../common/search_strategy';
-import { useKibana } from '../../../../../common/lib/kibana';
-import { flyoutProviders } from '../../../../shared/components/flyout_provider';
 import { useDefaultDocumentFlyoutProperties } from '../../../../shared/hooks/use_default_flyout_properties';
+import { useOpenFlyout } from '../../../../shared/hooks/use_open_flyout';
 import { buildFlyoutNavTitle } from '../../../../shared/utils/build_flyout_nav_title';
 import {
   ENTITIES_TITLE,
@@ -28,7 +25,13 @@ import { useFlyoutApi } from '../../../../use_flyout_api';
 import { cellActionRenderer } from '../../../../shared/components/cell_actions';
 import { ToolsFlyoutHeader } from '../../../../shared/components/tools_flyout_header';
 import { GraphVisualization } from '../../../../document/tools/graph/components/graph_visualization';
-import { FlyoutSessionContextProvider, useFlyoutSessionContext } from '../../../../session_context';
+import { useFlyoutSessionContext } from '../../../../session_context';
+import {
+  FLYOUT_ORIGIN,
+  FLYOUT_SESSION_KIND,
+  FLYOUT_SURFACE,
+  FLYOUT_TOOL,
+} from '../../../../../common/lib/telemetry';
 
 const TITLE = ENTITY_GRAPH_VIEW_TITLE;
 
@@ -56,10 +59,7 @@ export interface GraphViewProps {
  */
 export const GraphView = memo(
   ({ entityId, scopeId, entityName, onShowEntity, onShowOriginatingEntity }: GraphViewProps) => {
-    const { services } = useKibana();
-    const { overlays } = services;
-    const store = useStore();
-    const history = useHistory();
+    const open = useOpenFlyout();
     const { historyKey } = useFlyoutSessionContext();
     const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
     const { openDocumentFlyoutFromIndexAsChild, openNetworkFlyoutAsChild } = useFlyoutApi();
@@ -71,13 +71,19 @@ export const GraphView = memo(
           indexName,
           renderCellActions: cellActionRenderer,
           onAlertUpdated: noop,
+          origin: FLYOUT_ORIGIN.GRAPH_DOCUMENT_NODE,
           title: isEvent ? EVENT_TITLE : undefined,
         }),
       [openDocumentFlyoutFromIndexAsChild]
     );
 
     const onShowNetwork = useCallback(
-      (ip: string) => openNetworkFlyoutAsChild({ ip, flowTarget: FlowTargetSourceDest.source }),
+      (ip: string) =>
+        openNetworkFlyoutAsChild({
+          ip,
+          flowTarget: FlowTargetSourceDest.source,
+          origin: FLYOUT_ORIGIN.GRAPH_NETWORK_NODE,
+        }),
       [openNetworkFlyoutAsChild]
     );
 
@@ -88,42 +94,30 @@ export const GraphView = memo(
           'scopeId' | 'showLoadingState' | 'onShowDocument' | 'onShowEntity'
         >
       ) =>
-        overlays.openSystemFlyout(
-          flyoutProviders({
-            services,
-            store,
-            history,
-            children: (
-              <FlyoutSessionContextProvider value={{ session: 'inherit', historyKey }}>
-                <GraphGroupedNodePreviewPanel
-                  {...params}
-                  scopeId={scopeId}
-                  onShowDocument={onShowDocument}
-                  onShowEntity={onShowEntity}
-                />
-              </FlyoutSessionContextProvider>
-            ),
-          }),
+        open(
+          <GraphGroupedNodePreviewPanel
+            {...params}
+            scopeId={scopeId}
+            onShowDocument={onShowDocument}
+            onShowEntity={onShowEntity}
+          />,
           {
             ...defaultFlyoutProperties,
             historyKey,
-            session: 'inherit',
+            session: FLYOUT_SESSION_KIND.INHERIT,
             title: buildFlyoutNavTitle(
               params.docMode === 'grouped-entities' ? ENTITIES_TITLE : EVENT_TITLE
             ),
-          }
+          },
+          {
+            surface: FLYOUT_SURFACE.TOOL,
+            tool: FLYOUT_TOOL.GRAPH_VIEW,
+            session: FLYOUT_SESSION_KIND.INHERIT,
+            origin: FLYOUT_ORIGIN.GRAPH_GROUPED_NODE,
+          },
+          FLYOUT_SESSION_KIND.INHERIT
         ),
-      [
-        overlays,
-        services,
-        store,
-        history,
-        scopeId,
-        onShowDocument,
-        onShowEntity,
-        defaultFlyoutProperties,
-        historyKey,
-      ]
+      [scopeId, onShowDocument, onShowEntity, defaultFlyoutProperties, historyKey, open]
     );
 
     return (

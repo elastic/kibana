@@ -7,9 +7,12 @@
 
 import {
   agentBuilderDefaultAgentId,
+  createNonInteractiveConfig,
+  ConversationAccessControlMode,
   isConversationCreatedEvent,
   isConversationUpdatedEvent,
   isRoundCompleteEvent,
+  toAutoApprovedApis,
   AgentExecutionMode,
 } from '@kbn/agent-builder-common';
 import { ByteSizeValue } from '@kbn/config-schema';
@@ -68,6 +71,8 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
           conversation_id: conversationId,
           attachments,
           metadata,
+          configuration_overrides: configurationOverrides,
+          approvals,
         } = context.input;
 
         const {
@@ -76,9 +81,13 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
           'inference-id': inferenceIdRaw,
           'connector-id-by-feature': connectorIdByFeatureRaw,
           'create-conversation': createConversation,
+          'public-conversation': publicConversation,
           'plugin-id': pluginId,
           'aggregate-by': aggregateBy,
+          'product-solution': productSolution,
+          'product-feature': productFeature,
           'max-step-size': maxStepSize,
+          'reasoning-level': reasoningLevel,
         } = context.config;
         const maxContentLength =
           typeof maxStepSize === 'string' ? parseMaxStepSize(maxStepSize) : undefined;
@@ -114,6 +123,9 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
         }
 
         const storeConversation = createConversation || Boolean(conversationId);
+        const accessControl = publicConversation
+          ? { access_mode: ConversationAccessControlMode.Public }
+          : undefined;
 
         const executionService = serviceManager.internalStart?.execution;
         if (!executionService) {
@@ -129,20 +141,36 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
           request,
           abortSignal: context.abortSignal,
           metadata,
+          interactive: createNonInteractiveConfig(
+            approvals?.auto_approved_apis && toAutoApprovedApis(approvals.auto_approved_apis)
+          ),
           params: {
             agentId: effectiveAgentId,
             connectorId: effectiveConnectorId,
             conversationId,
             autoCreateConversationWithId: createConversation,
             storeConversation,
+            accessControl,
             structuredOutput: !!schema,
             outputSchema: schema,
+            configurationOverrides,
             nextInput: {
               message,
               attachments,
             },
             ...(maxContentLength !== undefined ? { maxContentLength } : {}),
-            ...(pluginId ? { telemetryMetadata: { pluginId, aggregateBy } } : {}),
+            ...(reasoningLevel !== undefined ? { reasoningLevel } : {}),
+            ...(pluginId
+              ? {
+                  telemetryMetadata: {
+                    pluginId,
+                    aggregateBy,
+                    productSolution,
+                    productFeature,
+                    interactionId: context.contextManager.getContext().execution.id,
+                  },
+                }
+              : {}),
           },
           // workflows already run as scheduled tasks
           useTaskManager: false,

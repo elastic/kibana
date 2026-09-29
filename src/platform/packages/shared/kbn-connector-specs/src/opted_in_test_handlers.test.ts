@@ -23,18 +23,34 @@ const createFailingContext = (): ActionContext => {
       delete: jest.fn(reject),
       request: jest.fn(reject),
     },
-    config: {},
-    log: {},
+    // Provide minimal placeholder values so connectors that derive their URL from
+    // config/secrets can reach the HTTP call rather than throwing on missing config.
+    // Keys: baseUrl (Sublime Security), tokenUrl (Salesforce), accountUrl (Azure Blob),
+    //       siteUrl (SharePoint Server), serverUrl (MCP-based: Box, Dropbox, GitHub, Monday),
+    //       subdomain (Jira Cloud, Confluence Cloud).
+    config: {
+      baseUrl: 'https://placeholder.example.com',
+      accountUrl: 'https://placeholder.example.com',
+      siteUrl: 'https://placeholder.example.com',
+      serverUrl: 'https://placeholder.example.com',
+      subdomain: 'placeholder',
+    },
+    secrets: { tokenUrl: 'https://placeholder.example.com' },
+    log: { debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn() },
   } as unknown as ActionContext;
 };
 
 describe('opted-in connector test handlers', () => {
   const optedInSpecs = Object.entries(connectorsSpecs).filter(
-    (entry): entry is [string, ConnectorSpec & { test: NonNullable<ConnectorSpec['test']> }] => {
+    (entry): entry is [string, ConnectorSpec] => {
       const [, spec] = entry;
-      return spec.test?.enabled === true;
+      return spec.test.enabled === true;
     }
   );
+
+  it('has at least one opted-in connector', () => {
+    expect(optedInSpecs.length).toBeGreaterThan(0);
+  });
 
   it.each(optedInSpecs)('%s test handler must throw on failure', async (_exportName, spec) => {
     const handler = spec.test.handler;

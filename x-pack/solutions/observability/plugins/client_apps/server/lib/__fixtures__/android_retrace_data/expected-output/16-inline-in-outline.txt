@@ -1,0 +1,5 @@
+java.io.IOException: Inline in outline
+	at com.example.synthetic.Inlinee.inlined(Inlinee.java:76)
+	at com.example.synthetic.OutlineWithInlineCaller.callerInlinee(OutlineWithInlineCaller.kt:98)
+	at com.example.synthetic.OutlineWithInlineCaller.caller(OutlineWithInlineCaller.kt:24)
+	at com.example.synthetic.OutlineWithInlineCaller.normalMethod(OutlineWithInlineCaller.kt:200)

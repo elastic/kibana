@@ -18,9 +18,6 @@ if (window.__kbnHardenPrototypes__) {
   require('@kbn/security-hardening/prototype');
 }
 
-export const Jquery = require('jquery');
-window.$ = window.jQuery = Jquery;
-
 // stateful deps
 export const KbnUiTheme = require('@kbn/ui-theme');
 export const KbnI18n = require('@kbn/i18n');
@@ -49,7 +46,6 @@ export const ReactDomServer = require('react-dom/server');
 // eslint-disable-next-line @kbn/eslint/module_migration
 export const ReactRouter = require('react-router');
 export const ReactRouterDom = require('react-router-dom');
-export const ReactRouterDomV5Compat = require('react-router-dom-v5-compat');
 // eslint-disable-next-line @kbn/eslint/module_migration
 export const StyledComponents = require('styled-components');
 export const FastestLevenshtein = require('fastest-levenshtein');
@@ -105,6 +101,7 @@ export const ChromaJs = require('chroma-js');
 // runtime deps which don't need to be copied across all bundles
 export const TsLib = require('tslib');
 export const Uuid = require('uuid');
+export const Inversify = require('inversify');
 export const KbnAnalytics = require('@kbn/analytics');
 export const KbnCryptoBrowser = require('@kbn/crypto-browser');
 export const KbnEsQuery = require('@kbn/es-query');

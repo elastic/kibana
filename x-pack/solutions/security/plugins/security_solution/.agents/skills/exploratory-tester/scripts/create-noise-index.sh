@@ -6,6 +6,7 @@
 # Usage:
 #   bash <script> --es-url <url> --username <user> --password <pass>
 #   bash <script> --es-url <url> --api-key <base64-encoded-key>
+#   bash <script> ... --session-dir <session directory>
 #
 # On success: prints the alias name and exits 0.
 # On failure: prints the error and exits 1.
@@ -16,6 +17,7 @@ ES_URL=""
 USERNAME=""
 PASSWORD=""
 API_KEY=""
+SESSION_DIR=""
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -23,6 +25,7 @@ while [[ $# -gt 0 ]]; do
     --username)  USERNAME="$2";  shift 2 ;;
     --password)  PASSWORD="$2";  shift 2 ;;
     --api-key)   API_KEY="$2";   shift 2 ;;
+    --session-dir) SESSION_DIR="$2"; shift 2 ;;
     *) echo "Unknown argument: $1" >&2; exit 1 ;;
   esac
 done
@@ -43,15 +46,58 @@ else
   AUTH_HEADER="Authorization: Basic $(echo -n "$USERNAME:$PASSWORD" | base64)"
 fi
 
+CURL_CONNECT_TIMEOUT="${EXPLORATORY_TESTER_CURL_CONNECT_TIMEOUT:-10}"
+CURL_MAX_TIME="${EXPLORATORY_TESTER_CURL_MAX_TIME:-30}"
+CURL_TIMEOUT_ARGS=(--connect-timeout "$CURL_CONNECT_TIMEOUT" --max-time "$CURL_MAX_TIME")
+
 TS=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+
+SCRIPT_DIR=""
+INDEX_PREFIX="logs-exploratory.noise"
+FALLBACK_INDEX_PREFIX="exploratory-noise"
+if [[ -n "$SESSION_DIR" ]]; then
+  SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+  SESSION_ID=$(PYTHONPATH="$SCRIPT_DIR" python3 - "$SESSION_DIR" <<'PY'
+import sys
+from pathlib import Path
+
+from session_resources import load_session_config, require_session_id
+
+config = load_session_config(Path(sys.argv[1]) / "config.json")
+print(require_session_id(config))
+PY
+)
+  INDEX_PREFIX="logs-exploratory.noise-$SESSION_ID"
+  FALLBACK_INDEX_PREFIX="exploratory-noise-$SESSION_ID"
+fi
 
 # Try preferred index name first; fall back to non-logs prefix on serverless
 # where logs-* matches a data stream template and cannot be used as a plain index.
-for INDEX in "logs-exploratory.noise-000001" "exploratory-noise-000001"; do
+INDEX_READY=false
+INDEX_OWNED=false
+for INDEX in "$INDEX_PREFIX-000001" "$FALLBACK_INDEX_PREFIX-000001"; do
   ALIAS="${INDEX%-000001}"   # strip trailing -000001
 
   echo "Creating noise index $INDEX ..."
-  RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" \
+  RESOURCE_STATE_BEFORE=none
+  PENDING_BEFORE=false
+  if [[ -n "$SESSION_DIR" ]]; then
+    RESOURCE_STATE_BEFORE=$(python3 "$SCRIPT_DIR/session-resource-state.py" \
+      --session-dir "$SESSION_DIR" --kind es_index --id "$INDEX")
+    if [[ "$RESOURCE_STATE_BEFORE" == "pending" ]]; then
+      PENDING_BEFORE=true
+    elif [[ "$RESOURCE_STATE_BEFORE" == "none" ]]; then
+      python3 "$SCRIPT_DIR/register-session-resource.py" \
+        --session-dir "$SESSION_DIR" \
+        --kind es_index \
+        --id "$INDEX" \
+        --endpoint "/$INDEX" \
+        --base-url es_url \
+        --pending
+    fi
+  fi
+  # Keep set -e from aborting before reconcile on transport failures.
+  RESPONSE=$(curl -s "${CURL_TIMEOUT_ARGS[@]}" -o /dev/null -w "%{http_code}" \
     -H "$AUTH_HEADER" \
     -X PUT "$ES_URL/$INDEX" \
     -H 'Content-Type: application/json' \
@@ -67,29 +113,100 @@ for INDEX in "logs-exploratory.noise-000001" "exploratory-noise-000001"; do
         }
       },
       \"aliases\": { \"$ALIAS\": {} }
-    }")
+    }" || printf '%s' '000')
 
   if [[ "$RESPONSE" == "200" ]]; then
     echo "Index created."
+    INDEX_READY=true
+    INDEX_OWNED=true
+    if [[ -n "$SESSION_DIR" ]]; then
+      python3 "$SCRIPT_DIR/register-session-resource.py" \
+        --session-dir "$SESSION_DIR" \
+        --kind es_index \
+        --id "$INDEX" \
+        --endpoint "/$INDEX" \
+        --base-url es_url \
+        --owned
+    fi
     break
   elif [[ "$RESPONSE" == "400" ]]; then
     # Could be "already exists" (fine) or data stream conflict (retry with fallback name)
-    BODY=$(curl -s -H "$AUTH_HEADER" -X GET "$ES_URL/$INDEX" 2>/dev/null || true)
+    BODY=$(curl -s "${CURL_TIMEOUT_ARGS[@]}" -H "$AUTH_HEADER" -X GET "$ES_URL/$INDEX" 2>/dev/null || true)
     if echo "$BODY" | grep -q '"mappings"'; then
       echo "Index already exists — reusing."
+      INDEX_READY=true
+      INDEX_OWNED=false
+      if [[ -n "$SESSION_DIR" ]]; then
+        # The index existed before this run reserved it, so reuse is correct and
+        # discarding our own fresh reservation is deliberate.
+        OWNERSHIP_ARGS=(--reused --confirm-preexisting)
+        if [[ "$RESOURCE_STATE_BEFORE" == "owned" || "$PENDING_BEFORE" == "true" ]]; then
+          OWNERSHIP_ARGS=(--owned)
+          INDEX_OWNED=true
+        fi
+        python3 "$SCRIPT_DIR/register-session-resource.py" \
+          --session-dir "$SESSION_DIR" \
+          --kind es_index \
+          --id "$INDEX" \
+          --endpoint "/$INDEX" \
+          --base-url es_url \
+          "${OWNERSHIP_ARGS[@]}"
+      fi
       break
     else
       echo "Index name $INDEX conflicts with a data stream template — trying fallback name ..."
+      if [[ -n "$SESSION_DIR" ]]; then
+        python3 "$SCRIPT_DIR/register-session-resource.py" \
+          --session-dir "$SESSION_DIR" \
+          --kind es_index \
+          --id "$INDEX" \
+          --endpoint "/$INDEX" \
+          --base-url es_url \
+          --remove-pending
+      fi
       continue
     fi
   else
+    if [[ -n "$SESSION_DIR" ]]; then
+      RECONCILIATION_STATUS=0
+      RECONCILIATION_OUTPUT=$(
+        python3 "$SCRIPT_DIR/reconcile-session-resource.py" \
+          --session-dir "$SESSION_DIR" \
+          --kind es_index \
+          --id "$INDEX" \
+          --endpoint "/$INDEX" \
+          --base-url es_url \
+          --probe-method HEAD \
+          2>&1
+      ) || RECONCILIATION_STATUS=$?
+      case "$RECONCILIATION_OUTPUT" in
+        Reconciled\ *)
+          echo "$RECONCILIATION_OUTPUT"
+          INDEX_READY=true
+          INDEX_OWNED=true
+          break
+          ;;
+        Removed\ absent\ pending\ *)
+          echo "$RECONCILIATION_OUTPUT"
+          continue
+          ;;
+      esac
+      if [[ "$RECONCILIATION_STATUS" -ne 0 ]]; then
+        printf '%s\n' "$RECONCILIATION_OUTPUT" >&2
+      fi
+    fi
     echo "Unexpected status $RESPONSE creating index $INDEX." >&2
     exit 1
   fi
 done
 
+if [[ "$INDEX_READY" != true ]]; then
+  echo "Unable to create or identify a reusable noise index." >&2
+  exit 1
+fi
+
 echo "Indexing noise documents into $INDEX ..."
-BULK_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+BULK_RESPONSE=$(curl -s "${CURL_TIMEOUT_ARGS[@]}" -w "\n%{http_code}" \
   -H "$AUTH_HEADER" \
   -X POST "$ES_URL/$INDEX/_bulk" \
   -H 'Content-Type: application/json' \
@@ -102,11 +219,37 @@ BULK_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
 {"@timestamp":"$TS","host.name":"noise-host-3","message":"missing source and destination fields entirely"}
 NDJSON
 )
+BULK_STATUS="${BULK_RESPONSE##*$'\n'}"
+BULK_BODY="${BULK_RESPONSE%$'\n'*}"
 
 if [[ "$BULK_STATUS" != "200" ]]; then
   echo "Bulk index failed (HTTP $BULK_STATUS)." >&2
   exit 1
 fi
+if ! printf '%s' "$BULK_BODY" | python3 -c '
+import json
+import sys
+
+try:
+    response = json.load(sys.stdin)
+except json.JSONDecodeError as exc:
+    print(f"Bulk index returned invalid JSON: {exc}", file=sys.stderr)
+    raise SystemExit(1)
+
+if not isinstance(response, dict):
+    print("Bulk index response was not a JSON object.", file=sys.stderr)
+    raise SystemExit(1)
+if response.get("errors") is True:
+    print("Bulk index reported item-level errors.", file=sys.stderr)
+    raise SystemExit(1)
+if response.get("errors") is not False:
+    print("Bulk index response omitted the errors flag.", file=sys.stderr)
+    raise SystemExit(1)
+'; then
+  exit 1
+fi
 
 echo "Noise index ready: $ALIAS"
+echo "NOISE_INDEX_NAME=$INDEX"
 echo "NOISE_INDEX_ALIAS=$ALIAS"
+echo "NOISE_INDEX_OWNED=$INDEX_OWNED"

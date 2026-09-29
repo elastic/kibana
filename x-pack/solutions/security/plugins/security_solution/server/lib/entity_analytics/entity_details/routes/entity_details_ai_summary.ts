@@ -27,6 +27,7 @@ import {
   MAX_SUMMARY_ANOMALY_JOB_ID_LENGTH,
   MAX_SUMMARY_VARIANT_ID_LENGTH,
 } from '@kbn/entity-store/common/entity_summary';
+import { formatBulkDropSummary } from '@kbn/entity-store/server';
 import { ENTITY_DETAILS_AI_SUMMARY_INTERNAL_URL } from '../../../../../common/entity_analytics/entity_analytics/constants';
 import { APP_ID, API_VERSIONS } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
@@ -131,7 +132,11 @@ export const entityDetailsAiSummaryRoute = ({
           }
 
           // Derive the author server-side — never trust the client-supplied value.
-          const generatedBy = coreContext.security.authc.getCurrentUser()?.username ?? 'unknown';
+          // Username is the last-resort display fallback; profile_uid enables
+          // human-friendly name resolution at read time.
+          const currentUser = coreContext.security.authc.getCurrentUser();
+          const generatedBy = currentUser?.username ?? 'unknown';
+          const authorProfileUid = currentUser?.profile_uid;
 
           // Enforce the structural caps at the authoritative persistence boundary so every
           // consumer of the datastream (flyout reopen, other users, Agent Builder) sees a
@@ -161,6 +166,7 @@ export const entityDetailsAiSummaryRoute = ({
             'entity.id': entityId,
             'entity.type': entityType,
             'Ai_summary.generated_by': generatedBy,
+            ...(authorProfileUid != null && { 'Ai_summary.author_profile_uid': authorProfileUid }),
             'Ai_summary.generated_at': summary.generated_at,
             'Ai_summary.highlights': highlights,
             ...(recommendedActions != null && {
@@ -175,9 +181,13 @@ export const entityDetailsAiSummaryRoute = ({
 
           // A dropped doc resolves (not throws) as `failed > 0`; treat it as a hard failure so
           // we don't report success for a summary that was never written.
-          const { failed } = await metadataClient.bulkAppendMetadata([doc]);
+          const { failed, dropsByType } = await metadataClient.bulkAppendMetadata([doc]);
           if (failed > 0) {
-            throw new Error('AI summary document was dropped from the metadata bulk write');
+            throw new Error(
+              `AI summary document was dropped from the metadata bulk write: ${formatBulkDropSummary(
+                dropsByType
+              )}`
+            );
           }
 
           // Emit the model's raw (pre-cap) output sizes so we can measure how often and by how

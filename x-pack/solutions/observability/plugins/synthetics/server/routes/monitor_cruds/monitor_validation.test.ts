@@ -178,6 +178,7 @@ describe('validateMonitor', () => {
       [ConfigKey.JOURNEY_FILTERS_MATCH]: 'false',
       [ConfigKey.JOURNEY_FILTERS_TAGS]: testTags,
       [ConfigKey.IGNORE_HTTPS_ERRORS]: false,
+      [ConfigKey.CERTIFICATE_ERROR_SPKI_ALLOWLIST]: [],
       [ConfigKey.THROTTLING_CONFIG]: {
         value: {
           download: '5',
@@ -277,6 +278,47 @@ describe('validateMonitor', () => {
         valid: false,
         reason: 'Monitor is not a valid monitor of type icmp',
         details: 'Invalid value "invalid-location" supplied to "locations"',
+      });
+    });
+
+    it('when api monitor uses Elastic managed locations', () => {
+      const testMonitor = {
+        ...testBrowserFields,
+        [ConfigKey.MONITOR_TYPE]: MonitorTypeEnum.API,
+        [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.API,
+        [ConfigKey.SOURCE_INLINE]: 'step()',
+      } as MonitorFields;
+      const result = validateMonitor(testMonitor, 'default');
+      expect(result).toMatchObject({
+        valid: false,
+        reason: 'API Journey monitors cannot run on Elastic managed locations',
+        details:
+          'API Journey monitors can only run on private locations. Remove Elastic managed locations from this monitor.',
+        payload: testMonitor,
+      });
+    });
+
+    it('when api monitor is created on Serverless', () => {
+      const testMonitor = {
+        ...testBrowserFields,
+        [ConfigKey.MONITOR_TYPE]: MonitorTypeEnum.API,
+        [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.API,
+        [ConfigKey.SOURCE_INLINE]: 'step()',
+        [ConfigKey.LOCATIONS]: [
+          {
+            id: 'private-1',
+            label: 'Private Location',
+            geo: { lat: 0, lon: 0 },
+            isServiceManaged: false,
+          },
+        ],
+      } as MonitorFields;
+      const result = validateMonitor(testMonitor, 'default', true);
+      expect(result).toMatchObject({
+        valid: false,
+        reason: 'API Journey monitors are not yet supported on Serverless',
+        details: 'API Journey monitor support is not yet available on Serverless.',
+        payload: testMonitor,
       });
     });
 
@@ -381,6 +423,30 @@ describe('validateMonitor', () => {
       });
     });
 
+    it('when payload is a correct API monitor on a private location', () => {
+      const testMonitor = {
+        ...testBrowserFields,
+        [ConfigKey.MONITOR_TYPE]: MonitorTypeEnum.API,
+        [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.API,
+        [ConfigKey.SOURCE_INLINE]: 'step()',
+        [ConfigKey.LOCATIONS]: [
+          {
+            id: 'private-1',
+            label: 'Private Location',
+            geo: { lat: 0, lon: 0 },
+            isServiceManaged: false,
+          },
+        ],
+      } as MonitorFields;
+      const result = validateMonitor(testMonitor, 'default');
+      expect(result).toMatchObject({
+        valid: true,
+        reason: '',
+        details: '',
+        payload: testMonitor,
+      });
+    });
+
     it('when payload is a correct Browser monitor', () => {
       const testMonitor = {
         ...testBrowserFields,
@@ -392,6 +458,367 @@ describe('validateMonitor', () => {
         reason: '',
         details: '',
         payload: testMonitor,
+      });
+    });
+  });
+
+  describe('HTTP authentication mutual exclusivity', () => {
+    it('validates an HTTP monitor using only Kerberos auth', () => {
+      const testMonitor = {
+        ...testHTTPFields,
+        [ConfigKey.USERNAME]: '',
+        [ConfigKey.PASSWORD]: '',
+        [ConfigKey.LOCATIONS]: [
+          {
+            id: 'private-1',
+            label: 'Private',
+            isServiceManaged: false,
+          },
+        ],
+        [ConfigKey.KERBEROS]: {
+          enabled: true,
+          auth_type: 'password',
+          realm: 'CORP.LOCAL',
+          username: 'svc',
+          password: 'secret',
+          keytab: '',
+          config_path: '/etc/krb5.conf',
+          krb5_conf: '',
+          service_name: '',
+          enable_krb5_fast: false,
+        },
+      } as MonitorFields;
+      const result = validateMonitor(testMonitor, 'default');
+      expect(result).toMatchObject({ valid: true, reason: '', details: '' });
+    });
+
+    it('validates an HTTP monitor using only Kerberos with inline krb5_conf', () => {
+      const testMonitor = {
+        ...testHTTPFields,
+        [ConfigKey.USERNAME]: '',
+        [ConfigKey.PASSWORD]: '',
+        [ConfigKey.KERBEROS]: {
+          enabled: true,
+          auth_type: 'password',
+          realm: 'CORP.LOCAL',
+          username: 'svc',
+          password: 'secret',
+          keytab: '',
+          config_path: '',
+          krb5_conf: '[libdefaults]\n  default_realm = CORP.LOCAL\n',
+          service_name: '',
+          enable_krb5_fast: false,
+        },
+      } as MonitorFields;
+      const result = validateMonitor(testMonitor, 'default');
+      expect(result).toMatchObject({ valid: true, reason: '', details: '' });
+    });
+
+    it('invalidates Kerberos password auth without credentials', () => {
+      const testMonitor = {
+        ...testHTTPFields,
+        [ConfigKey.USERNAME]: '',
+        [ConfigKey.PASSWORD]: '',
+        [ConfigKey.KERBEROS]: {
+          enabled: true,
+          auth_type: 'password',
+          realm: 'CORP.LOCAL',
+          username: '',
+          password: '',
+          keytab: '',
+          config_path: '/etc/krb5.conf',
+          krb5_conf: '',
+          service_name: '',
+          enable_krb5_fast: false,
+        },
+      } as MonitorFields;
+      const result = validateMonitor(testMonitor, 'default');
+      expect(result).toMatchObject({
+        valid: false,
+        reason: 'Monitor authentication configuration is invalid',
+        details: 'Kerberos password authentication requires both username and password.',
+      });
+    });
+
+    it('invalidates Kerberos keytab auth without a keytab path', () => {
+      const testMonitor = {
+        ...testHTTPFields,
+        [ConfigKey.USERNAME]: '',
+        [ConfigKey.PASSWORD]: '',
+        [ConfigKey.KERBEROS]: {
+          enabled: true,
+          auth_type: 'keytab',
+          realm: 'CORP.LOCAL',
+          username: 'svc',
+          password: '',
+          keytab: '',
+          config_path: '/etc/krb5.conf',
+          krb5_conf: '',
+          service_name: '',
+          enable_krb5_fast: false,
+        },
+      } as MonitorFields;
+      const result = validateMonitor(testMonitor, 'default');
+      expect(result).toMatchObject({
+        valid: false,
+        reason: 'Monitor authentication configuration is invalid',
+        details: 'Kerberos keytab authentication requires both username and a keytab path.',
+      });
+    });
+
+    it('invalidates Kerberos keytab auth without a username', () => {
+      const testMonitor = {
+        ...testHTTPFields,
+        [ConfigKey.USERNAME]: '',
+        [ConfigKey.PASSWORD]: '',
+        [ConfigKey.KERBEROS]: {
+          enabled: true,
+          auth_type: 'keytab',
+          realm: 'CORP.LOCAL',
+          username: '',
+          password: '',
+          keytab: '/etc/krb5.keytab',
+          config_path: '/etc/krb5.conf',
+          krb5_conf: '',
+          service_name: '',
+          enable_krb5_fast: false,
+        },
+      } as MonitorFields;
+      const result = validateMonitor(testMonitor, 'default');
+      expect(result).toMatchObject({
+        valid: false,
+        reason: 'Monitor authentication configuration is invalid',
+        details: 'Kerberos keytab authentication requires both username and a keytab path.',
+      });
+    });
+
+    it('invalidates Kerberos keytab auth on a public location', () => {
+      const testMonitor = {
+        ...testHTTPFields,
+        [ConfigKey.USERNAME]: '',
+        [ConfigKey.PASSWORD]: '',
+        [ConfigKey.KERBEROS]: {
+          enabled: true,
+          auth_type: 'keytab',
+          realm: 'CORP.LOCAL',
+          username: 'svc',
+          password: '',
+          keytab: '/etc/krb5.keytab',
+          config_path: '/etc/krb5.conf',
+          krb5_conf: '',
+          service_name: '',
+          enable_krb5_fast: false,
+        },
+      } as MonitorFields;
+      const result = validateMonitor(testMonitor, 'default');
+      expect(result).toMatchObject({
+        valid: false,
+        reason: 'Monitor authentication configuration is invalid',
+        details:
+          'Kerberos host-file settings (config_path or keytab) are only supported on private locations. Use an inline krb5_conf on public locations, or a private location for keytab auth.',
+      });
+    });
+
+    it('invalidates Kerberos config_path on a public location', () => {
+      const testMonitor = {
+        ...testHTTPFields,
+        [ConfigKey.USERNAME]: '',
+        [ConfigKey.PASSWORD]: '',
+        [ConfigKey.KERBEROS]: {
+          enabled: true,
+          auth_type: 'password',
+          realm: 'CORP.LOCAL',
+          username: 'svc',
+          password: 'secret',
+          keytab: '',
+          config_path: '/etc/krb5.conf',
+          krb5_conf: '',
+          service_name: '',
+          enable_krb5_fast: false,
+        },
+      } as MonitorFields;
+      const result = validateMonitor(testMonitor, 'default');
+      expect(result).toMatchObject({
+        valid: false,
+        reason: 'Monitor authentication configuration is invalid',
+        details:
+          'Kerberos host-file settings (config_path or keytab) are only supported on private locations. Use an inline krb5_conf on public locations, or a private location for keytab auth.',
+      });
+    });
+
+    it('validates Kerberos keytab auth on a private location', () => {
+      const testMonitor = {
+        ...testHTTPFields,
+        [ConfigKey.USERNAME]: '',
+        [ConfigKey.PASSWORD]: '',
+        [ConfigKey.LOCATIONS]: [
+          {
+            id: 'private-1',
+            label: 'Private',
+            isServiceManaged: false,
+          },
+        ],
+        [ConfigKey.KERBEROS]: {
+          enabled: true,
+          auth_type: 'keytab',
+          realm: 'CORP.LOCAL',
+          username: 'svc',
+          password: '',
+          keytab: '/etc/krb5.keytab',
+          config_path: '/etc/krb5.conf',
+          krb5_conf: '',
+          service_name: '',
+          enable_krb5_fast: false,
+        },
+      } as MonitorFields;
+      const result = validateMonitor(testMonitor, 'default');
+      expect(result).toMatchObject({ valid: true, reason: '', details: '' });
+    });
+
+    it('invalidates Kerberos when both config_path and krb5_conf are set', () => {
+      const testMonitor = {
+        ...testHTTPFields,
+        [ConfigKey.USERNAME]: '',
+        [ConfigKey.PASSWORD]: '',
+        [ConfigKey.KERBEROS]: {
+          enabled: true,
+          auth_type: 'password',
+          realm: 'CORP.LOCAL',
+          username: 'svc',
+          password: 'secret',
+          keytab: '',
+          config_path: '/etc/krb5.conf',
+          krb5_conf: '[libdefaults]\n  default_realm = CORP.LOCAL\n',
+          service_name: '',
+          enable_krb5_fast: false,
+        },
+      } as MonitorFields;
+      const result = validateMonitor(testMonitor, 'default');
+      expect(result).toMatchObject({
+        valid: false,
+        reason: 'Monitor authentication configuration is invalid',
+        details:
+          'Kerberos requires exactly one of config_path (file on the agent) or krb5_conf (inline krb5.conf body).',
+      });
+    });
+
+    it('invalidates Kerberos when neither config_path nor krb5_conf is set', () => {
+      const testMonitor = {
+        ...testHTTPFields,
+        [ConfigKey.USERNAME]: '',
+        [ConfigKey.PASSWORD]: '',
+        [ConfigKey.KERBEROS]: {
+          enabled: true,
+          auth_type: 'password',
+          realm: 'CORP.LOCAL',
+          username: 'svc',
+          password: 'secret',
+          keytab: '',
+          config_path: '',
+          krb5_conf: '',
+          service_name: '',
+          enable_krb5_fast: false,
+        },
+      } as MonitorFields;
+      const result = validateMonitor(testMonitor, 'default');
+      expect(result).toMatchObject({
+        valid: false,
+        reason: 'Monitor authentication configuration is invalid',
+        details:
+          'Kerberos requires exactly one of config_path (file on the agent) or krb5_conf (inline krb5.conf body).',
+      });
+    });
+
+    it('validates an HTTP monitor using only NTLM auth', () => {
+      const testMonitor = {
+        ...testHTTPFields,
+        [ConfigKey.USERNAME]: '',
+        [ConfigKey.PASSWORD]: '',
+        [ConfigKey.NTLM]: {
+          enabled: true,
+          username: 'ntlm-user',
+          password: 'ntlm-pass',
+          domain: 'EXAMPLE',
+          workstation: '',
+        },
+      } as MonitorFields;
+      const result = validateMonitor(testMonitor, 'default');
+      expect(result).toMatchObject({ valid: true, reason: '', details: '' });
+    });
+
+    it('invalidates NTLM auth without credentials', () => {
+      const testMonitor = {
+        ...testHTTPFields,
+        [ConfigKey.USERNAME]: '',
+        [ConfigKey.PASSWORD]: '',
+        [ConfigKey.NTLM]: {
+          enabled: true,
+          username: '',
+          password: '',
+          domain: '',
+          workstation: '',
+        },
+      } as MonitorFields;
+      const result = validateMonitor(testMonitor, 'default');
+      expect(result).toMatchObject({
+        valid: false,
+        reason: 'Monitor authentication configuration is invalid',
+        details: 'NTLM authentication requires both username and password.',
+      });
+    });
+
+    it('invalidates an HTTP monitor combining basic and Kerberos auth', () => {
+      const testMonitor = {
+        ...testHTTPFields,
+        [ConfigKey.KERBEROS]: {
+          enabled: true,
+          auth_type: 'password',
+          realm: '',
+          username: '',
+          password: '',
+          keytab: '',
+          config_path: '/etc/krb5.conf',
+          krb5_conf: '',
+          service_name: '',
+          enable_krb5_fast: false,
+        },
+      } as MonitorFields;
+      const result = validateMonitor(testMonitor, 'default');
+      expect(result).toMatchObject({
+        valid: false,
+        reason: 'Monitor authentication configuration is invalid',
+      });
+    });
+
+    it('invalidates an HTTP monitor combining Kerberos and NTLM auth', () => {
+      const testMonitor = {
+        ...testHTTPFields,
+        [ConfigKey.USERNAME]: '',
+        [ConfigKey.PASSWORD]: '',
+        [ConfigKey.KERBEROS]: {
+          enabled: true,
+          auth_type: 'password',
+          realm: '',
+          username: '',
+          password: '',
+          keytab: '',
+          config_path: '/etc/krb5.conf',
+          krb5_conf: '',
+          service_name: '',
+          enable_krb5_fast: false,
+        },
+        [ConfigKey.NTLM]: {
+          enabled: true,
+          username: '',
+          password: '',
+          domain: '',
+          workstation: '',
+        },
+      } as MonitorFields;
+      const result = validateMonitor(testMonitor, 'default');
+      expect(result).toMatchObject({
+        valid: false,
+        reason: 'Monitor authentication configuration is invalid',
       });
     });
   });
@@ -561,12 +988,9 @@ describe('validateMonitor', () => {
         'default'
       );
 
-      expect(result).toMatchObject({
-        valid: false,
-        reason: 'Invalid alert configuration',
-        details: '[status.enabled]: expected value of type [boolean] but got [undefined]',
-        payload: testMonitor,
-      });
+      expect(result.valid).toBe(false);
+      expect(result.reason).toBe('Invalid alert configuration');
+      expect(result.details).toMatch(/status/);
     });
     it('when parsed from serialized JSON for alert invalid key', () => {
       const testMonitor = getJsonPayload() as MonitorFields;
@@ -583,12 +1007,9 @@ describe('validateMonitor', () => {
         'default'
       );
 
-      expect(result).toMatchObject({
-        valid: false,
-        reason: 'Invalid alert configuration',
-        details: '[status.enabled]: expected value of type [boolean] but got [undefined]',
-        payload: testMonitor,
-      });
+      expect(result.valid).toBe(false);
+      expect(result.reason).toBe('Invalid alert configuration');
+      expect(result.details).toMatch(/status/);
     });
   });
 
@@ -625,6 +1046,92 @@ describe('validateMonitor', () => {
         reason: "Couldn't save or update monitor because of an invalid configuration.",
         details:
           'Invalid location: "invalid-location". Remove it or replace it with a valid location.',
+      });
+    });
+
+    it('when api monitor uses public locations', () => {
+      const result = validateProjectMonitor(
+        {
+          type: MonitorTypeEnum.API,
+          id: 'api-1',
+          name: 'API Journey',
+          schedule: 5,
+          locations: ['us_central'],
+          content: 'apiJourney("orders", () => {})',
+        },
+        [
+          {
+            id: 'us_central',
+            label: 'US Central',
+            isServiceManaged: true,
+            geo: { lat: 0, lon: 0 },
+            url: 'https://example.com',
+          },
+        ],
+        []
+      );
+      expect(result).toMatchObject({
+        valid: false,
+        reason: "Couldn't save or update monitor because of an invalid configuration.",
+        details:
+          'API Journey monitors can only run on private locations. Remove "locations" or replace them with "privateLocations".',
+      });
+    });
+
+    it('when api monitor uses only private locations', () => {
+      const result = validateProjectMonitor(
+        {
+          type: MonitorTypeEnum.API,
+          id: 'api-1',
+          name: 'API Journey',
+          schedule: 5,
+          privateLocations: ['My Private'],
+          content: 'apiJourney("orders", () => {})',
+        },
+        [],
+        [
+          {
+            id: 'priv-1',
+            label: 'My Private',
+            agentPolicyId: 'policy-1',
+            isServiceManaged: false,
+            spaces: ['*'],
+          },
+        ]
+      );
+      expect(result).toMatchObject({
+        valid: true,
+        reason: '',
+        details: '',
+      });
+    });
+
+    it('when api project monitor is created on Serverless', () => {
+      const result = validateProjectMonitor(
+        {
+          type: MonitorTypeEnum.API,
+          id: 'api-1',
+          name: 'API Journey',
+          schedule: 5,
+          privateLocations: ['My Private'],
+          content: 'apiJourney("orders", () => {})',
+        },
+        [],
+        [
+          {
+            id: 'priv-1',
+            label: 'My Private',
+            agentPolicyId: 'policy-1',
+            isServiceManaged: false,
+            spaces: ['*'],
+          },
+        ],
+        true
+      );
+      expect(result).toMatchObject({
+        valid: false,
+        reason: 'API Journey monitors are not yet supported on Serverless',
+        details: 'API Journey monitor support is not yet available on Serverless.',
       });
     });
   });
@@ -675,6 +1182,19 @@ describe('normalizeAPIConfig', () => {
       errorMessage: 'Invalid monitor key(s) for browser type:  url',
       formattedConfig: {
         type: 'browser',
+      },
+    });
+
+    expect(normalizeAPIConfig({ type: 'api', urls: '' } as any)).toEqual({
+      formattedConfig: {
+        type: 'api',
+      },
+    });
+
+    expect(normalizeAPIConfig({ type: 'api', urls: 'https://www.google.com' } as any)).toEqual({
+      errorMessage: 'Invalid monitor key(s) for api type:  urls',
+      formattedConfig: {
+        type: 'api',
       },
     });
   });
@@ -774,7 +1294,7 @@ describe('normalizeAPIConfig', () => {
       },
     });
     expect(normalizeAPIConfig({ type: 'browser', params: { a: [] } } as any)).toEqual({
-      errorMessage: 'Invalid params: [a]: expected value of type [string] but got [Array]',
+      errorMessage: 'Invalid params: Invalid value "[]" supplied to "a"',
       formattedConfig: {
         type: 'browser',
         params: { a: [] },

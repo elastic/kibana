@@ -26,7 +26,7 @@ import { useExperimentalFeatures } from '../../../hooks/use_experimental_feature
 import { useKibana } from '../../../hooks/use_kibana';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { appPaths } from '../../../utils/app_paths';
-import { isPreExecutionWorkflowEnabled } from '../../../utils/is_pre_execution_workflow_enabled';
+import { isWorkflowsUiEnabled } from '../../../utils/is_workflows_ui_enabled';
 import { AgentHeader } from './agent_header';
 import { CapabilitiesSection } from './capabilities_section';
 import { EditDetailsFlyout } from './edit_details_flyout';
@@ -63,7 +63,7 @@ export const AgentOverview: React.FC = () => {
 
   const canChangeAccessControlMode = isExperimentalFeaturesEnabled && canUpdateAgentAccess;
 
-  const showWorkflowSection = isPreExecutionWorkflowEnabled(uiSettings);
+  const showWorkflowSection = isWorkflowsUiEnabled(uiSettings);
 
   const enableElasticCapabilities = agent?.configuration?.enable_elastic_capabilities ?? false;
 
@@ -169,8 +169,10 @@ export const AgentOverview: React.FC = () => {
           currentInstructions={agent.configuration?.instructions ?? ''}
           showWorkflowSection={showWorkflowSection}
           workflowIds={agent.configuration?.workflow_ids ?? []}
+          postExecutionWorkflowIds={agent.configuration?.post_execution_workflow_ids ?? []}
           canEditAgent={canEditAgent}
           onOpenEditFlyout={() => setIsEditFlyoutOpen(true)}
+          agentId={agent.id}
         />
 
         {isEditFlyoutOpen && agent && (

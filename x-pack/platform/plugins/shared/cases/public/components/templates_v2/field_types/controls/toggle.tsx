@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import type { z } from '@kbn/zod/v4';
 import { Controller, useFormContext } from 'react-hook-form';
 import { EuiFormRow, EuiSwitch } from '@elastic/eui';
+import { InlineFieldActions } from './inline_field_actions';
 import { CASE_EXTENDED_FIELDS } from '../../../../../common/constants';
 import { getFieldSnakeKey } from '../../../../../common/utils';
 import type {
@@ -18,7 +19,10 @@ import type {
 import { FIELD_REQUIRED, TOGGLE_ON, TOGGLE_OFF } from '../../translations';
 import { getFieldRequirementLabel } from '../../../optional_field_label';
 
-type ToggleProps = z.infer<typeof ToggleFieldSchema> & ConditionRenderProps;
+type ToggleProps = z.infer<typeof ToggleFieldSchema> &
+  ConditionRenderProps & {
+    onEditCancel?: () => void;
+  };
 
 const isChecked = (value: unknown): boolean => value === true || value === 'true';
 
@@ -32,8 +36,12 @@ export const Toggle = ({
   metadata,
   isRequired,
   isRequiredOnClose,
+  onConfirm,
+  isSaving,
+  isSaveDisabled,
+  onEditCancel,
 }: ToggleProps) => {
-  const { control } = useFormContext();
+  const { control, resetField } = useFormContext();
   const path = `${CASE_EXTENDED_FIELDS}.${getFieldSnakeKey(name, type)}`;
   const defaultValue =
     metadata?.default === undefined
@@ -55,6 +63,11 @@ export const Toggle = ({
     };
   }, [isRequired]);
 
+  const handleCancel = useCallback(() => {
+    resetField(path);
+    onEditCancel?.();
+  }, [onEditCancel, path, resetField]);
+
   return (
     <Controller
       key={name}
@@ -65,23 +78,35 @@ export const Toggle = ({
       render={({ field, fieldState }) => {
         const checked = isChecked(field.value);
         return (
-          <EuiFormRow
-            label={label}
-            labelAppend={getFieldRequirementLabel(isRequired, isRequiredOnClose)}
-            isInvalid={!!fieldState.error}
-            error={fieldState.error?.message}
-            fullWidth
-          >
-            <EuiSwitch
-              data-test-subj={`toggle-field-${name}`}
-              label={checked ? TOGGLE_ON : TOGGLE_OFF}
-              checked={checked}
-              onChange={(event) => {
-                field.onChange(event.target.checked ? 'true' : 'false');
-                field.onBlur();
-              }}
-            />
-          </EuiFormRow>
+          <>
+            <EuiFormRow
+              label={label}
+              labelAppend={getFieldRequirementLabel(isRequired, isRequiredOnClose)}
+              isInvalid={!!fieldState.error}
+              error={fieldState.error?.message}
+              fullWidth
+            >
+              <EuiSwitch
+                data-test-subj={`toggle-field-${name}`}
+                label={checked ? TOGGLE_ON : TOGGLE_OFF}
+                checked={checked}
+                disabled={isSaving}
+                onChange={(event) => {
+                  field.onChange(event.target.checked ? 'true' : 'false');
+                  field.onBlur();
+                }}
+              />
+            </EuiFormRow>
+            {fieldState.isDirty && onConfirm && (
+              <InlineFieldActions
+                name={name}
+                onConfirm={onConfirm}
+                onCancel={handleCancel}
+                isLoading={isSaving}
+                isDisabled={isSaveDisabled}
+              />
+            )}
+          </>
         );
       }}
     />

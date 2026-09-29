@@ -11,6 +11,7 @@ import { EntityType } from '../../../../../../common/entity_analytics/types';
 import { useFlyoutApi } from '../../../../use_flyout_api';
 import { MisconfigurationInsights } from '.';
 import { MISCONFIGURATION_INSIGHTS_TOOL_TEST_ID } from './test_ids';
+import { FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry';
 
 const openMisconfigurationFindingAsChild = jest.fn();
 
@@ -129,7 +130,7 @@ describe('<MisconfigurationInsights /> host', () => {
     expect(openMisconfigurationFindingAsChild).toHaveBeenCalledTimes(1);
     expect(openMisconfigurationFindingAsChild).toHaveBeenCalledWith(
       { resourceId: 'resource-1', ruleId: 'rule-1' },
-      { title: 'Misconfiguration: My Rule' }
+      { title: 'Misconfiguration: My Rule', origin: FLYOUT_ORIGIN.MISCONFIGURATION_FINDING }
     );
   });
 });

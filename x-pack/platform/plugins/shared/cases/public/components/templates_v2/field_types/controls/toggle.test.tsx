@@ -16,6 +16,9 @@ interface FormWrapperProps {
   isRequired?: boolean;
   initialValue?: string;
   defaultValue?: boolean;
+  onConfirm?: () => void;
+  isSaving?: boolean;
+  isSaveDisabled?: boolean;
   onSubmitResult: (result: { isValid: boolean; data: Record<string, unknown> }) => void;
 }
 
@@ -23,6 +26,9 @@ const FormWrapper: React.FC<FormWrapperProps> = ({
   isRequired,
   initialValue,
   defaultValue,
+  onConfirm,
+  isSaving,
+  isSaveDisabled,
   onSubmitResult,
 }) => {
   const form = useForm({
@@ -50,6 +56,9 @@ const FormWrapper: React.FC<FormWrapperProps> = ({
         label="Requires escalation"
         isRequired={isRequired}
         metadata={defaultValue !== undefined ? { default: defaultValue } : undefined}
+        onConfirm={onConfirm}
+        isSaving={isSaving}
+        isSaveDisabled={isSaveDisabled}
       />
       <button type="button" onClick={handleSubmit}>
         {'Submit'}
@@ -129,5 +138,68 @@ describe('Toggle', () => {
       ?.requires_escalation_as_boolean;
     expect(isValid).toBe(true);
     expect(submitted).toBe('false');
+  });
+
+  describe('inline confirm/cancel actions', () => {
+    it('does not render the actions when onConfirm is not provided', async () => {
+      render(<FormWrapper defaultValue={false} onSubmitResult={jest.fn()} />);
+
+      await userEvent.click(screen.getByRole('switch', { name: 'Requires escalation' }));
+
+      expect(
+        screen.queryByTestId('template-field-confirm-requires_escalation')
+      ).not.toBeInTheDocument();
+    });
+
+    it('shows the confirm/cancel actions only after the toggle changes', async () => {
+      render(<FormWrapper defaultValue={false} onConfirm={jest.fn()} onSubmitResult={jest.fn()} />);
+
+      expect(
+        screen.queryByTestId('template-field-confirm-requires_escalation')
+      ).not.toBeInTheDocument();
+
+      await userEvent.click(screen.getByRole('switch', { name: 'Requires escalation' }));
+
+      expect(screen.getByTestId('template-field-confirm-requires_escalation')).toBeInTheDocument();
+      expect(screen.getByTestId('template-field-cancel-requires_escalation')).toBeInTheDocument();
+    });
+
+    it('calls onConfirm when the confirm action is clicked', async () => {
+      const onConfirm = jest.fn();
+      render(<FormWrapper defaultValue={false} onConfirm={onConfirm} onSubmitResult={jest.fn()} />);
+
+      await userEvent.click(screen.getByRole('switch', { name: 'Requires escalation' }));
+      await userEvent.click(screen.getByTestId('template-field-confirm-requires_escalation'));
+
+      expect(onConfirm).toHaveBeenCalledTimes(1);
+    });
+
+    it('resets the toggle and hides the actions when cancelling', async () => {
+      render(<FormWrapper defaultValue={false} onConfirm={jest.fn()} onSubmitResult={jest.fn()} />);
+
+      const toggle = screen.getByRole('switch', { name: 'Requires escalation' });
+      await userEvent.click(toggle);
+      expect(toggle).toBeChecked();
+
+      await userEvent.click(screen.getByTestId('template-field-cancel-requires_escalation'));
+
+      expect(screen.getByRole('switch', { name: 'Requires escalation' })).not.toBeChecked();
+      expect(
+        screen.queryByTestId('template-field-confirm-requires_escalation')
+      ).not.toBeInTheDocument();
+    });
+
+    it('disables the switch while saving', async () => {
+      render(
+        <FormWrapper
+          defaultValue={false}
+          onConfirm={jest.fn()}
+          isSaving
+          onSubmitResult={jest.fn()}
+        />
+      );
+
+      expect(screen.getByRole('switch', { name: 'Requires escalation' })).toBeDisabled();
+    });
   });
 });

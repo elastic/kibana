@@ -27,7 +27,7 @@ export function registerSyncIlmPolicyTask(taskManagerSetup: TaskManagerSetupCont
       title: 'Fleet Sync ILM policy namespace component templates',
       timeout: '15m',
       maxAttempts: 3,
-      createTaskRunner: ({ taskInstance, abortController }) => {
+      createTaskRunner: ({ taskInstance, signal }) => {
         const { spaceId, packageName, namespace } = taskInstance.params as SyncIlmPolicyTaskParams;
         return {
           async run() {
@@ -60,7 +60,7 @@ export function registerSyncIlmPolicyTask(taskManagerSetup: TaskManagerSetupCont
                 packageName,
                 namespace,
                 ilmPolicy,
-                abortController,
+                signal,
               });
             } catch (err) {
               logger.error(

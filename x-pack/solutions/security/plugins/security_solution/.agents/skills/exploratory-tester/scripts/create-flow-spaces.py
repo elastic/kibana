@@ -1,100 +1,232 @@
 #!/usr/bin/env python3
-"""
-Creates per-flow Kibana spaces for parallel-mode isolation.
-
-For each flow in config.json where isolate=true (the default), creates a
-dedicated Kibana space "exploratory-testing-flow-<N>" and updates the flow's
-space_id in config.json. Flows with isolate=false share the base space.
-
-Usage:
-    python3 scripts/create-flow-spaces.py --session-dir .exploratory-session/entity-analytics-20260714-093022
-
-Reads:  <session-dir>/config.json
-Writes: <session-dir>/config.json  (updates flow.space_id for each flow,
-                                    adds created_flow_spaces list)
-
-Exit 0: all spaces created (or already existed).
-Exit 1: unrecoverable error — check output for details.
-
-Run this during Phase 1c, while still authenticated as admin.
-"""
+"""Create session-owned per-flow Kibana spaces for parallel-mode isolation."""
 
 import argparse
 import json
-import subprocess
 import sys
+from pathlib import Path
 
-parser = argparse.ArgumentParser()
-parser.add_argument('--session-dir', required=True,
-                    help='Path to the session directory (contains config.json)')
-args = parser.parse_args()
+from session_resources import (
+    build_auth_args,
+    edit_session_config,
+    ensure_session_manifest,
+    is_owned_resource,
+    is_pending_resource,
+    namespaced_flow_space_id,
+    reconcile_pending_resource,
+    register_resource,
+    resource_state,
+    run_curl,
+    write_session_config,
+)
 
-CONFIG_PATH = f'{args.session_dir}/config.json'
 
-with open(CONFIG_PATH) as f:
-    cfg = json.load(f)
-
-if cfg.get('mode') != 'parallel':
-    print('Not parallel mode — no per-flow spaces needed.')
-    sys.exit(0)
-
-url      = cfg['environment']['url']
-base_sid = cfg['environment'].get('space_id', 'exploratory-testing')
-creds    = cfg.get('credentials', {})
-api_key  = creds.get('api_key')
-username = creds.get('username', 'elastic')
-password = creds.get('password', 'changeme')
-
-# Build auth args for curl: API key takes precedence over basic auth
-if api_key:
-    auth_args = ['-H', f'Authorization: ApiKey {api_key}']
-else:
-    auth_args = ['-u', f'{username}:{password}']
-
-created = []
-errors  = []
-
-for i, flow in enumerate(cfg['flows'], 1):
-    if not flow.get('isolate', True):
-        flow['space_id'] = base_sid
-        print(f'Flow {i} ({flow["name"]!r}): isolate=false → sharing {base_sid!r}')
-        continue
-
-    sid  = f'exploratory-testing-flow-{i}'
-    body = json.dumps({'id': sid, 'name': f'Exploratory Testing — Flow {i}', 'color': '#DD0A73'})
-
-    result = subprocess.run(
-        ['curl', '-s', '-w', '\n%{http_code}']
-        + auth_args +
-        ['-X', 'POST', f'{url}/api/spaces/space',
-         '-H', 'kbn-xsrf: true',
-         '-H', 'Content-Type: application/json',
-         '-d', body],
-        capture_output=True, text=True
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--session-dir",
+        required=True,
+        help="Path to the session directory (contains config.json)",
     )
+    args = parser.parse_args()
 
-    lines    = result.stdout.strip().rsplit('\n', 1)
-    http_code = lines[-1] if len(lines) > 1 else '000'
+    config_path = Path(args.session_dir) / "config.json"
+    with edit_session_config(config_path) as config:
+        if config.get("mode") != "parallel":
+            print("Not parallel mode — no per-flow spaces needed.")
+            return 0
 
-    if http_code in ('200', '409'):          # 409 = already exists, reuse
-        flow['space_id'] = sid
-        created.append(sid)
-        status = 'created' if http_code == '200' else 'already exists'
-        print(f'Flow {i} ({flow["name"]!r}): space {sid!r} {status}')
-    else:
-        # Fall back to base space rather than blocking the session
-        flow['space_id'] = base_sid
-        errors.append({'flow': i, 'space': sid, 'http_code': http_code, 'body': lines[0]})
-        print(f'Flow {i} ({flow["name"]!r}): space creation failed (HTTP {http_code}) '
-              f'— falling back to shared space {base_sid!r}', file=sys.stderr)
+        session_id = ensure_session_manifest(config)
+        write_session_config(config_path, config)
+        url = config["environment"]["url"].rstrip("/")
+        base_space_id = config["environment"].get(
+            "space_id", "exploratory-testing"
+        )
 
-cfg['created_flow_spaces'] = created
+        try:
+            auth_args = build_auth_args(config)
+        except ValueError as exc:
+            print(str(exc), file=sys.stderr)
+            return 1
 
-with open(CONFIG_PATH, 'w') as f:
-    json.dump(cfg, f, indent=2)
+        errors: list[dict[str, object]] = []
 
-print(f'\n{len(created)} per-flow space(s) ready. {len(errors)} fallback(s).')
-if errors:
-    print('Fallback details:', json.dumps(errors, indent=2), file=sys.stderr)
+        for flow_number, flow in enumerate(config["flows"], 1):
+            if not flow.get("isolate", True):
+                flow["space_id"] = base_space_id
+                print(
+                    f"Flow {flow_number} ({flow['name']!r}): "
+                    f"isolate=false → sharing {base_space_id!r}"
+                )
+                write_session_config(config_path, config)
+                continue
 
-sys.exit(0)
+            space_id = namespaced_flow_space_id(session_id, flow_number)
+            endpoint = f"/api/spaces/space/{space_id}"
+            existing_resource = next(
+                (
+                    resource
+                    for resource in config["session_resources"]
+                    if resource.get("kind") == "kibana_space"
+                    and resource.get("id") == space_id
+                ),
+                None,
+            )
+            pending_before_remote = is_pending_resource(
+                config,
+                kind="kibana_space",
+                resource_id=space_id,
+            )
+            pending_reservation = pending_before_remote or existing_resource is None
+            if existing_resource is None:
+                register_resource(
+                    config,
+                    kind="kibana_space",
+                    resource_id=space_id,
+                    owned=False,
+                    endpoint=endpoint,
+                    track_flow_space=False,
+                    state="pending",
+                )
+                write_session_config(config_path, config)
+            elif resource_state(existing_resource) == "pending":
+                write_session_config(config_path, config)
+            body = json.dumps(
+                {
+                    "id": space_id,
+                    "name": f"Exploratory Testing — Flow {flow_number}",
+                    "color": "#DD0A73",
+                }
+            )
+
+            try:
+                http_code, response_body = run_curl(
+                    [
+                        "curl",
+                        "-s",
+                        "-w",
+                        "\n%{http_code}",
+                        *auth_args,
+                        "-X",
+                        "POST",
+                        f"{url}/api/spaces/space",
+                        "-H",
+                        "kbn-xsrf: true",
+                        "-H",
+                        "Content-Type: application/json",
+                        "-d",
+                        body,
+                    ]
+                )
+            except TimeoutError as exc:
+                http_code = "000"
+                response_body = str(exc)
+
+            if http_code == "200":
+                flow["space_id"] = space_id
+                register_resource(
+                    config,
+                    kind="kibana_space",
+                    resource_id=space_id,
+                    owned=True,
+                    endpoint=endpoint,
+                )
+                print(
+                    f"Flow {flow_number} ({flow['name']!r}): "
+                    f"space {space_id!r} created"
+                )
+            elif http_code == "409":
+                flow["space_id"] = space_id
+                # A 409 against a reservation made in this run proves the space
+                # pre-existed the session, so reuse is correct here.
+                register_resource(
+                    config,
+                    kind="kibana_space",
+                    resource_id=space_id,
+                    owned=is_owned_resource(
+                        config, kind="kibana_space", resource_id=space_id
+                    )
+                    or pending_before_remote,
+                    endpoint=endpoint,
+                    allow_pending_downgrade=True,
+                )
+                print(
+                    f"Flow {flow_number} ({flow['name']!r}): "
+                    f"space {space_id!r} already exists — reusing"
+                )
+            else:
+                if pending_reservation:
+                    try:
+                        probe_status, _ = run_curl(
+                            [
+                                "curl",
+                                "-s",
+                                "-o",
+                                "/dev/null",
+                                "-w",
+                                "\n%{http_code}",
+                                *auth_args,
+                                "-X",
+                                "GET",
+                                f"{url}{endpoint}",
+                            ]
+                        )
+                    except TimeoutError:
+                        probe_status = "000"
+                    reconciliation = reconcile_pending_resource(
+                        config,
+                        kind="kibana_space",
+                        resource_id=space_id,
+                        endpoint=endpoint,
+                        http_code=probe_status,
+                        track_flow_space=True,
+                    )
+                else:
+                    reconciliation = "reused"
+                    probe_status = "not-probed"
+
+                if reconciliation == "owned":
+                    flow["space_id"] = space_id
+                    print(
+                        f"Flow {flow_number} ({flow['name']!r}): "
+                        f"space {space_id!r} found after HTTP {http_code}; "
+                        "reconciled as owned"
+                    )
+                else:
+                    flow["space_id"] = base_space_id
+                    errors.append(
+                        {
+                            "flow": flow_number,
+                            "space": space_id,
+                            "http_code": http_code,
+                            "probe_status": probe_status,
+                            "body": response_body,
+                        }
+                    )
+                    print(
+                        f"Flow {flow_number} ({flow['name']!r}): "
+                        f"space creation failed (HTTP {http_code}) — "
+                        f"falling back to shared space {base_space_id!r}; "
+                        f"pending reconciliation: {reconciliation}",
+                        file=sys.stderr,
+                    )
+
+            write_session_config(config_path, config)
+
+        created_count = len(config["created_flow_spaces"])
+        reused_count = len(config["reused_flow_spaces"])
+        print(
+            f"\n{created_count} per-flow space(s) created, "
+            f"{reused_count} reused. {len(errors)} fallback(s)."
+        )
+        if errors:
+            print(
+                f"Fallback details: {json.dumps(errors, indent=2)}",
+                file=sys.stderr,
+            )
+
+        return 1 if errors else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

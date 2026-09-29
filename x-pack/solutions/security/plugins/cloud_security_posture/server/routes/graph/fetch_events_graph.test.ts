@@ -51,7 +51,7 @@ describe('fetchEvents', () => {
         spaceId: 'default',
         esQuery: undefined,
       })
-    ).rejects.toThrowError(/Invalid index pattern/);
+    ).rejects.toThrow(/Invalid index pattern/);
   });
 
   it('should execute the esql query and return records for valid inputs', async () => {
@@ -67,7 +67,7 @@ describe('fetchEvents', () => {
       esQuery: undefined,
     });
 
-    expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
+    expect(esClient.asCurrentUser.helpers.esql).toHaveBeenCalledTimes(1);
     const [args] = esClient.asCurrentUser.helpers.esql.mock.calls[0];
     expect(args.query).toContain('FROM valid_index');
     expect(result).toEqual({ columns: [], records: [{ id: 'dummy' }] });
@@ -338,6 +338,35 @@ describe('regroupEvents', () => {
     expect(group.actorEntityType).toBe('user');
     expect(group.actorEntitySubType).toBe('admin');
     expect(group.actorsDocData).toEqual([record.actorDocData]);
+  });
+
+  it('aggregates risk score and asset criticality across the actors merged into a group', () => {
+    const record1 = buildEventEsqlRow({
+      actorEntityId: 'user:alice',
+      targetEntityId: 'host:server1',
+    });
+    const record2 = buildEventEsqlRow({
+      actorEntityId: 'user:bob',
+      targetEntityId: 'host:server1',
+    });
+    const enrichmentMap = new Map<string, EntityEnrichmentFields>([
+      ['user:alice', { type: 'user', riskScore: 94.1, assetCriticality: 'extreme_impact' }],
+      ['user:bob', { type: 'user', riskScore: 12.4, assetCriticality: 'low_impact' }],
+      ['host:server1', { type: 'host' }],
+    ]);
+
+    const [group] = regroupEvents([record1, record2], enrichmentMap);
+
+    // Both actors merge into one node, so the node reports the spread and the distribution
+    // rather than either entity's own value.
+    expect(group.actorRiskScore).toEqual({ min: 12.4, max: 94.1 });
+    expect(group.actorAssetCriticality).toEqual([
+      { level: 'extreme_impact', count: 1 },
+      { level: 'low_impact', count: 1 },
+    ]);
+    // The target has neither, so no aggregate is emitted for it.
+    expect(group.targetRiskScore).toBeUndefined();
+    expect(group.targetAssetCriticality).toBeUndefined();
   });
 
   it('merges multiple rows of the same type group into one group and sums badges', () => {

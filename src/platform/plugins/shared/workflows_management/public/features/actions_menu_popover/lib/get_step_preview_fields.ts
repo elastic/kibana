@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { unwrapSchema } from '@kbn/workflows/common/utils/zod';
 import { getZodTypeName } from '@kbn/workflows-yaml';
 import { z } from '@kbn/zod/v4';
 
@@ -22,17 +23,6 @@ function formatZodTypeName(raw: string): string {
     return `ARRAY<${formatZodTypeName(raw.slice(0, -2))}>`;
   }
   return raw.toUpperCase();
-}
-
-function unwrapSchema(schema: z.ZodType, depth = 0): z.ZodType {
-  if (depth >= 10) return schema;
-  const type = schema.def.type;
-  if (type === 'optional')
-    return unwrapSchema((schema as z.ZodOptional<z.ZodType>).unwrap(), depth + 1);
-  if (type === 'default')
-    return unwrapSchema((schema as z.ZodDefault<z.ZodType>).unwrap() as z.ZodType, depth + 1);
-  if (type === 'lazy') return unwrapSchema((schema as z.ZodLazy<z.ZodType>).unwrap(), depth + 1);
-  return schema;
 }
 
 export function getFieldsFromZodSchema(schema: z.ZodType | undefined): StepField[] {

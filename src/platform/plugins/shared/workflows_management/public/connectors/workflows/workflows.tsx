@@ -22,7 +22,7 @@ export function getConnectorType(): ConnectorTypeModel<
 > {
   return {
     id: '.workflows',
-    iconClass: 'workflowsApp',
+    iconClass: 'workflow',
     selectMessage: i18n.translate('xpack.stackConnectors.components.workflows.selectMessageText', {
       defaultMessage: 'Execute workflows when alerts are triggered.',
     }),

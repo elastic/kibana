@@ -81,6 +81,7 @@ jest.mock('../../../../shared/components/cell_actions', () => ({
 
 jest.mock('../../../../shared/hooks/use_default_flyout_properties', () => ({
   useDefaultDocumentFlyoutProperties: () => ({ size: 'm' }),
+  useDefaultToolsFlyoutProperties: () => ({ minWidth: 384, size: 'm' }),
 }));
 
 jest.mock('../../../../../common/hooks/is_in_security_app', () => ({
@@ -101,6 +102,8 @@ jest.mock('../../../../../common/lib/kibana', () => ({
   useKibana: () => ({
     services: {
       overlays: { openSystemFlyout: mockOpenSystemFlyout },
+      storage: { get: jest.fn(), set: jest.fn(), remove: jest.fn() },
+      telemetry: { reportEvent: jest.fn() },
     },
   }),
 }));
@@ -108,6 +111,7 @@ jest.mock('../../../../../common/lib/kibana', () => ({
 describe('<AlertsInsights /> host', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockOpenSystemFlyout.mockReturnValue({ onClose: Promise.resolve(), close: jest.fn() });
   });
 
   it('renders the header with the title, host label and storage icon', () => {

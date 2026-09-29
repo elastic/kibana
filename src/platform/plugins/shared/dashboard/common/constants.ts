@@ -32,7 +32,3 @@ export const DEFAULT_DASHBOARD_OPTIONS = {
   sync_tooltips: false,
   use_margins: true,
 } as const;
-
-export const UI_SETTINGS = {
-  ENABLE_LABS_UI: 'labs:dashboard:enable_ui',
-};

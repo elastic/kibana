@@ -289,7 +289,6 @@ export const PipelineTable: FunctionComponent<Props> = ({
           <EuiButtonIcon
             key="reloadButton"
             iconType="refresh"
-            color="success"
             aria-label={reloadButtonLabel}
             data-test-subj="reloadButton"
             size="m"

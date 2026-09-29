@@ -8,9 +8,30 @@
 import { ENDPOINT_DEFAULT_PAGE, ENDPOINT_DEFAULT_PAGE_SIZE } from '../constants';
 import { HostStatus } from '../types';
 import { GetMetadataListRequestSchema } from '../../api/endpoint';
+import { GetMetadataRequestSchema } from '../../api/endpoint/metadata/get_metadata';
 
 // NOTE: Even though schemas are kept in common/api/endpoint - we keep tests here, because common/api should import from outside
 describe('endpoint metadata schema', () => {
+  describe('GetMetadataRequestSchema', () => {
+    const params = GetMetadataRequestSchema.params;
+
+    it('should accept a valid id', () => {
+      expect(params.validate({ id: 'ed518850-681a-4d60-bb98-e22640cae2a8' })).toEqual({
+        id: 'ed518850-681a-4d60-bb98-e22640cae2a8',
+      });
+    });
+
+    it('should reject id longer than 256 characters', () => {
+      const longId = 'a'.repeat(257);
+      expect(() => params.validate({ id: longId })).toThrow();
+    });
+
+    it('should accept id exactly 256 characters long', () => {
+      const maxId = 'a'.repeat(256);
+      expect(params.validate({ id: maxId })).toEqual({ id: maxId });
+    });
+  });
+
   describe('GetMetadataListRequestSchemaV2', () => {
     const query = GetMetadataListRequestSchema.query;
 
@@ -33,27 +54,41 @@ describe('endpoint metadata schema', () => {
     });
 
     it('should throw if page param is not a number', () => {
-      expect(() => query.validate({ page: 'notanumber' })).toThrowError();
+      expect(() => query.validate({ page: 'notanumber' })).toThrow();
     });
 
     it('should throw if page param is less than 0', () => {
-      expect(() => query.validate({ page: -1 })).toThrowError();
+      expect(() => query.validate({ page: -1 })).toThrow();
     });
 
     it('should throw if pageSize param is not a number', () => {
-      expect(() => query.validate({ pageSize: 'notanumber' })).toThrowError();
+      expect(() => query.validate({ pageSize: 'notanumber' })).toThrow();
     });
 
     it('should throw if pageSize param is less than 1', () => {
-      expect(() => query.validate({ pageSize: 0 })).toThrowError();
+      expect(() => query.validate({ pageSize: 0 })).toThrow();
     });
 
     it('should throw if pageSize param is greater than 10000', () => {
-      expect(() => query.validate({ pageSize: 10001 })).toThrowError();
+      expect(() => query.validate({ pageSize: 10001 })).toThrow();
     });
 
     it('should throw if kuery is not string', () => {
-      expect(() => query.validate({ kuery: 123 })).toThrowError();
+      expect(() => query.validate({ kuery: 123 })).toThrow();
+    });
+
+    it('should reject kuery longer than 30000 characters', () => {
+      const longKuery = 'a'.repeat(30001);
+      expect(() => query.validate({ kuery: longKuery })).toThrow();
+    });
+
+    it('should accept kuery exactly 30000 characters long', () => {
+      const maxKuery = 'a'.repeat(30000);
+      expect(query.validate({ kuery: maxKuery })).toEqual({
+        page: ENDPOINT_DEFAULT_PAGE,
+        pageSize: ENDPOINT_DEFAULT_PAGE_SIZE,
+        kuery: maxKuery,
+      });
     });
 
     it('should work with valid hostStatus', () => {
@@ -69,7 +104,7 @@ describe('endpoint metadata schema', () => {
     it('should throw if invalid hostStatus', () => {
       expect(() =>
         query.validate({ hostStatuses: [HostStatus.UNHEALTHY, 'invalidstatus'] })
-      ).toThrowError();
+      ).toThrow();
     });
   });
 });

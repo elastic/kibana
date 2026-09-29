@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/deeplinks-agent-builder'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/search-kibana'
+  defaultOwner: '@elastic/workchat-eng'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/deeplinks-agent-builder'
   description: Moon project for @kbn/deeplinks-agent-builder
   channel: ''
-  owner: '@elastic/search-kibana'
+  owner: '@elastic/workchat-eng'
   sourceRoot: src/platform/packages/shared/deeplinks/agent_builder
 dependsOn: []
 tags:

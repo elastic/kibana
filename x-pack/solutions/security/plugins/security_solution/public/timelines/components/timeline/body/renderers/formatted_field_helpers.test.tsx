@@ -19,6 +19,7 @@ import { createFlyoutApiMock } from '../../../../../flyout_v2/use_flyout_api.moc
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
 import { RulePanelKey } from '../../../../../flyout/rule_details/right';
 import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
+import { FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry';
 
 jest.mock('@kbn/expandable-flyout');
 jest.mock('../../../../../common/lib/kibana');
@@ -183,6 +184,7 @@ describe('RenderRuleName', () => {
 
       expect(flyoutApi.openRuleFlyout).toHaveBeenCalledWith({
         ruleId: defaultProps.linkValue,
+        origin: FLYOUT_ORIGIN.TABLE_FIELD_LINK,
         title: 'Rule: Test Rule Name',
       });
       expect(mockOpenFlyout).not.toHaveBeenCalled();

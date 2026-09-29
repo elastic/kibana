@@ -214,7 +214,7 @@ describe('OtelTelemetryService', () => {
       const taskInstance = { state: {} } as unknown as ConcreteTaskInstance;
       taskAbortController = new AbortController();
       taskRunner = taskDef.createTaskRunner(
-        taskManagerMock.createRunContext({ taskInstance, abortController: taskAbortController })
+        taskManagerMock.createRunContext({ taskInstance, signal: taskAbortController.signal })
       );
     });
 

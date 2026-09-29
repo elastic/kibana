@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
-import type { AlertEpisode } from '../../queries/episodes_query';
+import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
 import { RelatedAlertEpisode } from './related_alert_episode';
 
 describe('RelatedAlertEpisode', () => {
@@ -32,7 +32,7 @@ describe('RelatedAlertEpisode', () => {
     render(
       <RelatedAlertEpisode
         episode={makeEpisode({ 'episode.id': 'ep-1' })}
-        ruleName={ruleName}
+        title={ruleName}
         groupingFields={groupingFields}
         href="/app/management/alertingV2/episodes/ep-1"
       />
@@ -50,7 +50,7 @@ describe('RelatedAlertEpisode', () => {
     render(
       <RelatedAlertEpisode
         episode={makeEpisode({ 'episode.id': 'ep-3', severity: 'high' })}
-        ruleName={ruleName}
+        title={ruleName}
         groupingFields={groupingFields}
         href="/app/management/alertingV2/episodes/ep-3"
       />
@@ -67,7 +67,7 @@ describe('RelatedAlertEpisode', () => {
     render(
       <RelatedAlertEpisode
         episode={episodeWithoutStatus as AlertEpisode}
-        ruleName={ruleName}
+        title={ruleName}
         groupingFields={groupingFields}
         href="/x"
       />

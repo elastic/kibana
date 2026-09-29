@@ -13,9 +13,9 @@ import { i18n } from '@kbn/i18n';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { TRACE_ID_FIELD } from '@kbn/discover-utils';
-import { where } from '@kbn/esql-composer';
 import { createRestorableStateProvider } from '@kbn/restorable-state';
 import { getEbtProps } from '@kbn/ebt-click';
+import { esqlEquals } from '../../../../../utils/esql_expressions';
 import { useDataSourcesContext } from '../../../../../hooks/use_data_sources';
 import { ContentFrameworkSection } from '../../../../..';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
@@ -127,9 +127,10 @@ function InternalTraceWaterfall({
 
   const { from: rangeFrom, to: rangeTo } = data.query.timefilter.timefilter.getAbsoluteTime();
 
+  const traceIdWhereClause = useMemo(() => esqlEquals(TRACE_ID_FIELD, traceId), [traceId]);
   const { discoverUrl, esqlQueryString } = useDiscoverLinkAndEsqlQuery({
     indexPattern: indexes.apm.traces,
-    whereClause: where(`${TRACE_ID_FIELD} == ?traceId`, { traceId }),
+    whereClause: traceIdWhereClause,
   });
 
   const openInDiscoverSectionAction = useOpenInDiscoverSectionAction({

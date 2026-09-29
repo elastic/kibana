@@ -65,6 +65,14 @@ export const WATCHLIST_LOOKBACK_PERIOD_LABEL = i18n.translate(
   { defaultMessage: 'Lookback period' }
 );
 
+export const WATCHLIST_INDEX_PATTERN_MISSING_TIMESTAMP = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.watchlists.flyout.indexPatternMissingTimestamp',
+  {
+    defaultMessage:
+      'The selected index pattern does not contain a @timestamp field, which is required for the lookback period.',
+  }
+);
+
 export const WATCHLIST_CSV_DATA_SOURCE_TITLE = i18n.translate(
   'xpack.securitySolution.entityAnalytics.watchlists.flyout.csvDataSourceTitle',
   { defaultMessage: 'CSV Data Source' }

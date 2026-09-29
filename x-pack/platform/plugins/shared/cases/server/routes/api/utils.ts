@@ -8,9 +8,17 @@
 import type { Boom } from '@hapi/boom';
 import { boomify, isBoom } from '@hapi/boom';
 import { schema } from '@kbn/config-schema';
-import type { CustomHttpResponseOptions, ResponseError, Logger } from '@kbn/core/server';
+import type {
+  CustomHttpResponseOptions,
+  ResponseError,
+  Logger,
+  RouteValidationFunction,
+} from '@kbn/core/server';
+import type * as rt from 'io-ts';
 import type { CaseError, HTTPError } from '../../common/error';
 import { isCaseError, isHTTPError } from '../../common/error';
+import { getTypedApiErrorAttributes } from '../../common/api_errors';
+import { decodeWithExcessOrThrow } from '../../common/runtime_types';
 
 /**
  * Transforms an error into the correct format for a kibana response.
@@ -28,14 +36,31 @@ export function wrapError(
     boom = isBoom(error) ? error : boomify(error, options);
   }
 
+  // Kibana's response adapter only serializes `payload.attributes` — a Boom's
+  // `data` is silently dropped. Lift typed attributes (created via
+  // createTypedApiError) into a ResponseError object so machine-readable codes
+  // like `field_identity_immutable` reach API clients.
+  const attributes = getTypedApiErrorAttributes(boom);
+
   return {
-    body: boom,
+    body: attributes ? { message: boom.message, attributes } : boom,
     headers: boom.output.headers as { [key: string]: string },
     statusCode: boom.output.statusCode,
   };
 }
 
 export const escapeHatch = schema.object({}, { unknowns: 'allow' });
+
+/** Same io-ts decode as the client, run as Core `validate.body` / `validate.query`. */
+export const createIoTsRouteValidation =
+  <A, O, I>(runtimeType: rt.Type<A, O, I>): RouteValidationFunction<A> =>
+  (inputValue, { ok, badRequest }) => {
+    try {
+      return ok(decodeWithExcessOrThrow(runtimeType)(inputValue));
+    } catch (error) {
+      return badRequest(isBoom(error) || error instanceof Error ? error.message : error);
+    }
+  };
 
 /**
  * Creates a warning header with a message formatted according to RFC7234.

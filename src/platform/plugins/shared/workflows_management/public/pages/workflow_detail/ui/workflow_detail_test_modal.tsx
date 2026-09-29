@@ -15,6 +15,7 @@ import {
   selectEditorYaml,
   selectIsTestModalOpen,
   selectReplayExecutionId,
+  selectWorkflow,
   selectWorkflowDefinition,
   selectWorkflowId,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
@@ -32,7 +33,9 @@ import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 export const WorkflowDetailTestModal = () => {
   const dispatch = useDispatch();
   const { notifications } = useKibana().services;
-  const { canExecuteWorkflow } = useWorkflowsCapabilities();
+  const { canExecuteWorkflow: hasExecutePrivilege } = useWorkflowsCapabilities();
+  const workflow = useSelector(selectWorkflow);
+  const canExecuteWorkflow = hasExecutePrivilege && workflow?.permissions?.execute !== false;
 
   const { setSelectedExecution } = useWorkflowUrlState();
 
@@ -61,26 +64,42 @@ export const WorkflowDetailTestModal = () => {
   }, [dispatch]);
 
   useEffect(() => {
-    if (isTestModalOpen) {
-      if (!canExecuteWorkflow) {
-        notifications.toasts.addWarning(
-          i18n.translate('workflows.detail.testModal.warningNoPermissions', {
-            defaultMessage: 'You do not have permission to run workflows.',
-          }),
-          { toastLifeTimeMs: 3000 }
-        );
-        closeModal();
-      } else if (!definition) {
-        notifications.toasts.addWarning(
-          i18n.translate('workflows.detail.testModal.warningInvalidDefinition', {
-            defaultMessage: 'Please fix the errors to run the workflow.',
-          }),
-          { toastLifeTimeMs: 3000 }
-        );
-        closeModal();
-      }
+    if (!isTestModalOpen) {
+      return;
     }
-  }, [closeModal, canExecuteWorkflow, isTestModalOpen, definition, notifications.toasts]);
+
+    if (!canExecuteWorkflow) {
+      notifications.toasts.addWarning(
+        i18n.translate('workflows.detail.testModal.warningNoPermissions', {
+          defaultMessage: 'You do not have permission to run workflows.',
+        }),
+        { toastLifeTimeMs: 3000 }
+      );
+      closeModal();
+      return;
+    }
+
+    if (!definition && !yamlString) {
+      return;
+    }
+
+    if (!definition) {
+      notifications.toasts.addWarning(
+        i18n.translate('workflows.detail.testModal.warningInvalidDefinition', {
+          defaultMessage: 'Please fix the errors to run the workflow.',
+        }),
+        { toastLifeTimeMs: 3000 }
+      );
+      closeModal();
+    }
+  }, [
+    closeModal,
+    canExecuteWorkflow,
+    definition,
+    isTestModalOpen,
+    notifications.toasts,
+    yamlString,
+  ]);
 
   if (!isTestModalOpen || !definition || !canExecuteWorkflow) {
     return null;
@@ -88,7 +107,7 @@ export const WorkflowDetailTestModal = () => {
 
   return (
     <WorkflowExecuteModal
-      isTestRun={true}
+      isTestRun
       definition={definition}
       workflowId={workflowId}
       yamlString={yamlString}

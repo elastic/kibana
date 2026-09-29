@@ -168,6 +168,7 @@ const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
         <EuiFlexItem grow={false}>
           {type === 'other' ? (
             <div
+              data-test-subj={`${dataTestSubject}-filterActions-placeholder`}
               css={css`
                 width: 48px;
               `}

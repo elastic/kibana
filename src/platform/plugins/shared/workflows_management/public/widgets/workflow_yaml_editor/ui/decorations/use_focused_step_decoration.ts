@@ -9,7 +9,7 @@
 
 import { useEffect, useMemo } from 'react';
 import { useSelector } from 'react-redux-v7';
-import { monaco } from '@kbn/monaco';
+import { monaco } from '@kbn/code-editor';
 import { useStepHighlightBlockClass } from './use_step_highlight_block_class';
 import {
   selectEditorFocusedStepInfo,
@@ -21,11 +21,7 @@ export interface StepLineRange {
   lineEnd: number;
 }
 
-/**
- * Draws the border + shadow block around the focused step.
- * When `overrideRange` is set (e.g. right after inserting a step), that range
- * takes precedence so the highlight appears before workflowLookup catches up.
- */
+/** Draws a highlight around the focused step or the supplied range. */
 export const useFocusedStepDecoration = (
   editor: monaco.editor.IStandaloneCodeEditor | null,
   overrideRange?: StepLineRange | null
@@ -70,9 +66,6 @@ export const useFocusedStepDecoration = (
     ]);
   }, [editor, focusedInfo, overrideRange, blockClassName, decorationsCollection]);
 
-  // Cleanup effect: only clears decorations on unmount or when
-  // editor/decorationsCollection changes, avoiding unnecessary clears
-  // during normal focusedStepInfo or blockClassName updates.
   useEffect(() => {
     if (!decorationsCollection) {
       return;

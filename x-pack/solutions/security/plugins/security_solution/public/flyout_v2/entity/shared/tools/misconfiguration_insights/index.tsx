@@ -22,6 +22,7 @@ import { EntityIconByType } from '../../../../../entity_analytics/components/ent
 import { MisconfigurationFindingsDetailsTable } from '../../../../../cloud_security_posture/components/csp_details/misconfiguration_findings_details_table';
 import type { CloudPostureEntityIdentifier } from '../../../../../cloud_security_posture/components/entity_insight';
 import { MISCONFIGURATION_INSIGHTS_TOOL_TEST_ID } from './test_ids';
+import { FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry';
 
 const TITLE = MISCONFIGURATION_INSIGHTS_TITLE;
 
@@ -58,7 +59,10 @@ export const MisconfigurationInsights = memo(
       (resourceId: string, ruleId: string, ruleName?: string) => {
         openMisconfigurationFindingAsChild(
           { resourceId, ruleId },
-          { title: formatFlyoutTitle(MISCONFIGURATION_FINDING_TITLE, ruleName) }
+          {
+            title: formatFlyoutTitle(MISCONFIGURATION_FINDING_TITLE, ruleName),
+            origin: FLYOUT_ORIGIN.MISCONFIGURATION_FINDING,
+          }
         );
       },
       [openMisconfigurationFindingAsChild]

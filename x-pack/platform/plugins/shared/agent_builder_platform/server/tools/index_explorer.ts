@@ -29,7 +29,7 @@ export const indexExplorerTool = (): BuiltinToolDefinition<typeof indexExplorerS
   return {
     id: platformCoreTools.indexExplorer,
     type: ToolType.builtin,
-    description: `List relevant indices, aliases and datastreams based on a natural language query.
+    description: `List relevant indices, aliases, datastreams, and ES|QL views based on a natural language query.
 
 The 'indexPattern' parameter can be used to filter indices by a specific pattern, e.g. 'foo*'.
 This should *only* be used if you know what you're doing (e.g. if the user explicitly specified a pattern).
@@ -40,6 +40,13 @@ User: "Show me my latest alerts"
 You: call tool 'index_explorer' with { query: 'indices containing user alerts' }
 Tool result: [{ type: "index", name: '.alerts' }]
 `,
+    annotations: {
+      title: 'Explore Indices',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     schema: indexExplorerSchema,
     handler: async (
       { query: nlQuery, indexPattern = '*', limit = 1 },
@@ -54,6 +61,7 @@ Tool result: [{ type: "index", name: '.alerts' }]
         indexPattern,
         limit,
         includeDatasets: experimentalFeatures.datasets,
+        includeViews: true,
         esClient: esClient.asCurrentUser,
         model,
       });

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
@@ -41,22 +41,24 @@ const statusFiltersJsonSchema = z
 
 export const serviceSlosRoute = defineRoute<ServiceSlosResponse>()({
   endpoint: 'GET /internal/apm/services/{serviceName}/slos',
-  params: z.object({
-    path: z.object({ serviceName: z.string() }),
-    query: environmentSchema
-      .merge(
-        z.object({
-          page: z.coerce.number(),
-          perPage: z.coerce.number(),
-        })
-      )
-      .merge(
-        z
-          .object({
-            statusFilters: statusFiltersJsonSchema,
-            kqlQuery: z.string(),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({ serviceName: z.string() }),
+      query: environmentSchema
+        .merge(
+          z.object({
+            page: z.coerce.number(),
+            perPage: z.coerce.number(),
           })
-          .partial()
-      ),
-  }),
+        )
+        .merge(
+          z
+            .object({
+              statusFilters: statusFiltersJsonSchema,
+              kqlQuery: z.string(),
+            })
+            .partial()
+        ),
+    })
+  ),
 });

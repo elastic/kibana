@@ -13,7 +13,9 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { usePrebuiltRulesStatus } from '../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_status';
 import { MiniCallout } from '../mini_callout/mini_callout';
 import {
+  getUpdateRulesCalloutText,
   getUpdateRulesCalloutTitle,
+  NEW_PREBUILT_RULES_AVAILABLE_CALLOUT_TEXT,
   NEW_PREBUILT_RULES_AVAILABLE_CALLOUT_TITLE,
 } from '../mini_callout/translations';
 import { AllRulesTabs } from '../rules_table/rules_table_toolbar';
@@ -54,7 +56,8 @@ export const RuleUpdateCallouts = ({
       {shouldDisplayUpdateRulesCallout && (
         <MiniCallout
           data-test-subj="prebuilt-rules-update-callout"
-          title={getUpdateRulesCalloutTitle(updateCallOutOnClick)}
+          title={getUpdateRulesCalloutTitle()}
+          text={getUpdateRulesCalloutText(updateCallOutOnClick)}
         />
       )}
       {shouldDisplayNewRulesCallout && (
@@ -62,6 +65,7 @@ export const RuleUpdateCallouts = ({
           color="success"
           data-test-subj="prebuilt-rules-new-callout"
           title={NEW_PREBUILT_RULES_AVAILABLE_CALLOUT_TITLE}
+          text={NEW_PREBUILT_RULES_AVAILABLE_CALLOUT_TEXT}
         />
       )}
     </EuiFlexGroup>

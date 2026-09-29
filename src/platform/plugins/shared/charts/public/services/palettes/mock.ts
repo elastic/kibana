@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { of } from 'rxjs';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { PaletteDefinition, SeriesLayer } from '@kbn/coloring';
 import type { PaletteService } from './service';
@@ -88,6 +89,7 @@ export const paletteServiceMock: PublicMethodsOf<PaletteService> = {
       getPalettes: async () => {
         return getPaletteRegistry();
       },
+      getPalettes$: () => of(getPaletteRegistry()),
     };
   },
 };

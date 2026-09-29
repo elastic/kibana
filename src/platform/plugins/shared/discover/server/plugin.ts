@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Subscription } from 'rxjs';
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
 import type { PluginSetup as DataPluginSetup } from '@kbn/data-plugin/server';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
@@ -33,19 +32,18 @@ import { registerSkill } from './agent_builder/register_skill';
 import type { ConfigSchema } from './config';
 import { appLocatorGetLocationCommon } from '../common/app_locator_get_location';
 import {
-  EMBEDDABLE_TRANSFORMS_FEATURE_FLAG_KEY,
   METRICS_EXPERIENCE_PRODUCT_FEATURE_ID,
   TRACES_PRODUCT_FEATURE_ID,
 } from '../common/constants';
 import { getSearchEmbeddableTransforms } from '../common/embeddable';
+import { createProfileStateRegistry } from '../common/context_awareness';
 
 export class DiscoverServerPlugin
   implements Plugin<object, DiscoverServerPluginStart, object, DiscoverServerPluginStartDeps>
 {
   private readonly config: ConfigSchema;
   private readonly logger: Logger;
-  private subscriptions: Subscription[] = [];
-  private embeddableTransformsEnabled = true;
+  private readonly profileStateRegistry = createProfileStateRegistry();
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.config = initializerContext.config.get();
@@ -68,6 +66,7 @@ export class DiscoverServerPlugin
 
     registerRoutes(
       core.http,
+      core.userActivity,
       this.logger,
       plugins.usageCollection?.createUsageCounter('discover_sessions_api')
     );
@@ -80,7 +79,14 @@ export class DiscoverServerPlugin
       plugins.share.url.locators.create({
         id: DISCOVER_APP_LOCATOR,
         getLocation: (params) => {
-          return appLocatorGetLocationCommon({ useHash: false, setStateToKbnUrl }, params);
+          return appLocatorGetLocationCommon(
+            {
+              useHash: false,
+              setStateToKbnUrl,
+              profileStateRegistry: this.profileStateRegistry,
+            },
+            params
+          );
         },
       });
     }
@@ -88,12 +94,8 @@ export class DiscoverServerPlugin
     plugins.embeddable.registerEmbeddableFactory(createSearchEmbeddableFactory());
     plugins.embeddable.registerEmbeddableServerDefinition(SEARCH_EMBEDDABLE_TYPE, {
       title: 'Discover session',
-      getTransforms: (drilldownTransforms) =>
-        getSearchEmbeddableTransforms(drilldownTransforms, () => this.embeddableTransformsEnabled),
-      getSchema: (getDrilldownsSchema) =>
-        this.embeddableTransformsEnabled
-          ? getDiscoverSessionEmbeddableSchema(getDrilldownsSchema)
-          : undefined,
+      getTransforms: (drilldownTransforms) => getSearchEmbeddableTransforms(drilldownTransforms),
+      getSchema: (getDrilldownsSchema) => getDiscoverSessionEmbeddableSchema(getDrilldownsSchema),
     });
 
     if (plugins.agentBuilder) {
@@ -121,18 +123,6 @@ export class DiscoverServerPlugin
   }
 
   public start(core: CoreStart, deps: DiscoverServerPluginStartDeps) {
-    this.subscriptions.push(
-      core.featureFlags
-        .getBooleanValue$(EMBEDDABLE_TRANSFORMS_FEATURE_FLAG_KEY, this.embeddableTransformsEnabled)
-        .subscribe((value) => {
-          this.embeddableTransformsEnabled = value;
-        })
-    );
-
     return { locator: initializeLocatorServices(core, deps) };
-  }
-
-  public stop() {
-    this.subscriptions.forEach((sub) => sub.unsubscribe());
   }
 }

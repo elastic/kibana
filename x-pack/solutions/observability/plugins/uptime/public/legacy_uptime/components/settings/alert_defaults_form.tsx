@@ -173,6 +173,7 @@ export const AlertDefaultsForm: React.FC<SettingsFormProps> = ({
           }
         >
           <EuiComboBox
+            aria-label={alertFormI18n.defaultConnectorsLabel}
             placeholder={alertFormI18n.inputPlaceHolder}
             options={options}
             selectedOptions={options.filter((opt) =>

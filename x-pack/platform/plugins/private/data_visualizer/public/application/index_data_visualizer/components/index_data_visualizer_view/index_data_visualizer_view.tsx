@@ -108,6 +108,7 @@ export interface IndexDataVisualizerViewProps {
   currentSavedSearch: SavedSearch | null;
   currentSessionId?: string;
   getAdditionalLinks?: GetAdditionalLinks;
+  projectRouting?: string;
 }
 
 export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = ({
@@ -161,7 +162,9 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = ({
     dataVisualizerListState.searchString
   );
 
-  const { currentDataView, currentSessionId, getAdditionalLinks } = dataVisualizerProps;
+  const { currentDataView, currentSessionId, getAdditionalLinks, projectRouting } =
+    dataVisualizerProps;
+  const resolvedProjectRouting = projectRouting ?? cps?.cpsManager?.getProjectRouting();
 
   const dataViewFields: DataViewField[] = currentDataView.fields;
 
@@ -253,7 +256,8 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = ({
     input,
     dataVisualizerListState,
     savedRandomSamplerPreference,
-    setGlobalState
+    setGlobalState,
+    resolvedProjectRouting
   );
 
   useEffect(
@@ -541,6 +545,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = ({
                     setFrozenDataPreference={setFrozenDataPreference}
                     dataView={currentDataView}
                     query={undefined}
+                    projectRouting={resolvedProjectRouting}
                     disabled={false}
                     timefilter={timefilter}
                   />

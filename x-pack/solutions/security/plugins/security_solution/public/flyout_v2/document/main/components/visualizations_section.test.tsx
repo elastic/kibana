@@ -116,6 +116,7 @@ describe('VisualizationsSection', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    openSystemFlyout.mockReturnValue({ onClose: Promise.resolve(), close: jest.fn() });
     mockUseKibana.mockReturnValue({
       services: {
         overlays: {
@@ -125,6 +126,8 @@ describe('VisualizationsSection', () => {
           get: jest.fn().mockReturnValue(true),
         },
         serverless: undefined,
+        storage: { get: jest.fn(), set: jest.fn(), remove: jest.fn() },
+        telemetry: { reportEvent: jest.fn() },
       },
     } as unknown as ReturnType<typeof useKibana>);
     mockUseIsInSecurityApp.mockReturnValue(true);

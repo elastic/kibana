@@ -11,28 +11,23 @@ import type { ReactNode } from 'react';
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import type { AppMenuConfig, AppMenuItemType } from '@kbn/core-chrome-app-menu-components';
-import { AppHeader } from '@kbn/app-header';
+import type { AppHeaderShareAction } from '@kbn/app-header';
+import { DiscoverAppHeader } from '@kbn/app-header/discover';
 import { AppMenuActionId } from '@kbn/discover-utils';
 import { getChromeHeaderBack, getChromeHeaderTitle } from './utils';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useInternalStateSelector } from '../../state_management/redux';
-import { useIsChromeNextProjectHeader } from './use_is_chrome_next_project_header';
+import { useIsProjectChromeStyle } from './use_is_project_chrome_style';
 
 interface ChromeAppHeaderProps {
   menu?: AppMenuConfig;
-  titleAppend?: ReactNode;
-  isCollapsed?: boolean;
-  hasTabs?: boolean;
+  share?: AppHeaderShareAction;
+  tabsBar?: ReactNode;
 }
 
-export const ChromeAppHeader = ({
-  menu,
-  titleAppend,
-  isCollapsed,
-  hasTabs = false,
-}: ChromeAppHeaderProps) => {
+export const ChromeAppHeader = ({ menu, share, tabsBar }: ChromeAppHeaderProps) => {
   const { embeddableEditor } = useDiscoverServices();
-  const isChromeNextProjectHeader = useIsChromeNextProjectHeader();
+  const isProjectChromeStyle = useIsProjectChromeStyle();
   const persistedDiscoverSession = useInternalStateSelector(
     (state) => state.persistedDiscoverSession
   );
@@ -57,7 +52,6 @@ export const ChromeAppHeader = ({
 
     return {
       ...menu,
-      isCollapsed,
       items: menu?.items?.map((item) => {
         // We need more space for the tabs as the title is now in the same row. Move all items to the
         // overflow menu. (Except switch language)
@@ -67,16 +61,16 @@ export const ChromeAppHeader = ({
           return {
             ...item,
             overflow,
-            order: newSessionItem.order + 0.5,
+            order: (newSessionItem.order ?? 0) + 0.5,
           } as AppMenuItemType;
         }
 
         return { ...item, overflow } as AppMenuItemType;
       }),
     };
-  }, [isCollapsed, menu]);
+  }, [menu]);
 
-  if (!isChromeNextProjectHeader) {
+  if (!isProjectChromeStyle) {
     return null;
   }
 
@@ -86,14 +80,14 @@ export const ChromeAppHeader = ({
         position: relative;
       `}
     >
-      <AppHeader
+      <DiscoverAppHeader
         title={title}
         back={back}
         menu={appMenu}
+        share={share}
         sticky={false}
         spacing="compact"
-        titleAppend={titleAppend}
-        borderless={hasTabs}
+        tabsBar={tabsBar}
       />
     </div>
   );

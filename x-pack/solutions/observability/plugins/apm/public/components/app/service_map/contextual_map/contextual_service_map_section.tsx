@@ -8,14 +8,18 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { getEbtProps } from '@kbn/ebt-click';
 import { isActivePlatinumLicense } from '../../../../../common/license_check';
 import { invalidLicenseMessage } from '../../../../../common/service_map';
 import { useLicenseContext } from '../../../../context/license/use_license_context';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { getServiceMapUrl } from '../../../../embeddable/service_map/get_service_map_url';
 import { ServiceMapEmbeddable } from '../../../../embeddable/service_map/service_map_embeddable';
+import type { ServiceFlyoutOptions } from '../../../shared/service_flyout/types';
 import { LicensePrompt } from '../../../shared/license_prompt';
+import { APM_EBT_ACTIONS } from '../../ebt_constants';
 import { DisabledPrompt } from '../disabled_prompt';
+import { SERVICE_MAP_EBT_ELEMENTS } from '../ebt_constants';
 import { ContextualServiceMapControls } from './contextual_service_map_controls';
 import {
   CONTEXTUAL_MAP_DEFAULT_BASE_MAX_HOPS,
@@ -39,6 +43,13 @@ export interface ContextualServiceMapSectionProps {
   rangeTo: string;
   environment: string;
   kuery: string;
+  /**
+   * Seeded as filter-bar pills on the global map Explore link (and embeddable
+   * full-map href). Use for non-Controls fields such as transaction.name/type.
+   */
+  filterPills?: Array<{ field: string; value: string }>;
+  /** Initial query scope for the service flyout opened from this map (e.g. the host page's filters). */
+  flyoutOptions?: ServiceFlyoutOptions;
   /** Fixed graph area height when `sectionHeight` is not set. */
   panelHeight?: number;
   /** Fixed outer panel height; map graph fills remaining space below header controls. */
@@ -56,6 +67,8 @@ export function ContextualServiceMapSection({
   rangeTo,
   environment,
   kuery,
+  filterPills,
+  flyoutOptions,
   panelHeight = DEFAULT_CONTEXTUAL_SERVICE_MAP_PANEL_HEIGHT,
   sectionHeight,
   embeddableMinHeight,
@@ -162,6 +175,7 @@ export function ContextualServiceMapSection({
     environment,
     kuery,
     serviceName,
+    filterPills,
   });
 
   const titleRow = (
@@ -172,7 +186,14 @@ export function ContextualServiceMapSection({
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiLink href={fullMapHref} data-test-subj={exploreLinkTestSubj}>
+        <EuiLink
+          href={fullMapHref}
+          data-test-subj={exploreLinkTestSubj}
+          {...getEbtProps({
+            action: APM_EBT_ACTIONS.EXPLORE_SERVICE_MAP,
+            element: SERVICE_MAP_EBT_ELEMENTS.SECTION_HEADER_LINK,
+          })}
+        >
           {EXPLORE_IN_SERVICE_MAP_LABEL}
         </EuiLink>
       </EuiFlexItem>
@@ -207,6 +228,8 @@ export function ContextualServiceMapSection({
         environment={environment}
         kuery={kuery}
         serviceName={serviceName}
+        filterPills={filterPills}
+        flyoutOptions={flyoutOptions}
         core={core}
         enableContextualMap
         contextualMapBaseMaxHops={baseMaxHops}

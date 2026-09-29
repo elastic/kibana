@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { AnyAction, PayloadAction } from 'redux-toolkit-v1';
-import { createAsyncThunk, createSlice } from 'redux-toolkit-v1';
-import { batch } from 'react-redux-v7';
+import type { UnknownAction, PayloadAction } from '@reduxjs/toolkit';
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import { batch } from 'react-redux';
 
 import type { HttpSetup, HttpFetchOptions } from '@kbn/core/public';
 import { fetchStream } from './fetch_stream';
@@ -35,7 +35,7 @@ export const startStream = createAsyncThunk(
 
     // Custom buffering to avoid hammering the DOM with updates.
     // We can revisit this once Kibana is on React 18.
-    const actionBuffer: AnyAction[] = [];
+    const actionBuffer: UnknownAction[] = [];
     function flushBuffer(withTimeout = true) {
       batch(() => {
         for (const action of actionBuffer) {

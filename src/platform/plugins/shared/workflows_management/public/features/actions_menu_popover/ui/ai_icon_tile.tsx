@@ -12,16 +12,12 @@ import { css } from '@emotion/react';
 import React from 'react';
 import { AiIcon } from '@kbn/shared-ux-ai-components';
 
-/** Matches @kbn/shared-ux-ai-components AiButton icon-only diagonal gradient. */
 const AI_TILE_GRADIENT_ANGLE = 135;
 const AI_TILE_GRADIENT_START_PERCENT = 2.98;
 const AI_TILE_GRADIENT_END_PERCENT = 66.24;
 
-/**
- * Soft Primary → Assistance fill + border, using Base tokens (same weight as other
- * category tiles). Light/Filled variants are stronger AiButton chrome.
- */
-export const aiIconTileCss = ({ euiTheme }: UseEuiTheme) => {
+/** Creates the AI category tile gradient. */
+export const aiIconTileCss = ({ euiTheme }: UseEuiTheme): ReturnType<typeof css> => {
   const fill = `linear-gradient(${AI_TILE_GRADIENT_ANGLE}deg, ${euiTheme.colors.backgroundBasePrimary} ${AI_TILE_GRADIENT_START_PERCENT}%, ${euiTheme.colors.backgroundBaseAssistance} ${AI_TILE_GRADIENT_END_PERCENT}%)`;
   const border = `linear-gradient(${AI_TILE_GRADIENT_ANGLE}deg, ${euiTheme.colors.borderBasePrimary} ${AI_TILE_GRADIENT_START_PERCENT}%, ${euiTheme.colors.borderBaseAssistance} ${AI_TILE_GRADIENT_END_PERCENT}%)`;
 
@@ -46,7 +42,7 @@ export const aiIconTileCss = ({ euiTheme }: UseEuiTheme) => {
   });
 };
 
-/** Sparkles glyph with the standard Kibana AI Primary → Assistance SVG gradient. */
+/** Renders the standard AI sparkles icon. */
 export function ActionsMenuAiIcon(): JSX.Element {
   return <AiIcon iconType="sparkles" size="m" aria-hidden />;
 }

@@ -23,6 +23,7 @@ import { createConfig } from './create_config';
 import type { OsqueryPluginSetup, OsqueryPluginStart, SetupPlugins, StartPlugins } from './types';
 import { defineRoutes } from './routes';
 import { osquerySearchStrategyProvider } from './search_strategy/osquery';
+import { OSQUERY_SEARCH_STRATEGY } from './search_strategy/constants';
 import { initSavedObjects } from './saved_objects';
 import type { OsqueryAppContext } from './lib/osquery_app_context_services';
 import { OsqueryAppContextService } from './lib/osquery_app_context_services';
@@ -88,6 +89,21 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       security: plugins.security,
       telemetryEventsSender: this.telemetryEventsSender,
       licensing: plugins.licensing,
+      isCpsActive: async (request) => {
+        if (!experimentalFeatures.crossProjectSearch) {
+          return false;
+        }
+
+        const [, startPlugins] = await core.getStartServices();
+
+        // `cps.isCpsActive` is tri-state: `undefined` means the linked projects could not be
+        // resolved, which is not the same as there being none. Osquery collapses that to "do not
+        // fan out" deliberately. An unresolved scope is one whose index grants we cannot inspect --
+        // almost always a custom role missing `read_project_routing` -- and fanning those out would
+        // put exactly the principals we know least about on `asCurrentUser`. The cost is that such
+        // a role reads origin-only until the predefined roles carry the privilege.
+        return (await startPlugins.cps?.isCpsActive(request)) === true;
+      },
     };
 
     initSavedObjects(core.savedObjects);
@@ -100,10 +116,11 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       .then(([{ elasticsearch }, depsStart]) => {
         const osquerySearchStrategy = osquerySearchStrategyProvider(
           depsStart.data,
-          elasticsearch.client
+          elasticsearch.client,
+          osqueryContext
         );
 
-        plugins.data.search.registerSearchStrategy('osquerySearchStrategy', osquerySearchStrategy);
+        plugins.data.search.registerSearchStrategy(OSQUERY_SEARCH_STRATEGY, osquerySearchStrategy);
         defineRoutes(router, osqueryContext, this.schemaService);
       })
       .catch(() => {
@@ -117,13 +134,13 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
         title: 'Reconcile osquery pack schedule IDs onto the Fleet wire',
         timeout: '5m',
         maxAttempts: 3,
-        createTaskRunner: ({ abortController, taskInstance }) => ({
+        createTaskRunner: ({ signal, taskInstance }) => ({
           run: async () =>
             runReconcileTask({
               coreStart: this.coreStart,
               osqueryContext: this.osqueryAppContextService,
               logger: this.logger,
-              abortController,
+              signal,
               isRruleFeatureEnabled: this.rruleSchedulingEnabled,
               taskState: taskInstance?.state,
             }),
@@ -132,7 +149,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
     });
 
     if (plugins.cases) {
-      plugins.cases.attachmentFramework.registerUnified(osqueryUnifiedAttachment);
+      plugins.cases.attachmentFramework.registerAttachment(osqueryUnifiedAttachment);
     }
 
     return {

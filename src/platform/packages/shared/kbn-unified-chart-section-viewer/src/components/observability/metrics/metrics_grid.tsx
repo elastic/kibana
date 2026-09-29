@@ -7,14 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { EuiFlexGridProps } from '@elastic/eui';
 import { EuiFlexGrid, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { EmbeddableComponentProps } from '@kbn/lens-plugin/public';
 import { ACTION_INSPECT_PANEL, type QuickActionIds } from '@kbn/embeddable-plugin/public';
-import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
+import {
+  DiscoverFlyouts,
+  openAfterDismissingOtherFlyouts,
+  type MetricsGridSettings,
+} from '@kbn/discover-utils';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { getFieldSearchMatchingHighlight } from '@kbn/field-utils';
 import { stableStringify } from '@kbn/std';
@@ -25,7 +29,12 @@ import { MetricInsightsFlyout } from '../../flyout';
 import { EmptyState } from '../../empty_state/empty_state';
 import { useGridNavigation } from '../../../hooks/use_grid_navigation';
 import { FieldsMetadataProvider } from '../../../context/fields_metadata';
-import { createESQLQuery, firstNonNullable, getMetricUniqueKey } from '../../../common/utils';
+import {
+  createESQLQuery,
+  firstNonNullable,
+  getAggregationLabel,
+  getMetricUniqueKey,
+} from '../../../common/utils';
 import {
   ACTION_COPY_TO_DASHBOARD,
   ACTION_EXPLORE_IN_DISCOVER_TAB,
@@ -117,7 +126,8 @@ export const MetricsGrid = ({
 }: MetricsGridProps) => {
   const gridRef = useRef<HTMLDivElement>(null);
   const { euiTheme } = useEuiTheme();
-  const { flyoutState, onFlyoutStateChange } = useMetricsExperienceState();
+  const { flyoutState, onFlyoutStateChange, profileId, gridSettings, onMetricExplored } =
+    useMetricsExperienceState();
 
   const gridColumns = columns || 1;
   const gridRows = Math.ceil(metricItems.length / gridColumns);
@@ -163,7 +173,6 @@ export const MetricsGrid = ({
 
   const handleViewDetails = useCallback(
     (index: number, esqlQuery: string, metricItem: ParsedMetricItem) => {
-      dismissAllFlyoutsExceptFor(DiscoverFlyouts.metricInsights);
       onFlyoutStateChange({
         gridPosition: index,
         metricUniqueKey: getMetricUniqueKey(metricItem),
@@ -173,6 +182,31 @@ export const MetricsGrid = ({
     },
     [onFlyoutStateChange]
   );
+
+  const hasFlyoutToOpen = Boolean(flyoutData) && isTabSelected;
+  const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
+
+  // Push flyouts share one inline offset on the app scroll container, so this one only mounts once
+  // the others have unmounted. Keyed on whether a flyout is owed rather than on `flyoutData`, so
+  // switching metrics while the flyout is open does not dismiss and remount it. This covers both
+  // View details and a tab restoring its `flyoutState` when it becomes active.
+  useEffect(() => {
+    if (!hasFlyoutToOpen) {
+      setIsFlyoutOpen(false);
+      return;
+    }
+
+    let isCurrent = true;
+    openAfterDismissingOtherFlyouts(DiscoverFlyouts.metricInsights, () => {
+      if (isCurrent) {
+        setIsFlyoutOpen(true);
+      }
+    });
+
+    return () => {
+      isCurrent = false;
+    };
+  }, [hasFlyoutToOpen]);
 
   const handleCloseFlyout = useCallback(() => {
     if (!flyoutState) {
@@ -255,13 +289,16 @@ export const MetricsGrid = ({
                   userSource={userSource}
                   description={getDescription?.(metricItem)}
                   userMessages={getUserMessages ? getUserMessages(metricItem) : undefined}
+                  profileId={profileId}
+                  gridSettings={gridSettings}
+                  onMetricExplored={onMetricExplored}
                 />
               </EuiFlexItem>
             );
           })}
         </EuiFlexGrid>
       </A11yGridWrapper>
-      {flyoutData && isTabSelected && (
+      {flyoutData && isFlyoutOpen && (
         <MetricInsightsFlyout
           metricItem={flyoutData.metricItem}
           esqlQuery={flyoutData.esqlQuery}
@@ -294,6 +331,9 @@ interface ChartItemProps
   whereStatements?: string[];
   userSource?: string;
   userMessages?: EmbeddableComponentProps['userMessages'];
+  profileId: string;
+  gridSettings: MetricsGridSettings;
+  onMetricExplored?: (metricUniqueKey: string) => void;
 }
 
 const ChartItem = React.memo(
@@ -320,12 +360,29 @@ const ChartItem = React.memo(
     onFocusCell,
     onViewDetails,
     userMessages,
+    profileId,
+    gridSettings,
+    onMetricExplored,
   }: ChartItemProps) => {
-    const { profileId, gridSettings } = useMetricsExperienceState();
     const { euiTheme } = useEuiTheme();
     const colorPalette = useMemo(
       () => Object.values(euiTheme.colors.vis).slice(0, 10),
       [euiTheme.colors.vis]
+    );
+
+    const recordExploredMetric = useCallback<React.MouseEventHandler<HTMLDivElement>>(
+      (event) => {
+        // Only count clicks on panel action controls (Inspect, View details, Explore in
+        // Discover, Copy to dashboard, and the overflow menu that hosts Cases), not clicks
+        // on the chart body, legend, or time series selection.
+        const isActionClick = (event.target as HTMLElement).closest(
+          '[data-test-subj^="embeddablePanelAction-"], [data-test-subj="embeddablePanelToggleMenuIcon"]'
+        );
+        if (isActionClick) {
+          onMetricExplored?.(getMetricUniqueKey(metricItem));
+        }
+      },
+      [onMetricExplored, metricItem]
     );
 
     const applicableDimensions = useStableApplicableDimensions(
@@ -346,6 +403,11 @@ const ChartItem = React.memo(
           })
         : '';
     }, [metricItem, applicableDimensions, whereStatements, userSource, gridSettings]);
+
+    const yAxisTitle = useMemo(() => {
+      const instrument = firstNonNullable(metricItem.metricTypes);
+      return instrument ? getAggregationLabel({ instrument, gridSettings }) : undefined;
+    }, [metricItem.metricTypes, gridSettings]);
 
     const color = useMemo(() => colorPalette[index % colorPalette.length], [index, colorPalette]);
     const chartLayers = useChartLayers({
@@ -375,6 +437,7 @@ const ChartItem = React.memo(
         isFocused={isFocused}
         isSelected={isSelected}
         onFocus={onFocusCell}
+        onClickCapture={recordExploredMetric}
       >
         <Chart
           id={metricItem.metricName}
@@ -391,6 +454,7 @@ const ChartItem = React.memo(
           title={metricItem.metricName}
           description={description}
           chartLayers={chartLayers}
+          yAxisTitle={yAxisTitle}
           syncCursor
           syncTooltips={false}
           titleHighlight={titleHighlight}
@@ -454,6 +518,7 @@ const A11yGridCell = React.forwardRef(
       isFocused,
       isSelected,
       onFocus,
+      onClickCapture,
     }: React.PropsWithChildren<{
       id: string;
       rowIndex: number;
@@ -462,6 +527,7 @@ const A11yGridCell = React.forwardRef(
       isFocused: boolean;
       isSelected: boolean;
       onFocus: (rowIndex: number, colIndex: number) => void;
+      onClickCapture?: React.MouseEventHandler<HTMLDivElement>;
     }>,
     ref: React.Ref<HTMLDivElement>
   ) => {
@@ -484,6 +550,7 @@ const A11yGridCell = React.forwardRef(
         data-chart-index={index}
         tabIndex={isFocused ? 0 : -1}
         onFocus={handleFocusCell}
+        onClickCapture={onClickCapture}
         css={css`
           outline: none;
           cursor: pointer;
