@@ -202,6 +202,30 @@ describe('route_config', () => {
     });
   });
 
+  describe('connectors route gating', () => {
+    const agentConnectorsPath = '/agents/:agentId/connectors';
+    const manageConnectorsPath = '/manage/connectors';
+    const findRoute = (routes: ReturnType<typeof getEnabledRoutes>, path: string) =>
+      routes.find((r) => r.path === path);
+
+    const config = (experimental: boolean): RouteAccessConfig => ({
+      featureFlags: { experimental },
+      capabilities: { isUIAMEnabled: true },
+    });
+
+    it('includes both connectors routes when experimental features are enabled', () => {
+      const routes = getEnabledRoutes(config(true));
+      expect(findRoute(routes, agentConnectorsPath)).toBeDefined();
+      expect(findRoute(routes, manageConnectorsPath)).toBeDefined();
+    });
+
+    it('includes both connectors routes when experimental features are disabled', () => {
+      const routes = getEnabledRoutes(config(false));
+      expect(findRoute(routes, agentConnectorsPath)).toBeDefined();
+      expect(findRoute(routes, manageConnectorsPath)).toBeDefined();
+    });
+  });
+
   describe('route view ids', () => {
     it('uses a stable prefixed viewId for every route', () => {
       allRoutes.forEach((route) => {
