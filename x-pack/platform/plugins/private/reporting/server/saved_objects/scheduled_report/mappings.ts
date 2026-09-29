@@ -16,15 +16,14 @@ export const scheduledReportMappings: SavedObjectsTypeMappingDefinition = {
     createdBy: {
       type: 'keyword',
     },
+    // Deliberately unbounded, like `createdBy` which they are derived from: an `ignore_above`
+    // value would leave the id out of the index, and the `list` filter reads an absent id as a
+    // legacy, username-owned report.
     createdById: {
       type: 'keyword',
-      // Well above any realm-qualified username (e.g. a SAML NameID or LDAP DN). An unindexed
-      // value would make the `list` filter treat the report as legacy, username-owned.
-      ignore_above: 1024,
     },
     createdByApiKeyId: {
       type: 'keyword',
-      ignore_above: 1024,
     },
   },
 };

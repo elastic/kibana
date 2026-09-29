@@ -482,7 +482,7 @@ describe('ScheduledReportsService', () => {
       await scheduledReportsService.list({
         user: {
           username: 'rshared',
-          authentication_realm: { type: 'native', name: 'default_native' },
+          lookup_realm: { type: 'native', name: 'default_native' },
         } as ReportingUser,
         page: 1,
         size: 10,
@@ -982,7 +982,7 @@ describe('ScheduledReportsService', () => {
       const result = await scheduledReportsService.bulkDisable({
         user: {
           username: 'rshared',
-          authentication_realm: { type: 'native', name: 'default_native' },
+          lookup_realm: { type: 'native', name: 'default_native' },
         } as ReportingUser,
         ids: [crossRealmReport.id],
       });
@@ -1017,7 +1017,7 @@ describe('ScheduledReportsService', () => {
       await scheduledReportsService.bulkDisable({
         user: {
           username: 'rshared',
-          authentication_realm: { type: 'native', name: 'default_native' },
+          lookup_realm: { type: 'native', name: 'default_native' },
         } as ReportingUser,
         ids: [legacyReport.id],
       });
@@ -2191,7 +2191,7 @@ describe('ScheduledReportsService', () => {
       const result = await scheduledReportsService.bulkDelete({
         user: {
           username: 'rshared',
-          authentication_realm: { type: 'native', name: 'default_native' },
+          lookup_realm: { type: 'native', name: 'default_native' },
         } as ReportingUser,
         ids: [crossRealmReport.id],
       });
@@ -2752,7 +2752,7 @@ describe('ScheduledReportsService', () => {
           id: crossRealmReport.id,
           user: {
             username: 'rshared',
-            authentication_realm: { type: 'native', name: 'default_native' },
+            lookup_realm: { type: 'native', name: 'default_native' },
           } as ReportingUser,
         })
       ).rejects.toMatchObject({ body: 'Not found.', statusCode: 404 });
@@ -2779,7 +2779,7 @@ describe('ScheduledReportsService', () => {
         id: legacyReport.id,
         user: {
           username: 'rshared',
-          authentication_realm: { type: 'native', name: 'default_native' },
+          lookup_realm: { type: 'native', name: 'default_native' },
         } as ReportingUser,
       });
 
@@ -2803,7 +2803,7 @@ describe('ScheduledReportsService', () => {
         id: legacyReport.id,
         user: {
           username: 'admin-user',
-          authentication_realm: { type: 'native', name: 'default_native' },
+          lookup_realm: { type: 'native', name: 'default_native' },
         } as ReportingUser,
       });
 

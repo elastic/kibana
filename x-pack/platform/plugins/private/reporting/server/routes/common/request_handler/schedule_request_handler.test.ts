@@ -244,7 +244,7 @@ describe('Handle request to schedule', () => {
         reporting: reportingCore,
         user: {
           username: 'testymcgee',
-          authentication_realm: { type: 'native', name: 'default_native' },
+          lookup_realm: { type: 'native', name: 'default_native' },
         } as ReportingUser,
         context: mockContext,
         path: '/api/reporting/test/generate/pdf',
@@ -356,7 +356,7 @@ describe('Handle request to schedule', () => {
         reporting: reportingCore,
         user: {
           username: 'testymcgee',
-          authentication_realm: { type: 'native', name: 'default_native' },
+          lookup_realm: { type: 'native', name: 'default_native' },
         } as ReportingUser,
         context: mockContext,
         path: '/api/reporting/test/generate/pdf',

@@ -19,7 +19,7 @@ describe('toStableUserIds', () => {
           username: 'rshared',
           profile_uid: 'profile-123',
           authentication_type: 'realm',
-          authentication_realm: { type: 'native', name: 'default_native' },
+          lookup_realm: { type: 'native', name: 'default_native' },
         },
       })
     ).resolves.toEqual(['profile-123', 'realm:["native","default_native","rshared"]']);
@@ -31,7 +31,7 @@ describe('toStableUserIds', () => {
         authUser: {
           username: 'rshared',
           authentication_type: 'realm',
-          authentication_realm: { type: 'file', name: 'default_file' },
+          lookup_realm: { type: 'file', name: 'default_file' },
         },
       })
     ).resolves.toEqual(['realm:["file","default_file","rshared"]']);
@@ -41,7 +41,7 @@ describe('toStableUserIds', () => {
         authUser: {
           username: 'rshared',
           authentication_type: 'realm',
-          authentication_realm: { type: 'native', name: 'default_native' },
+          lookup_realm: { type: 'native', name: 'default_native' },
         },
       })
     ).resolves.toEqual(['realm:["native","default_native","rshared"]']);
@@ -55,7 +55,7 @@ describe('toStableUserIds', () => {
       toStableUserIds({
         authUser: {
           authentication_type: 'realm',
-          authentication_realm: { type: 'native', name: 'default_native' },
+          lookup_realm: { type: 'native', name: 'default_native' },
         },
       })
     ).resolves.toEqual([]);
@@ -94,7 +94,7 @@ describe('toStableUserIds', () => {
         authUser: {
           username: 'rshared',
           authentication_type: 'api_key',
-          authentication_realm: { type: '_es_api_key', name: '_es_api_key' },
+          lookup_realm: { type: '_es_api_key', name: '_es_api_key' },
         },
         resolveApiKeyOwner: async () => undefined,
       })
@@ -114,7 +114,7 @@ describe('toStableUserIds', () => {
       authUser: {
         username: 'rshared',
         authentication_type: 'realm',
-        authentication_realm: { type: 'file', name: 'default_file' },
+        lookup_realm: { type: 'file', name: 'default_file' },
       },
     });
 
@@ -230,7 +230,7 @@ describe('getReportingUserIdentity', () => {
           username: 'rshared',
           profile_uid: 'profile-123',
           authentication_type: 'realm',
-          authentication_realm: { type: 'native', name: 'default_native' },
+          lookup_realm: { type: 'native', name: 'default_native' },
         } as never,
         request,
         esClient,
@@ -243,17 +243,42 @@ describe('getReportingUserIdentity', () => {
     });
   });
 
+  it('uses the realm the username was resolved in, not the one that authenticated the request', async () => {
+    const request = httpServerMock.createKibanaRequest();
+
+    // A proxy impersonating a user with `es-security-runas-user`: the request authenticates as the
+    // proxy account, while `username` is the impersonated user, resolved in its own realm. Such
+    // requests never carry a profile uid, so the realm-qualified id is all there is to match on.
+    await expect(
+      getReportingUserIdentity({
+        user: {
+          username: 'rshared',
+          authentication_type: 'realm',
+          authentication_realm: { type: 'file', name: 'default_file' },
+          lookup_realm: { type: 'native', name: 'default_native' },
+        } as never,
+        request,
+        esClient,
+      })
+    ).resolves.toEqual({
+      id: 'realm:["native","default_native","rshared"]',
+      ids: ['realm:["native","default_native","rshared"]'],
+      apiKeyId: undefined,
+      username: 'rshared',
+    });
+  });
+
   it('returns distinct ids for the same username in different realms', async () => {
     const request = httpServerMock.createKibanaRequest();
     const fileUser = {
       username: 'rshared',
       authentication_type: 'realm',
-      authentication_realm: { type: 'file', name: 'default_file' },
+      lookup_realm: { type: 'file', name: 'default_file' },
     } as never;
     const nativeUser = {
       username: 'rshared',
       authentication_type: 'realm',
-      authentication_realm: { type: 'native', name: 'default_native' },
+      lookup_realm: { type: 'native', name: 'default_native' },
     } as never;
 
     const fileIdentity = await getReportingUserIdentity({ user: fileUser, request, esClient });
@@ -397,7 +422,7 @@ describe('getReportingUserIdentity', () => {
           username: '1806480617',
           profile_uid: 'profile-uiam',
           authentication_type: 'token',
-          authentication_realm: { type: 'saml', name: 'cloud-saml-kibana' },
+          lookup_realm: { type: 'saml', name: 'cloud-saml-kibana' },
         } as never,
         request,
         esClient,

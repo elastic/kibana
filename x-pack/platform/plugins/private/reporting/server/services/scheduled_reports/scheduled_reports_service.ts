@@ -66,6 +66,13 @@ interface BulkOperationResult {
 export type CreatedAtSearchResponse = SearchResponse<{ created_at: string }>;
 
 /**
+ * Users who can manage reporting bypass every ownership check, so resolving their identity would
+ * only add an Elasticsearch round trip -- and, for an API key, a lookup failure that turns a valid
+ * request into an error.
+ */
+const UNRESOLVED_IDENTITY: ReportingUserIdentity = { ids: [] };
+
+/**
  * Names the acting principal in authorization warnings. An API key is named by its id: a UIAM key
  * reports that id as its username, so a username alone would not identify the actor.
  */
@@ -180,7 +187,9 @@ export class ScheduledReportsService {
     search?: string;
   }): Promise<ListScheduledReportsApiResponse> {
     try {
-      const identity = await this._getIdentity(user);
+      const identity = this.userCanManageReporting
+        ? UNRESOLVED_IDENTITY
+        : await this._getIdentity(user);
 
       let filter: KueryNode | undefined;
       if (!this.userCanManageReporting) {
@@ -297,7 +306,9 @@ export class ScheduledReportsService {
     user: ReportingUser;
   }): Promise<BulkOperationResult> {
     try {
-      const identity = await this._getIdentity(user);
+      const identity = this.userCanManageReporting
+        ? UNRESOLVED_IDENTITY
+        : await this._getIdentity(user);
 
       const bulkGetResult = await this.savedObjectsClient.bulkGet<ScheduledReportType>(
         ids.map((id) => ({ id, type: SCHEDULED_REPORT_SAVED_OBJECT_TYPE }))
@@ -670,7 +681,9 @@ export class ScheduledReportsService {
   }) {
     const errors: BulkOperationError[] = [];
     const scheduledReportSavedObjectsToUpdate: Array<SavedObject<ScheduledReportType>> = [];
-    const identity = await this._getIdentity(user);
+    const identity = this.userCanManageReporting
+      ? UNRESOLVED_IDENTITY
+      : await this._getIdentity(user);
     const updatedScheduledReportIds: Set<string> = new Set();
 
     for (const so of scheduledReportSavedObjects) {

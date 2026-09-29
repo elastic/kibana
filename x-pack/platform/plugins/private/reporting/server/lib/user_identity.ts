@@ -30,7 +30,7 @@ interface StableUserIdAuthUser {
   username?: string;
   profile_uid?: string;
   authentication_type?: string;
-  authentication_realm?: { type?: string; name?: string };
+  lookup_realm?: { type?: string; name?: string };
 }
 
 interface ApiKeyAuthUser {
@@ -145,12 +145,12 @@ export const toStableUserIds = async ({
       toRealmId(apiKeyOwner?.realmType, apiKeyOwner?.realmName, apiKeyOwner?.username)
     );
   } else {
+    // `lookup_realm`, not `authentication_realm`: the former is where `username` was resolved, the
+    // latter is what authenticated the request. They differ when a proxy impersonates a user with
+    // `es-security-runas-user`, and such requests never carry a profile uid, so they always reach
+    // here.
     ids.push(
-      toRealmId(
-        authUser.authentication_realm?.type,
-        authUser.authentication_realm?.name,
-        authUser.username
-      )
+      toRealmId(authUser.lookup_realm?.type, authUser.lookup_realm?.name, authUser.username)
     );
   }
 
