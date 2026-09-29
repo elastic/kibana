@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiIllustration, EuiText, EuiTitle, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { illustrations } from '@elastic/eui-illustrations';
+import { generatePreview } from '@elastic/eui-illustrations';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 interface SearchPlaceholderProps {
@@ -26,7 +26,7 @@ export const SearchPlaceholder = ({ customPlaceholderMessage }: SearchPlaceholde
     >
       <EuiFlexItem grow={false}>
         <EuiIllustration
-          type={illustrations.generatePreview}
+          type={generatePreview}
           alt=""
           fullWidth={false}
           style={{ maxInlineSize: 200, marginInline: 'auto' }}
