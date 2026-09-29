@@ -54,7 +54,7 @@ describe('memoryOptimizeStepDefinition', () => {
       agent_id?: string;
       recalled_ids?: string[];
       sandbox_id?: string;
-      connector_id?: string;
+      round_connector_id?: string;
       conversation_id?: string;
       round_id?: string;
     },
@@ -110,6 +110,7 @@ describe('memoryOptimizeStepDefinition', () => {
       logger: expect.anything(),
       getAgentBuilder,
       connectorId: undefined,
+      interactionId: 'workflow-exec-1',
     });
     expect(getMemoryEsClient).toHaveBeenCalledTimes(1);
     expect(getScopedEsClient).not.toHaveBeenCalled();
@@ -227,7 +228,7 @@ describe('memoryOptimizeStepDefinition', () => {
         response: 'Redis evictions.',
         agent_id: 'nightshift.investigation',
         sandbox_id: 'default__conv-1',
-        connector_id: 'anthropic-sonnet',
+        round_connector_id: 'anthropic-sonnet',
       })
     );
 

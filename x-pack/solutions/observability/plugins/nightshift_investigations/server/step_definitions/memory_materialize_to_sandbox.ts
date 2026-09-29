@@ -12,7 +12,6 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { SandboxPluginStart } from '@kbn/sandbox-plugin/server';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../agents/investigation';
 import { hydrateMemoryWorkspace } from '../memory/register_memory';
-import { previewText } from '../memory/log_format';
 import type { NightshiftTelemetryClient } from '../telemetry';
 import { unscopeConversationId } from '../tools/sandbox_bash/tool_utils';
 import { withTimeout } from './with_timeout';
@@ -124,11 +123,7 @@ export const memoryMaterializeToSandboxStepDefinition = ({
       context.logger.info(
         `Materializing semantic memory into sandbox ${sandboxId} (agent ${trimmedAgentId})`
       );
-      context.logger.debug(
-        `Memory materialize step promptChars=${prompt?.length ?? 0} prompt=${JSON.stringify(
-          previewText(prompt)
-        )}`
-      );
+      context.logger.debug(`Memory materialize step promptChars=${prompt?.length ?? 0}`);
 
       let result: Awaited<ReturnType<typeof hydrateMemoryWorkspace>>;
       try {

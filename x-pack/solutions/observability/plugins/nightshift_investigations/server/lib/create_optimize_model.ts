@@ -8,13 +8,30 @@
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginStart, ScopedModel } from '@kbn/agent-builder-server';
 import type { ConnectorTelemetryMetadata } from '@kbn/inference-common';
+import {
+  SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
+  SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_FEATURE,
+  SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_SOLUTION,
+  SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID,
+} from '@kbn/significant-events-schema';
+
+/** Attributes Cortex and Semantic Memory optimize LLM calls to Nightshift investigation spend. */
+export const createInvestigationOptimizeTelemetry = (
+  interactionId: string
+): ConnectorTelemetryMetadata => ({
+  pluginId: SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID,
+  aggregateBy: SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
+  productSolution: SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_SOLUTION,
+  productFeature: SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_FEATURE,
+  interactionId,
+});
 
 /**
  * Same LLM path Agent Builder converse uses:
  * `runtime.createModelProvider` → `resolveSelectedConnectorId` → bound client.
  *
- * Pass the triggering round's connector as `connectorId` (from
- * `round.model_usage.connector_id`) so optimize inherits that turn.
+ * Pass the triggering round's connector as `connectorId` (the workflow's
+ * `round_connector_id` input) so optimize inherits that turn.
  */
 export const createOptimizeModel = async ({
   request,

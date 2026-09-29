@@ -33,7 +33,7 @@ describe('cortexOptimizeStepDefinition', () => {
     prompt: string;
     response: string;
     agent_id?: string;
-    connector_id?: string;
+    round_connector_id?: string;
     conversation_id?: string;
     round_id?: string;
   }) =>
@@ -104,7 +104,7 @@ describe('cortexOptimizeStepDefinition', () => {
         prompt: 'why is checkout slow?',
         response: 'Redis evictions.',
         agent_id: NIGHTSHIFT_INVESTIGATION_AGENT_ID,
-        connector_id: 'anthropic-sonnet',
+        round_connector_id: 'anthropic-sonnet',
       })
     );
 

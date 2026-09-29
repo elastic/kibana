@@ -15,6 +15,9 @@ import {
 
 const workflow = parse(NIGHTSHIFT_DECISION_TREE_REINFORCE_WORKFLOW.yaml) as {
   name: string;
+  triggers: Array<{
+    inputs: { properties: Record<string, unknown>; additionalProperties?: boolean };
+  }>;
   steps: Array<{
     name: string;
     type?: string;
@@ -40,6 +43,24 @@ describe('decision tree reinforce workflow', () => {
       ['ensure_reinforcement_agent', 'nightshift.ensureInvestigationAgent'],
       ['reinforce_decision_trees', 'ai.agent'],
     ]);
+  });
+
+  // The schema is strict, so any after-execution input Agent Builder sends must be declared here.
+  it('declares every input the after-execution hook sends', () => {
+    const [{ inputs }] = workflow.triggers;
+    expect(inputs.additionalProperties).toBe(false);
+    expect(Object.keys(inputs.properties).sort()).toEqual(
+      [
+        'agent_id',
+        'conversation_id',
+        'prompt',
+        'response',
+        'round_connector_id',
+        'round_id',
+        'tool_calls',
+        'workflow_context',
+      ].sort()
+    );
   });
 
   // ${{ }} passes the array through. Liquid `{{ }}` stringifies it as

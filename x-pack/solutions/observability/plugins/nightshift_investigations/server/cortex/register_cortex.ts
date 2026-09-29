@@ -13,15 +13,12 @@ import type {
 } from '@kbn/core/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { ContextEnginePluginSetup } from '@kbn/context-engine-plugin/server';
-import {
-  SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
-  SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_FEATURE,
-  SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_SOLUTION,
-  SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID,
-} from '@kbn/significant-events-schema';
 import { i18n } from '@kbn/i18n';
 import type { SandboxSession } from '@kbn/sandbox-plugin/server';
-import { createOptimizeModel } from '../lib/create_optimize_model';
+import {
+  createInvestigationOptimizeTelemetry,
+  createOptimizeModel,
+} from '../lib/create_optimize_model';
 import { CORTEX_AI_INDEX_DEST, CORTEX_AI_INDEX_ID } from '../../common/cortex';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../agents/investigation';
 import { createCortexTelemetry } from '../telemetry';
@@ -147,13 +144,7 @@ export const runCortexOptimize = async ({
     request,
     connectorId: requestedConnectorId,
     agentBuilder: getAgentBuilder(),
-    telemetryMetadata: {
-      pluginId: SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID,
-      aggregateBy: SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
-      productSolution: SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_SOLUTION,
-      productFeature: SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_FEATURE,
-      interactionId,
-    },
+    telemetryMetadata: createInvestigationOptimizeTelemetry(interactionId),
     logger,
   });
   if (!model) {

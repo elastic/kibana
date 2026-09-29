@@ -8,7 +8,10 @@
 import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { SandboxSession } from '@kbn/sandbox-plugin/server';
-import { createOptimizeModel } from '../lib/create_optimize_model';
+import {
+  createInvestigationOptimizeTelemetry,
+  createOptimizeModel,
+} from '../lib/create_optimize_model';
 import { previewText } from './log_format';
 import { materializeMemory, type MaterializeMemoryResult } from './materialize';
 import {
@@ -70,6 +73,7 @@ export const runMemoryOptimize = async ({
   getAgentBuilder,
   logger,
   connectorId: requestedConnectorId,
+  interactionId,
 }: {
   request: KibanaRequest;
   agentId?: string;
@@ -82,6 +86,7 @@ export const runMemoryOptimize = async ({
   getAgentBuilder: () => AgentBuilderPluginStart | undefined;
   logger: Logger;
   connectorId?: string;
+  interactionId: string;
 }): Promise<MemoryOptimizeSummary | undefined> => {
   logger.debug(
     `Memory optimize wiring space=${spaceId} agent=${agentId} ` +
@@ -94,6 +99,7 @@ export const runMemoryOptimize = async ({
     request,
     connectorId: requestedConnectorId,
     agentBuilder: getAgentBuilder(),
+    telemetryMetadata: createInvestigationOptimizeTelemetry(interactionId),
     logger,
   });
   if (!model) {

@@ -70,7 +70,7 @@ export const memoryOptimizeStepDefinition = ({
           'Workspace key from nightshift.obtainSandbox. Already space-scoped. ' +
             'Omit when there is no conversation sandbox.'
         ),
-      connector_id: z
+      round_connector_id: z
         .string()
         .max(1024)
         .optional()
@@ -108,8 +108,7 @@ export const memoryOptimizeStepDefinition = ({
         })`
       );
       context.logger.debug(
-        `Memory optimize step connector=${context.input.connector_id ?? '(none)'} ` +
-          `promptChars=${context.input.prompt.length} responseChars=${context.input.response.length} ` +
+        `Memory optimize step promptChars=${context.input.prompt.length} responseChars=${context.input.response.length} ` +
           `recalledIds=${context.input.recalled_ids?.length ?? 0}`
       );
 
@@ -128,7 +127,8 @@ export const memoryOptimizeStepDefinition = ({
               signal,
               logger,
               getAgentBuilder,
-              connectorId: context.input.connector_id,
+              connectorId: context.input.round_connector_id,
+              interactionId: workflowExecutionId,
             }),
           OPTIMIZE_TIMEOUT_MS,
           `Memory optimize timed out after ${OPTIMIZE_TIMEOUT_MS}ms`

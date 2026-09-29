@@ -33,7 +33,7 @@ triggers:
         agent_id:
           type: string
           description: Supported agent policy selector; never a storage or Space boundary.
-        connector_id:
+        round_connector_id:
           type: string
           description: Inference connector the triggering agent used for this round.
         workflow_context:
@@ -83,7 +83,7 @@ steps:
               prompt: '{{ inputs.prompt }}'
               response: '{{ inputs.response }}'
               agent_id: '{{ inputs.agent_id }}'
-              connector_id: '{{ inputs.connector_id }}'
+              round_connector_id: '{{ inputs.round_connector_id }}'
               conversation_id: '{{ inputs.conversation_id }}'
               round_id: '{{ inputs.round_id }}'
               sandbox_id: '{{ steps.obtain_sandbox.output.sandbox_id }}'
@@ -95,7 +95,7 @@ steps:
               prompt: '{{ inputs.prompt }}'
               response: '{{ inputs.response }}'
               agent_id: '{{ inputs.agent_id }}'
-              connector_id: '{{ inputs.connector_id }}'
+              round_connector_id: '{{ inputs.round_connector_id }}'
               conversation_id: '{{ inputs.conversation_id }}'
               round_id: '{{ inputs.round_id }}'
               sandbox_id: '{{ steps.obtain_sandbox.output.sandbox_id }}'

@@ -55,7 +55,7 @@ export const cortexOptimizeStepDefinition = ({
         .max(1024)
         .optional()
         .describe('Workspace key from nightshift.obtainSandbox. Already space-scoped.'),
-      connector_id: z
+      round_connector_id: z
         .string()
         .max(1024)
         .optional()
@@ -101,7 +101,7 @@ export const cortexOptimizeStepDefinition = ({
             roundId: context.input.round_id,
             logger,
             getAgentBuilder,
-            connectorId: context.input.connector_id,
+            connectorId: context.input.round_connector_id,
           }),
         OPTIMIZE_TIMEOUT_MS,
         `Cortex optimize timed out after ${OPTIMIZE_TIMEOUT_MS}ms`
