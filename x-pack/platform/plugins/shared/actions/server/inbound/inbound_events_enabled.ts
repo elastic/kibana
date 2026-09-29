@@ -20,12 +20,18 @@ import { i18n } from '@kbn/i18n';
 export const resolveInboundEventsEnabled = ({
   actionTypeId,
   hasIdentity,
+  eventsEnabled = false,
 }: {
   actionTypeId: string;
   hasIdentity: boolean;
+  /** In-memory connector has events on, with no saved-object identity. */
+  eventsEnabled?: boolean;
 }): boolean => {
   if (connectorTypeIsInboundOnly(actionTypeId)) {
     return true;
+  }
+  if (eventsEnabled) {
+    return connectorTypeIsDual(actionTypeId);
   }
   return connectorTypeIsDual(actionTypeId) && hasIdentity;
 };
@@ -108,9 +114,11 @@ export const resolveUpdateInboundEventsEnabled = ({
 export const attachInboundEventsEnabled = <T extends { id: string; actionTypeId: string }>({
   connectors,
   connectorIdsWithIdentity,
+  connectorIdsWithEventsEnabled = new Set<string>(),
 }: {
   connectors: T[];
   connectorIdsWithIdentity: ReadonlySet<string>;
+  connectorIdsWithEventsEnabled?: ReadonlySet<string>;
 }): T[] =>
   connectors.map((connector) => {
     if (!connectorTypeHasInboundEvents(connector.actionTypeId)) {
@@ -121,6 +129,7 @@ export const attachInboundEventsEnabled = <T extends { id: string; actionTypeId:
       isInboundEventsEnabled: resolveInboundEventsEnabled({
         actionTypeId: connector.actionTypeId,
         hasIdentity: connectorIdsWithIdentity.has(connector.id),
+        eventsEnabled: connectorIdsWithEventsEnabled.has(connector.id),
       }),
     };
   });
@@ -128,12 +137,14 @@ export const attachInboundEventsEnabled = <T extends { id: string; actionTypeId:
 export const readInboundEventsEnabled = ({
   actionTypeId,
   hasIdentity,
+  eventsEnabled = false,
 }: {
   actionTypeId: string;
   hasIdentity: boolean;
+  eventsEnabled?: boolean;
 }): boolean | undefined => {
   if (!connectorTypeHasInboundEvents(actionTypeId)) {
     return undefined;
   }
-  return resolveInboundEventsEnabled({ actionTypeId, hasIdentity });
+  return resolveInboundEventsEnabled({ actionTypeId, hasIdentity, eventsEnabled });
 };

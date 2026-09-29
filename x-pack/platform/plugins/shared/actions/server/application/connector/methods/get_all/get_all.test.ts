@@ -792,6 +792,60 @@ describe('getAll()', () => {
       expect(result[0]).not.toHaveProperty('hasInboundEventIdentity');
     });
 
+    test('reports inbound events on for an in-memory connector with events enabled', async () => {
+      (connectorTypeHasInboundEvents as jest.Mock).mockImplementation(
+        (actionTypeId: string) => actionTypeId === '.slack2'
+      );
+      (connectorTypeIsDual as jest.Mock).mockImplementation(
+        (actionTypeId: string) => actionTypeId === '.slack2'
+      );
+      unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+        total: 0,
+        per_page: 10,
+        page: 1,
+        saved_objects: [],
+      });
+      scopedClusterClient.asInternalUser.search.mockResponse(
+        // @ts-expect-error not full search response
+        {
+          aggregations: {
+            'elastic-apps-slack': { doc_count: 0 },
+          },
+        }
+      );
+
+      actionsClient = new ActionsClient({
+        logger,
+        actionTypeRegistry,
+        authTypeRegistry,
+        unsecuredSavedObjectsClient,
+        scopedClusterClient,
+        kibanaIndices,
+        actionExecutor,
+        bulkExecutionEnqueuer,
+        request,
+        authorization: authorization as unknown as ActionsAuthorization,
+        inMemoryConnectors: [
+          createMockInMemoryConnector({
+            id: 'elastic-apps-slack',
+            actionTypeId: '.slack2',
+            name: 'Slack (Elastic app)',
+            isPreconfigured: true,
+            isDynamic: true,
+            isInboundEventsEnabled: true,
+          }),
+        ],
+        connectorTokenClient: connectorTokenClientMock.create(),
+        getEventLogClient,
+        encryptedSavedObjectsClient,
+        isESOCanEncrypt,
+        getAxiosInstanceWithAuth,
+      });
+
+      const result = await actionsClient.getAll();
+      expect(result[0].isInboundEventsEnabled).toBe(true);
+    });
+
     test('filters out inference connectors without endpoints', async () => {
       unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
         total: 1,
