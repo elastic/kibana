@@ -58,5 +58,7 @@
     "@kbn/inference-plugin",
     "@kbn/management-settings-ids",
     "@kbn/ui-callout",
+    "@kbn/core-chrome-browser-context-mocks",
+    "@kbn/core-chrome-browser-mocks",
   ]
 }
