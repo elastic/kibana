@@ -133,6 +133,33 @@ describe('enrichReportCore', () => {
     expect(invoke.mock.calls[1][0]).toContain('MIDDLE_EVIDENCE');
   });
 
+  it('shrinks context again when the first overflow retry still exceeds the window', async () => {
+    const overflow = new InferenceTaskError(
+      ChatCompletionErrorCode.ContextLengthExceededError,
+      'context window exceeded',
+      {}
+    );
+    const invoke = jest
+      .fn()
+      .mockRejectedValueOnce(overflow)
+      .mockRejectedValueOnce(overflow)
+      .mockResolvedValueOnce({ raw: { response_metadata: {} }, parsed: OUTPUT });
+    const text = `${'L'.repeat(200_000)}MIDDLE_EVIDENCE${'R'.repeat(200_000)}`;
+
+    const result = await enrichReportCore(buildModel(invoke), logger, { text, iocs });
+
+    expect(invoke).toHaveBeenCalledTimes(3);
+    expect(result.context.mode).toBe('degraded_context');
+    expect(result.context.selected_chars).toBeLessThan(30_000);
+    expect(result.context.coverage).toBe(
+      result.context.selected_chars / result.context.original_chars
+    );
+    expect(String(invoke.mock.calls[2][0]).length).toBeLessThan(
+      String(invoke.mock.calls[1][0]).length
+    );
+    expect(invoke.mock.calls[2][0]).toContain('MIDDLE_EVIDENCE');
+  });
+
   it('bounds the IOC candidate payload on overflow retry', async () => {
     const overflow = new InferenceTaskError(
       ChatCompletionErrorCode.ContextLengthExceededError,

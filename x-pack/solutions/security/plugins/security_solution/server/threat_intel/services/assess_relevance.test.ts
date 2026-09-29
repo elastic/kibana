@@ -152,6 +152,38 @@ describe('assessRelevance', () => {
       String(invoke.mock.calls[0][0]).length
     );
   });
+
+  it('shrinks context again when the first overflow retry still exceeds the window', async () => {
+    const overflow = new InferenceTaskError(
+      ChatCompletionErrorCode.ContextLengthExceededError,
+      'context window exceeded',
+      {}
+    );
+    const invoke = jest
+      .fn()
+      .mockRejectedValueOnce(overflow)
+      .mockRejectedValueOnce(overflow)
+      .mockResolvedValueOnce({ raw: { response_metadata: {} }, parsed: SAMPLE_OUTPUT });
+    const withStructuredOutput = jest.fn().mockReturnValue({ invoke });
+    const model = {
+      connector: { connectorId: 'test-connector' },
+      chatModel: { withStructuredOutput },
+    } as unknown as ScopedModel;
+    const text = `${'L'.repeat(200_000)}MIDDLE_RELEVANCE${'R'.repeat(200_000)}`;
+
+    const result = await assessRelevance(model, logger, { text });
+
+    expect(invoke).toHaveBeenCalledTimes(3);
+    expect(result.context.mode).toBe('degraded_context');
+    expect(result.context.selected_chars).toBeLessThan(30_000);
+    expect(result.context.coverage).toBe(
+      result.context.selected_chars / result.context.original_chars
+    );
+    expect(String(invoke.mock.calls[2][0]).length).toBeLessThan(
+      String(invoke.mock.calls[1][0]).length
+    );
+    expect(String(invoke.mock.calls[2][0])).toContain('MIDDLE_RELEVANCE');
+  });
 });
 
 // `withStructuredOutput` is mocked everywhere above, so the schema's own parsing of
