@@ -41,6 +41,7 @@ import type {
 import {
   attachAlertTriageWorkerToAllRules,
   detachAlertTriageWorkerFromAllRules,
+  detachRuleIdChunks,
 } from './alert_triage_rule_attachments';
 
 interface AlertTriageOpts {
@@ -327,19 +328,24 @@ export class WorkersService {
         // earlier one already attached some rules. Roll those back on failure — best-effort, so
         // a failed rollback does not mask the original error — rather than leave rules carrying
         // the action while the Worker itself stays (or is reported) disabled.
-        await attachAlertTriageWorkerToAllRules(alertTriageAttachmentService).catch(
-          async (err: Error) => {
-            this.logger.error(`Alert Triage Worker: rule attachment failed: ${err.message}`);
-            await detachAlertTriageWorkerFromAllRules(alertTriageAttachmentService).catch(
-              (rollbackErr: Error) => {
-                this.logger.error(
-                  `Alert Triage Worker: rollback detach after failed attach also failed: ${rollbackErr.message}`
-                );
-              }
-            );
-            throw err;
-          }
-        );
+        // Only the rule IDs *this attempt* attached are compensated (via onRulesAttached +
+        // detachRuleIdChunks): a re-enable of an already-attached Worker must not detach rules
+        // that were attached before this call, which detachAlertTriageWorkerFromAllRules would
+        // do by re-querying every currently-attached rule.
+        const attachedRuleIdChunks: string[][] = [];
+        await attachAlertTriageWorkerToAllRules(alertTriageAttachmentService, (ruleIds) =>
+          attachedRuleIdChunks.push(ruleIds)
+        ).catch(async (err: Error) => {
+          this.logger.error(`Alert Triage Worker: rule attachment failed: ${err.message}`);
+          await detachRuleIdChunks(alertTriageAttachmentService, attachedRuleIdChunks).catch(
+            (rollbackErr: Error) => {
+              this.logger.error(
+                `Alert Triage Worker: rollback detach after failed attach also failed: ${rollbackErr.message}`
+              );
+            }
+          );
+          throw err;
+        });
       }
 
       await management.updateWorkflow(

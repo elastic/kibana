@@ -982,9 +982,15 @@ describe('WorkersService', () => {
       expect(harness.updateWorkflow).not.toHaveBeenCalled();
     });
 
-    it('attach fails partway through: rolls back the rules a prior pass already attached', async () => {
+    it('attach fails partway through: rolls back only the rules this attempt attached, not rules already attached', async () => {
       const harness = createPersistentHarness();
-      const attachment = makeAttachmentService({ notAttachedIds: ['r1', 'r2'], pageSize: 1 });
+      // 'existing-rule' was attached by a previous enable (or a manual attachment); r1/r2 are
+      // the rules this attempt selects to attach. A rollback must leave existing-rule alone.
+      const attachment = makeAttachmentService({
+        notAttachedIds: ['r1', 'r2'],
+        attachedIds: ['existing-rule'],
+        pageSize: 1,
+      });
       const realUpdateRuleAttachments = attachment.updateRuleAttachments.getMockImplementation();
       // Pass 1 (attach r1) succeeds for real; pass 2 (attach r2) fails.
       attachment.updateRuleAttachments
@@ -997,16 +1003,18 @@ describe('WorkersService', () => {
       );
 
       expect(harness.updateWorkflow).not.toHaveBeenCalled();
-      // The compensating rollback detaches r1, the rule the failed pass's predecessor attached,
-      // so no rule is left carrying the action while the Worker is reported disabled.
+      // The compensating rollback detaches only r1, the rule the failed pass's predecessor
+      // attached, so no rule this attempt touched is left carrying the action.
       expect(attachment.updateRuleAttachments).toHaveBeenCalledWith({
         attachRuleIds: [],
         detachRuleIds: ['r1'],
       });
+      // existing-rule predates this attempt and must survive the rollback untouched — a
+      // rollback that detached every currently-attached rule would wipe it too.
       expect(
         (await attachment.getRuleAttachmentSelection({ search: '', attachmentFilter: 'attached' }))
           .attachedRuleIds
-      ).toEqual([]);
+      ).toEqual(['existing-rule']);
     });
 
     it('attach fails and the rollback detach also fails: original attach error still surfaces', async () => {
