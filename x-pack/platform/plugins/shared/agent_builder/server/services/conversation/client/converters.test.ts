@@ -2353,7 +2353,7 @@ describe('conversation model converters', () => {
 
   describe('metadata, template_id, and template_version round-trips', () => {
     describe('fromEs', () => {
-      it('applies conversation.feedback map to populate round.feedback on read', () => {
+      it('exposes conversation.feedback map on the returned conversation', () => {
         const doc: ConversationDocument = {
           _id: 'conv-feedback-map',
           _seq_no: 1,
@@ -2402,66 +2402,11 @@ describe('conversation model converters', () => {
 
         const result = fromEs(doc, requestingUser);
 
-        const round = result.rounds.find((r) => r.id === 'round-1');
-        expect(round?.feedback).toEqual({
-          vote: 'up',
-          chips: [],
-          comment: '',
-          submitted_at: '2025-01-01T00:00:00.000Z',
+        expect(result.feedback).toEqual({
+          'round-1': { vote: 'up', chips: [], comment: '', submitted_at: '2025-01-01T00:00:00.000Z' },
         });
-        expect(result.feedback).toEqual({ 'round-1': round?.feedback });
       });
 
-      it('falls back to round.feedback from conversation_rounds for old docs without feedback map', () => {
-        const doc: ConversationDocument = {
-          _id: 'conv-legacy-feedback',
-          _seq_no: 1,
-          _primary_term: 1,
-          _source: {
-            agent_id: 'agent_id',
-            title: 'Legacy feedback test',
-            user_id: 'user_id',
-            user_name: 'user_name',
-            space: 'space',
-            schema_version: CONVERSATION_SCHEMA_VERSION,
-            conversation_rounds: [
-              {
-                id: 'round-1',
-                status: ConversationRoundStatus.completed,
-                input: { message: 'q' },
-                response: { message: 'a' },
-                steps: [],
-                started_at: roundCreationDate,
-                time_to_first_token: 10,
-                time_to_last_token: 50,
-                model_usage: { connector_id: 'c', llm_calls: 1, input_tokens: 5, output_tokens: 5 },
-                feedback: {
-                  vote: 'down',
-                  chips: [],
-                  comment: '',
-                  submitted_at: '2025-01-01T00:00:00.000Z',
-                },
-              },
-            ],
-            events: [
-              {
-                id: 'round-1::user_message',
-                type: TimelineEventType.userMessage,
-                created_at: roundCreationDate,
-                actor: { type: EventActorType.user, id: 'user_id', username: 'user_name' },
-                data: { message: 'q' },
-              },
-            ],
-            created_at: creationDate,
-            updated_at: updateDate,
-          },
-        };
-
-        const result = fromEs(doc, requestingUser);
-
-        const round = result.rounds.find((r) => r.id === 'round-1');
-        expect(round?.feedback?.vote).toBe('down');
-      });
 
       it('deserializes metadata, template_id, and template_version when present in the document', () => {
         const doc: ConversationDocument = {

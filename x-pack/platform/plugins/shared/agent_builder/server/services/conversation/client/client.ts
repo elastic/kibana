@@ -894,16 +894,6 @@ class ConversationClientImpl implements ConversationClient {
 
         if (feedback.vote === null) {
           const { [roundId]: _removed, ...rest } = existing;
-          // Old-format docs store feedback directly on conversation_rounds. Clearing it from the
-          // rounds array here ensures toEs doesn't write the stale vote back to conversation_rounds,
-          // which would otherwise resurface on next read via the roundsWithRefs fallback in fromEs.
-          if (round.feedback) {
-            const { feedback: _cleared, ...roundWithoutFeedback } = round;
-            return {
-              feedback: rest,
-              rounds: current.rounds.map((r) => (r.id === roundId ? roundWithoutFeedback : r)),
-            };
-          }
           return { feedback: rest };
         }
 

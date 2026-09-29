@@ -269,18 +269,11 @@ export const fromEs = (document: Document, user: CurrentUser): NormalizedConvers
   const isEventsNative = isEventsNativeVersion(storedSchemaVersion);
 
   const storedFeedback = document._source!.feedback;
-  const roundsWithFeedback =
-    storedFeedback && Object.keys(storedFeedback).length > 0
-      ? roundsWithRefs.map((r) => {
-          const fb = storedFeedback[r.id];
-          return fb ? { ...r, feedback: fb } : r;
-        })
-      : roundsWithRefs;
 
   const conversation: NormalizedConversation = {
     ...base,
     ...perUserFlags,
-    rounds: roundsWithFeedback,
+    rounds: roundsWithRefs,
     ...(attachmentsForRefs.length > 0 ? { attachments: attachmentsForRefs } : {}),
     ...(document._source!.state ? { state: document._source!.state } : {}),
     ...(isEventsNative ? { schema_version: storedSchemaVersion } : {}),
