@@ -1,0 +1,8 @@
+prs:
+- https://github.com/elastic/kibana/pull/292471
+type: enhancement
+products:
+- product: cloud-serverless
+- product: kibana
+title: Add blocked banners and a Blocked badge on model cards
+description: Adds a Blocked badge and usability banners for Elastic Inference Service models that are blocked by region policy, in preview, or at end of life.
