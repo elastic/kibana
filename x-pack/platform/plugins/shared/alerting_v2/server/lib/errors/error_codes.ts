@@ -38,9 +38,11 @@ export const ALERTING_ERROR_CODES = {
   INVALID_STATE_TRANSITION_CONFIG: 'INVALID_STATE_TRANSITION_CONFIG',
   /** A signal rule's merged shape violates signal constraints. */
   INVALID_SIGNAL_RULE: 'INVALID_SIGNAL_RULE',
+  /** An alert rule's merged shape is missing a required lifecycle object. */
+  INVALID_ALERT_RULE: 'INVALID_ALERT_RULE',
   /**
-   * A rule's merged shape has a recovery/no-data query block that is
-   * inconsistent with its `recovery_strategy`/`no_data_strategy`.
+   * A rule's merged shape has a `recovery` or `no_data` block that does not
+   * compose with its `query`.
    */
   INVALID_RULE_QUERY_CONFIG: 'INVALID_RULE_QUERY_CONFIG',
   /**

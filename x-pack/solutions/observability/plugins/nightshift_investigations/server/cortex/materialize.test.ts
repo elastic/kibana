@@ -43,6 +43,7 @@ describe('materializeCortex', () => {
         content: 'Checkout talks to Redis.',
       }),
       upsert: jest.fn(),
+      create: jest.fn(),
       corroborate: jest.fn(),
       archive: jest.fn(),
       pruneDuplicates: jest.fn().mockResolvedValue(0),
@@ -109,6 +110,7 @@ describe('materializeCortex', () => {
           : undefined;
       }),
       upsert: jest.fn(),
+      create: jest.fn(),
       corroborate: jest.fn(),
       archive: jest.fn(),
       pruneDuplicates: jest.fn().mockResolvedValue(0),
