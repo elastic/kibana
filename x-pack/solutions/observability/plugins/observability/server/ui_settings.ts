@@ -166,10 +166,14 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
     value: 1000,
     description: i18n.translate('xpack.observability.apmMaxNumberOfServicesUiSettingDescription', {
       defaultMessage:
-        'Limit the number of services shown in the Services Inventory. ' +
+        'Limit the number of services shown in the Services Inventory (minimum: 1, maximum: 5 000). ' +
         'Increasing this value beyond the default may slow down queries and increase memory usage on Elasticsearch.',
     }),
-    schema: schema.number({ min: 1, max: 5000 }),
+    schema: schema.number({
+      min: 1,
+      max: 5000,
+      validate: (n) => (!Number.isInteger(n) ? 'must be a whole number' : undefined),
+    }),
     solutionViews: ['classic', 'oblt'],
   },
   [enableInfrastructureAssetCustomDashboards]: {
