@@ -165,11 +165,23 @@ export const setQueryOperationSchema = z
   .object({
     operation: z.literal('set_query'),
     query: querySchema,
-    recovery: recoverySchema.optional(),
-    no_data: noDataSchema.optional(),
+  })
+  .describe('Use `set_query` to define the ES|QL condition that should fire the rule.');
+
+export const setRecoveryOperationSchema = z
+  .object({
+    operation: z.literal('set_recovery'),
+    recovery: recoverySchema,
+  })
+  .describe('Use `set_recovery` to control how alert episodes recover. Requires `kind: alert`.');
+
+export const setNoDataOperationSchema = z
+  .object({
+    operation: z.literal('set_no_data'),
+    no_data: noDataSchema,
   })
   .describe(
-    'Use `set_query` to define the ES|QL condition that should fire the rule. Optionally set how recovery is detected and what happens when data stops arriving.'
+    'Use `set_no_data` to control what happens when data stops arriving. Requires `kind: alert`.'
   );
 
 export const setGroupingOperationSchema = groupingSchema
@@ -230,6 +242,8 @@ export const ruleOperationSchema = z.discriminatedUnion('operation', [
   setKindOperationSchema,
   setScheduleOperationSchema,
   setQueryOperationSchema,
+  setRecoveryOperationSchema,
+  setNoDataOperationSchema,
   setGroupingOperationSchema,
   setStateTransitionOperationSchema,
   setDashboardsOperationSchema,
@@ -405,9 +419,12 @@ export const executeRuleOperations = async (
           ...next,
           query: op.query,
           ...(resolvedTimeField ? { time_field: resolvedTimeField } : {}),
-          ...(op.recovery !== undefined ? { recovery: op.recovery } : {}),
-          ...(op.no_data !== undefined ? { no_data: op.no_data } : {}),
         };
+        break;
+      }
+
+      case 'set_recovery': {
+        next = { ...next, recovery: op.recovery };
 
         // A recovering delay is inert under `manual` and the write API rejects
         // the pair, and no operation can remove a phase, so switching to manual
@@ -430,6 +447,10 @@ export const executeRuleOperations = async (
         }
         break;
       }
+
+      case 'set_no_data':
+        next = { ...next, no_data: op.no_data };
+        break;
 
       case 'set_grouping': {
         if (lastQueryColumns && lastQueryColumns.length > 0) {
