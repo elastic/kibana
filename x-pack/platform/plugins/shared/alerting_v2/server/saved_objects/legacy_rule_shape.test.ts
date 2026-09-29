@@ -8,7 +8,7 @@
 import { collapseLegacyRuleShape, toApiQuery, toApiStateTransition } from './legacy_rule_shape';
 import type { RuleSavedObjectAttributes } from './schemas/rule_saved_object_attributes';
 
-type StoredQuery = RuleSavedObjectAttributes['query'];
+type StoredQuery = NonNullable<RuleSavedObjectAttributes['query']>;
 
 const COMPOSED_BASE = 'FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name';
 const STANDALONE_QUERY = 'FROM logs-* | STATS errors = COUNT(*) BY host.name';

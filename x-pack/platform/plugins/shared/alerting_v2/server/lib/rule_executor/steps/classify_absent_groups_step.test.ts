@@ -462,15 +462,11 @@ describe('ClassifyAbsentGroupsStep', () => {
 
       const rule = createRuleResponse({
         kind: 'alert',
-        recovery_strategy: 'query',
-        no_data_strategy: 'none',
+        recovery: { strategy: 'query', query: 'FROM m | STATS c BY host.name' },
+        no_data: { strategy: 'ignore' },
         grouping: { fields: ['host.name'] },
         schedule: { every: '1m', lookback },
-        query: {
-          format: 'standalone',
-          breach: { query: 'FROM m | WHERE breach' },
-          recovery: { query: 'FROM m | STATS c BY host.name' },
-        },
+        query: { base: 'FROM m | WHERE breach' },
       });
 
       const state = createRulePipelineState({
@@ -507,15 +503,11 @@ describe('ClassifyAbsentGroupsStep', () => {
 
       const rule = createRuleResponse({
         kind: 'alert',
-        recovery_strategy: 'none',
-        no_data_strategy: 'emit',
+        recovery: { strategy: 'manual' },
+        no_data: { strategy: 'alert', query: 'FROM m | STATS c BY host.name' },
         grouping: { fields: ['host.name'] },
         schedule: { every: '1m', lookback },
-        query: {
-          format: 'standalone',
-          breach: { query: 'FROM m | WHERE breach' },
-          no_data: { query: 'FROM m | STATS c BY host.name' },
-        },
+        query: { base: 'FROM m | WHERE breach' },
       });
 
       const state = createRulePipelineState({
@@ -548,7 +540,7 @@ describe('ClassifyAbsentGroupsStep', () => {
 
       const rule = createRuleResponse({
         kind: 'alert',
-        recovery_strategy: 'no_breach',
+        recovery: { strategy: 'no_breach' },
       });
 
       const state = createRulePipelineState({

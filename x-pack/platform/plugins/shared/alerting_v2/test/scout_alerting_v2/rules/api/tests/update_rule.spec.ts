@@ -638,7 +638,7 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
       expect(response.body.code).toBe('INVALID_RULE_QUERY_CONFIG');
       // The rejected update must not have persisted: the breach block stays.
       const stored = await apiServices.alertingV2.rules.get(created.id);
-      expect(stored.query.breach).toStrictEqual({ segment: 'WHERE count >= 10' });
+      expect(stored.query!.breach).toStrictEqual({ segment: 'WHERE count >= 10' });
     }
   );
 

@@ -53,16 +53,16 @@ jest.mock('../../lib/rule_executor/schedule', () => {
 
 // Sanity: confirm the model version import succeeded (if this is 0 the folds
 // won't be registered and every registry.register() call will throw).
-// The POC's five model versions ('7'–'11') were squashed into a single '7';
+// The POC's five model versions ('8'–'12') were squashed into a single '8';
 // both detection-type folds are part of that squashed entry.
 it('ruleModelVersions carries both detection-type fold contributions in the squashed entry', () => {
-  const v7 = ruleModelVersions['7'] as {
+  const v8 = ruleModelVersions['8'] as {
     changes: Array<{ type: string; addedMappings?: unknown }>;
   };
-  expect(v7).toBeDefined();
+  expect(v8).toBeDefined();
   // Two mappings_additions come from the manifest folds (query + threshold);
   // each has addedMappings.metadata.properties.builder_fields.properties.
-  const manifestFoldChanges = v7.changes.filter(
+  const manifestFoldChanges = v8.changes.filter(
     (c) =>
       c.type === 'mappings_addition' &&
       (c.addedMappings as any)?.metadata?.properties?.builder_fields?.properties !== undefined
@@ -86,7 +86,6 @@ const detectionConfig: PluginConfig = {
       maxGroupsPerExecution: 10000,
     },
   },
-  esql: { responseFormat: 'json' },
 } as PluginConfig;
 
 function createDetectionClient(builderTypeRegistry: BuilderTypeRegistry) {
@@ -173,9 +172,9 @@ describe('security.detection.query — create via RulesClient', () => {
         },
         time_field: '@timestamp',
         schedule: { every: '5m' },
-        recovery_strategy: 'none',
-        no_data_strategy: 'none',
-        state_transition: { pending_count: 0 },
+        recovery: { strategy: 'manual' },
+        no_data: { strategy: 'ignore' },
+        state_transition: { pending: { count: 0 } },
         // No query: execution-time types compile at run time, not write time.
       },
       options: { id: 'query-rule-id' },
@@ -222,9 +221,9 @@ describe('security.detection.query — create via RulesClient', () => {
           },
           time_field: '@timestamp',
           schedule: { every: '5m' },
-          recovery_strategy: 'none',
-          no_data_strategy: 'none',
-          state_transition: { pending_count: 0 },
+          recovery: { strategy: 'manual' },
+          no_data: { strategy: 'ignore' },
+          state_transition: { pending: { count: 0 } },
         },
       })
     ).rejects.toThrow('query must not be blank (only whitespace)');
@@ -267,9 +266,9 @@ describe('security.detection.threshold — create via RulesClient', () => {
         },
         time_field: '@timestamp',
         schedule: { every: '5m' },
-        recovery_strategy: 'none',
-        no_data_strategy: 'none',
-        state_transition: { pending_count: 0 },
+        recovery: { strategy: 'manual' },
+        no_data: { strategy: 'ignore' },
+        state_transition: { pending: { count: 0 } },
       },
       options: { id: 'threshold-rule-id' },
     });
@@ -316,9 +315,9 @@ describe('security.detection.threshold — create via RulesClient', () => {
           },
           time_field: '@timestamp',
           schedule: { every: '5m' },
-          recovery_strategy: 'none',
-          no_data_strategy: 'none',
-          state_transition: { pending_count: 0 },
+          recovery: { strategy: 'manual' },
+          no_data: { strategy: 'ignore' },
+          state_transition: { pending: { count: 0 } },
         },
       })
     ).rejects.toThrow('cardinality.field "source.ip" is already listed in threshold.field');

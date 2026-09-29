@@ -185,7 +185,9 @@ describe('useComposeDiscoverFlyout — create-from-template source stamping (ste
       metadata: { name: 'Template rule' },
       time_field: '@timestamp',
       schedule: { every: '5m', lookback: '10m' },
-      query: { format: 'standalone' as const, breach: { query: 'FROM logs-* | LIMIT 10' } },
+      query: { base: 'FROM logs-* | LIMIT 10' },
+      recovery: { strategy: 'no_breach' as const },
+      no_data: { strategy: 'ignore' as const },
     },
   };
 
@@ -193,7 +195,7 @@ describe('useComposeDiscoverFlyout — create-from-template source stamping (ste
     jest.clearAllMocks();
     capturedFlyoutProps = {};
     hookApi = undefined;
-    mockCreateMutate.mockImplementation((_payload, opts) => opts?.onSuccess?.(createdRule));
+    mockCreateMutate.mockImplementation((_payload, opts) => opts?.onSuccess?.());
   });
 
   it('stamps { type: template, id } on the create payload when opened from a template', async () => {

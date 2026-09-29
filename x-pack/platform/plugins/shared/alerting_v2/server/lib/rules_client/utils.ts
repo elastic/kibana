@@ -12,7 +12,6 @@ import type {
   RuleOwnership,
   RuleResponse,
   RuleSource,
-  UpdateRuleData,
 } from '@kbn/alerting-v2-schemas';
 import {
   IMMUTABLE_RULE_FIELDS,

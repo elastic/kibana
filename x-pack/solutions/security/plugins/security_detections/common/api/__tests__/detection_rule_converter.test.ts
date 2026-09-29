@@ -148,16 +148,16 @@ function buildFrameworkResponse(
   return {
     id: '0d3f4c1a-7b2e-4b8f-9c6d-1e5a8f0b2c3d',
     kind: 'alert',
-    state_transition: { pending_count: 0 },
+    state_transition: { pending: { count: 0 } },
     time_field: '@timestamp',
     schedule: {
       every: input.schedule.interval,
       ...(input.schedule.lookback !== undefined ? { lookback: input.schedule.lookback } : {}),
     },
     enabled: false,
-    created_by: 'elastic_profile_uid',
+    created_by: { profile_uid: 'elastic_profile_uid' },
     created_at: '2026-09-11T09:14:02.331Z',
-    updated_by: 'elastic_profile_uid',
+    updated_by: { profile_uid: 'elastic_profile_uid' },
     updated_at: '2026-09-11T09:14:02.331Z',
     metadata: {
       name: input.name,
@@ -449,12 +449,12 @@ describe('Internal fields — off-table rule', () => {
     expect('grouping' in publicResponse).toBe(false);
   });
 
-  it('recovery_strategy is not in the public response', () => {
-    expect('recovery_strategy' in publicResponse).toBe(false);
+  it('recovery is not in the public response', () => {
+    expect('recovery' in publicResponse).toBe(false);
   });
 
-  it('no_data_strategy is not in the public response', () => {
-    expect('no_data_strategy' in publicResponse).toBe(false);
+  it('no_data is not in the public response', () => {
+    expect('no_data' in publicResponse).toBe(false);
   });
 
   it('state_transition is not in the public response', () => {
@@ -667,20 +667,20 @@ describe('toPublicResponse — unknown builder type', () => {
 describe('toFrameworkCreate — uniform detection-rule fields', () => {
   const frameworkData = toFrameworkCreate(QUERY_CREATE_INPUT) as Record<string, unknown>;
 
-  it('sets recovery_strategy to "none" for uniform stored rules', () => {
+  it('sets recovery.strategy to "manual" for uniform stored rules', () => {
     // Sent explicitly so stored detection rules are uniform even if the
     // framework default changes.  rule-crud-api.md "Create a rule".
-    expect(frameworkData.recovery_strategy).toBe('none');
+    expect(frameworkData.recovery).toEqual({ strategy: 'manual' });
   });
 
-  it('sets no_data_strategy to "none" for uniform stored rules', () => {
-    expect(frameworkData.no_data_strategy).toBe('none');
+  it('sets no_data.strategy to "ignore" for uniform stored rules', () => {
+    expect(frameworkData.no_data).toEqual({ strategy: 'ignore' });
   });
 
-  it('sets state_transition: { pending_count: 0 } for immediate active transition', () => {
-    // pending_count: 0 means zero consecutive breaches are required before the
+  it('sets state_transition: { pending: { count: 0 } } for immediate active transition', () => {
+    // pending.count: 0 means zero consecutive breaches are required before the
     // alert activates, so the first match immediately produces an active alert.
-    expect(frameworkData.state_transition).toEqual({ pending_count: 0 });
+    expect(frameworkData.state_transition).toEqual({ pending: { count: 0 } });
   });
 
   it('does not set grouping', () => {
@@ -707,18 +707,18 @@ describe('toFrameworkReplace — uniform detection-rule lifecycle invariants', (
     unknown
   >;
 
-  it('restates recovery_strategy: "none" on every full write', () => {
+  it('restates recovery: { strategy: "manual" } on every full write', () => {
     // Must be explicit rather than surviving through the merge's "omitted = keep
     // stored" rule, so a future change in merge semantics cannot silently break
     // the invariant.
-    expect(frameworkData.recovery_strategy).toBe('none');
+    expect(frameworkData.recovery).toEqual({ strategy: 'manual' });
   });
 
-  it('restates no_data_strategy: "none" on every full write', () => {
-    expect(frameworkData.no_data_strategy).toBe('none');
+  it('restates no_data: { strategy: "ignore" } on every full write', () => {
+    expect(frameworkData.no_data).toEqual({ strategy: 'ignore' });
   });
 
-  it('restates state_transition: { pending_count: 0 } on every full write', () => {
-    expect(frameworkData.state_transition).toEqual({ pending_count: 0 });
+  it('restates state_transition: { pending: { count: 0 } } on every full write', () => {
+    expect(frameworkData.state_transition).toEqual({ pending: { count: 0 } });
   });
 });

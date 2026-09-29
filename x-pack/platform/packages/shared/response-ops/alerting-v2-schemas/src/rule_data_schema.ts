@@ -829,8 +829,12 @@ export const isRecoveryTransitionConsistentWithStrategy = (data: RuleLifecycleSh
 /** The create-rule fields the refinements below read. */
 type CreateRuleRefinementFields = Pick<
   z.infer<typeof createRuleDataBaseSchema>,
-  'kind' | 'query' | 'recovery' | 'no_data' | 'state_transition'
->;
+  'kind' | 'recovery' | 'no_data' | 'state_transition'
+> & {
+  // Optional because a builder-authored body carries its parameters instead of
+  // a query; the builder refinements below keep exactly one of the two present.
+  query?: z.infer<typeof querySchema>;
+};
 
 /** Builder invariants — shared between the create and update schemas. */
 
@@ -984,56 +988,15 @@ export const replaceRuleMetadataSchema = metadataSchema
   })
   .meta({ id: 'alerting_replace_rule_metadata' });
 
-export const replaceRuleBodySchema = createRuleDataBaseSchema
-  .extend({
+// The refinement chain is `applyCreateRuleRefinements`, shared with POST and
+// bulk create, so the three write paths cannot drift apart.
+export const replaceRuleBodySchema = applyCreateRuleRefinements(
+  createRuleDataBaseSchema.extend({
+    // Builder-authored rules omit `query`, exactly as single create allows.
     query: querySchema.optional(),
     metadata: replaceRuleMetadataSchema,
   })
-  .refine(isStateTransitionAllowed, {
-    message: 'state_transition is only allowed when kind is "alert".',
-    path: ['state_transition'],
-  })
-  .refine((data) => data.metadata.builder_fields != null || isSignalUsingStandaloneFormat(data), {
-    message: 'kind "signal" requires query.format "standalone".',
-    path: ['query', 'format'],
-  })
-  .refine(isSignalQueryBreachOnly, {
-    message: 'Signal rules cannot set recovery_strategy or no_data_strategy.',
-    path: ['recovery_strategy'],
-  })
-  .refine(isRecoveryQueryConsistentWithStrategy, {
-    message: 'query.recovery is only allowed when recovery_strategy is "query".',
-    path: ['query', 'recovery'],
-  })
-  .refine(
-    (data) => data.metadata.builder_fields != null || isRecoveryQueryProvidedForStrategy(data),
-    {
-      message: 'query.recovery is required when recovery_strategy is "query".',
-      path: ['query', 'recovery'],
-    }
-  )
-  .refine(isNoDataQueryConsistentWithStrategy, {
-    message: 'query.no_data is only allowed when no_data_strategy is set to a non-"none" value.',
-    path: ['query', 'no_data'],
-  })
-  .refine(isNoDataQueryProvidedForStrategy, {
-    message:
-      'query.no_data is required when no_data_strategy is not "none" for standalone-format rules.',
-    path: ['query', 'no_data'],
-  })
-  .refine(isNoDataStrategyNotEmit, rejectEmitNoDataStrategy)
-  .refine(isRecoveryTransitionConsistentWithStrategy, {
-    message:
-      'state_transition.recovering_count and recovering_timeframe have no effect when recovery is disabled (recovery_strategy is "none" or unset).',
-    path: ['state_transition', 'recovering_count'],
-  })
-  .refine(isQueryAbsentForBuilderFields, rejectQueryWithBuilderFields)
-  .refine(isBuilderTypeProvidedForBuilderFields, rejectBuilderFieldsWithoutBuilderType)
-  .refine(isQueryProvidedWithoutBuilderFields, {
-    message: 'query is required unless metadata.builder_fields is set.',
-    path: ['query'],
-  })
-  .meta({ id: 'alerting_replace_rule' });
+).meta({ id: 'alerting_replace_rule' });
 
 export type ReplaceRuleData = z.infer<typeof replaceRuleBodySchema>;
 
