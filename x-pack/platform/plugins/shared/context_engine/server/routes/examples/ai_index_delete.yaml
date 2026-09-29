@@ -1,0 +1,57 @@
+responses:
+  200:
+    content:
+      application/json:
+        examples:
+          deleteAiIndexResponseExample:
+            summary: "AI Index deleted"
+            description: "Example response after the AI Index entry is deleted"
+            value:
+              acknowledged: true
+              errors: []
+          deleteAiIndexPartialFailureExample:
+            summary: "Deleted with a cleanup error"
+            description: "The entry was deleted but a best-effort cleanup step failed"
+            value:
+              acknowledged: true
+              errors:
+                - "Failed to delete automations: Workflows management is unavailable."
+  404:
+    content:
+      application/json:
+        examples:
+          notFoundExample:
+            summary: "AI Index not found"
+            description: "No AI Index with the given ID exists in the current space"
+            value:
+              statusCode: 404
+              error: Not Found
+              message: "AI index 'customer_support' not found"
+          contextEngineDisabledExample:
+            summary: "Context Engine turned off"
+            description: "Context Engine is turned off in this space"
+            value:
+              statusCode: 404
+              error: Not Found
+              message: Not Found
+  409:
+    content:
+      application/json:
+        examples:
+          managedExample:
+            summary: "Managed AI Index"
+            description: "The AI Index is managed by a plugin and cannot be deleted"
+            value:
+              statusCode: 409
+              error: Conflict
+              message: "AI index 'customer_support' is managed and cannot be modified via the API"
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl \
+        -X DELETE "https://${KIBANA_URL}/api/context_engine/ai_index/customer_support?delete_knowledge_indicators=true" \
+        -H "Authorization: ApiKey ${API_KEY}" \
+        -H "kbn-xsrf: true"
+  - lang: Console
+    source: |
+      DELETE kbn:/api/context_engine/ai_index/customer_support?delete_knowledge_indicators=true
