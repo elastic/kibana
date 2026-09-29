@@ -338,6 +338,52 @@ describe('prepareIocAdjudication and reconcileIocAdjudication', () => {
     expect(prepared.reviewable[0].context).not.toContain('attacker later downloaded');
   });
 
+  it('matches percent-encoded URL candidates against Unicode source spelling', () => {
+    const prepared = prepareIocAdjudication({
+      text: 'The attacker staged https://evil.com/café during exfiltration.',
+      iocs: [candidate('https://evil.com/caf%C3%A9')],
+    });
+
+    expect(prepared.reviewable[0].context).toContain('attacker staged');
+    expect(prepared.reviewable[0].context).toContain('café');
+  });
+
+  it('requires whole-hostname boundaries for domain review context', () => {
+    const prepared = prepareIocAdjudication({
+      text:
+        'Docs mention evil.com in passing. ' +
+        `${'filler prose. '.repeat(40)}` +
+        'The attacker later used not-evil.com for C2.',
+      iocs: [
+        candidate('evil.com', {
+          type: 'domain',
+          tier: 'discriminating',
+          tier_heuristic: 'discriminating',
+          tier_basis: 'defanged_source',
+        }),
+      ],
+    });
+
+    expect(prepared.reviewable[0].context).toContain('Docs mention');
+    expect(prepared.reviewable[0].context).not.toContain('attacker later used');
+  });
+
+  it('does not treat a longer FQDN as a domain match', () => {
+    const prepared = prepareIocAdjudication({
+      text: 'The attacker used evil.com.au for staging.',
+      iocs: [
+        candidate('evil.com', {
+          type: 'domain',
+          tier: 'discriminating',
+          tier_heuristic: 'discriminating',
+          tier_basis: 'defanged_source',
+        }),
+      ],
+    });
+
+    expect(prepared.reviewable[0].context).toBe('');
+  });
+
   it('does not treat a different port as the same origin citation', () => {
     const prepared = prepareIocAdjudication({
       text: 'Payload mirrored at https://blog.example:8443/payload',

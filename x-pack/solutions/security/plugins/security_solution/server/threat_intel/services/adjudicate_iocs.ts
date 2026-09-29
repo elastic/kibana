@@ -115,6 +115,8 @@ const MAX_OCCURRENCES_TO_SCORE = 32;
 interface ScoredOccurrence {
   source: string;
   index: number;
+  /** Matched span length in `source` (may differ from IOC value length for decoded URLs). */
+  length: number;
   score: number;
 }
 
@@ -139,13 +141,22 @@ const isUrlBoundaryAt = (source: string, index: number): boolean => {
 /**
  * `new URL('https://evil.example').toString()` normalizes to a trailing `/`.
  * Prose often omits that root slash; treat an empty path as an equivalent match.
+ * Also try the decoded path so percent-encoded IOC values still match Unicode prose.
  */
 const urlPathCandidates = (parsed: URL): string[] => {
-  const pathPart = `${parsed.pathname}${parsed.search}${parsed.hash}`;
+  const encoded = `${parsed.pathname}${parsed.search}${parsed.hash}`;
   if (parsed.pathname === '/' && parsed.search === '' && parsed.hash === '') {
     return ['/', ''];
   }
-  return [pathPart];
+  const candidates = [encoded];
+  try {
+    const decodedPath = decodeURIComponent(parsed.pathname);
+    const decoded = `${decodedPath}${parsed.search}${parsed.hash}`;
+    if (decoded !== encoded) candidates.push(decoded);
+  } catch {
+    // Malformed percent-encoding; keep the serialized form only.
+  }
+  return candidates;
 };
 
 const scoreUrlOccurrences = (source: string, urlValue: string): ScoredOccurrence[] => {
@@ -183,6 +194,7 @@ const scoreUrlOccurrences = (source: string, urlValue: string): ScoredOccurrence
         scored.push({
           source,
           index,
+          length: after - index,
           score: (ATTRIBUTION_CONTEXT_CUE.test(window) ? 1_000_000 : 0) + index,
         });
       }
@@ -192,6 +204,7 @@ const scoreUrlOccurrences = (source: string, urlValue: string): ScoredOccurrence
   }
   if (scored.length === 0) {
     const exactValues = (() => {
+      const values = [urlValue];
       try {
         const parsed = new URL(urlValue);
         if (
@@ -200,12 +213,18 @@ const scoreUrlOccurrences = (source: string, urlValue: string): ScoredOccurrence
           parsed.hash === '' &&
           urlValue.endsWith('/')
         ) {
-          return [urlValue, urlValue.slice(0, -1)];
+          values.push(urlValue.slice(0, -1));
         }
       } catch {
         // Keep the original value when parsing fails.
       }
-      return [urlValue];
+      try {
+        const decoded = decodeURI(urlValue);
+        if (decoded !== urlValue) values.push(decoded);
+      } catch {
+        // Malformed percent-encoding; skip the decoded spelling.
+      }
+      return values;
     })();
     for (const exactValue of exactValues) {
       let from = 0;
@@ -222,6 +241,7 @@ const scoreUrlOccurrences = (source: string, urlValue: string): ScoredOccurrence
           scored.push({
             source,
             index,
+            length: exactValue.length,
             score: (ATTRIBUTION_CONTEXT_CUE.test(window) ? 1_000_000 : 0) + index,
           });
         }
@@ -232,26 +252,43 @@ const scoreUrlOccurrences = (source: string, urlValue: string): ScoredOccurrence
   return scored;
 };
 
-const scoreOccurrences = (
+const isHostnameLabelChar = (char: string | undefined): boolean =>
+  char !== undefined && /[a-z0-9-]/i.test(char);
+
+/** Whole-host match: reject `evil.com` inside `not-evil.com` or `evil.com.au`. */
+const isDomainBoundaryAt = (source: string, start: number, end: number): boolean => {
+  const before = source[start - 1];
+  if (before === '.' || isHostnameLabelChar(before)) return false;
+  const after = source[end];
+  if (after === undefined) return true;
+  if (after === '.') return !isHostnameLabelChar(source[end + 1]);
+  return !isHostnameLabelChar(after);
+};
+
+const scoreDomainOccurrences = (
   source: string,
   lowerSource: string,
-  lowerValue: string
+  lowerDomain: string
 ): ScoredOccurrence[] => {
   const scored: ScoredOccurrence[] = [];
   let from = 0;
   while (from < lowerSource.length && scored.length < MAX_OCCURRENCES_TO_SCORE) {
-    const index = lowerSource.indexOf(lowerValue, from);
+    const index = lowerSource.indexOf(lowerDomain, from);
     if (index < 0) break;
-    const window = source.slice(
-      Math.max(0, index - CONTEXT_CHARS),
-      Math.min(source.length, index + lowerValue.length + CONTEXT_CHARS)
-    );
-    scored.push({
-      source,
-      index,
-      score: (ATTRIBUTION_CONTEXT_CUE.test(window) ? 1_000_000 : 0) + index,
-    });
-    from = index + Math.max(lowerValue.length, 1);
+    const after = index + lowerDomain.length;
+    from = index + Math.max(lowerDomain.length, 1);
+    if (isDomainBoundaryAt(lowerSource, index, after)) {
+      const window = source.slice(
+        Math.max(0, index - CONTEXT_CHARS),
+        Math.min(source.length, after + CONTEXT_CHARS)
+      );
+      scored.push({
+        source,
+        index,
+        length: lowerDomain.length,
+        score: (ATTRIBUTION_CONTEXT_CUE.test(window) ? 1_000_000 : 0) + index,
+      });
+    }
   }
   return scored;
 };
@@ -280,8 +317,8 @@ const contextFor = (
     iocType === 'url'
       ? [...scoreUrlOccurrences(originalText, value), ...scoreUrlOccurrences(refangedText, value)]
       : [
-          ...scoreOccurrences(originalText, lowerOriginal, cacheKey),
-          ...scoreOccurrences(refangedText, lowerRefanged, cacheKey),
+          ...scoreDomainOccurrences(originalText, lowerOriginal, cacheKey),
+          ...scoreDomainOccurrences(refangedText, lowerRefanged, cacheKey),
         ];
   const best = scored.reduce<ScoredOccurrence | undefined>((winner, candidate) => {
     if (!winner || candidate.score > winner.score) return candidate;
@@ -289,7 +326,7 @@ const contextFor = (
     return winner;
   }, undefined);
 
-  const context = best === undefined ? '' : sliceContext(best.source, best.index, value.length);
+  const context = best === undefined ? '' : sliceContext(best.source, best.index, best.length);
   cache.set(cacheKey, context);
   return context;
 };
