@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["public/**/*.ts", "public/**/*.tsx", "test/scout/**/*"],
+  "include": ["public/**/*.ts", "public/**/*.tsx", "test/scout*/**/*"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/i18n",
