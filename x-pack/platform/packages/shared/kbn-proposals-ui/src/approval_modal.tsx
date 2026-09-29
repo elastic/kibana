@@ -79,7 +79,6 @@ export const ApprovalModal = memo<ApprovalModalProps>(
         <ApprovalContent
           title={title}
           tone={getProposalTone(proposal)}
-          iconType="lock"
           comment={proposal.comment}
           titleId={titleId}
           caption={getProposalCaption(proposal, { includeRiskDetails: true })}

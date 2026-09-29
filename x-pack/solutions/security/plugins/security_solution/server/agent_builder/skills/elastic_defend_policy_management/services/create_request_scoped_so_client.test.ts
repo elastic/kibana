@@ -11,8 +11,8 @@ import type { StartServicesAccessor } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import {
   PolicyReadonlySoClientMethodNotAllowedError,
-  createRequestScopedReadonlySoClient,
-} from './create_request_scoped_readonly_so_client';
+  createRequestScopedSoClient,
+} from './create_request_scoped_so_client';
 
 const BLOCKED_METHODS = ['create', 'createPointInTimeFinder'] as const;
 
@@ -27,11 +27,11 @@ const createDeps = () => {
   return { request, scopedClient, getScopedClient, getStartServices };
 };
 
-describe('createRequestScopedReadonlySoClient', () => {
+describe('createRequestScopedSoClient', () => {
   it('passes the identical request and Security-only exclusion to Core', async () => {
     const { request, getScopedClient, getStartServices } = createDeps();
 
-    await createRequestScopedReadonlySoClient({ getStartServices, request });
+    await createRequestScopedSoClient({ getStartServices, request, readonly: true });
 
     expect(getStartServices).toHaveBeenCalledTimes(1);
     expect(getScopedClient).toHaveBeenCalledTimes(1);
@@ -43,9 +43,21 @@ describe('createRequestScopedReadonlySoClient', () => {
     expect(getScopedClient.mock.calls[0][1]).not.toHaveProperty('includedHiddenTypes');
   });
 
+  it('returns the request-scoped client unwrapped for write access', async () => {
+    const { request, scopedClient, getStartServices } = createDeps();
+
+    await expect(
+      createRequestScopedSoClient({ getStartServices, request, readonly: false })
+    ).resolves.toBe(scopedClient);
+  });
+
   it.each(BLOCKED_METHODS)('throws the local error when accessing %s', async (methodName) => {
     const { request, getStartServices } = createDeps();
-    const client = await createRequestScopedReadonlySoClient({ getStartServices, request });
+    const client = await createRequestScopedSoClient({
+      getStartServices,
+      request,
+      readonly: true,
+    });
 
     expect(() => client[methodName]).toThrow(PolicyReadonlySoClientMethodNotAllowedError);
     expect(() => client[methodName]).toThrow(
@@ -58,7 +70,11 @@ describe('createRequestScopedReadonlySoClient', () => {
     const namespacedClient = savedObjectsClientMock.create();
     scopedClient.asScopedToNamespace.mockReturnValue(namespacedClient);
 
-    const client = await createRequestScopedReadonlySoClient({ getStartServices, request });
+    const client = await createRequestScopedSoClient({
+      getStartServices,
+      request,
+      readonly: true,
+    });
     const scoped = client.asScopedToNamespace('space-b');
 
     expect(scopedClient.asScopedToNamespace).toHaveBeenCalledWith('space-b');
@@ -85,7 +101,11 @@ describe('createRequestScopedReadonlySoClient', () => {
     scopedClient.get.mockResolvedValue(savedObject);
     scopedClient.find.mockResolvedValue(findResponse);
 
-    const client = await createRequestScopedReadonlySoClient({ getStartServices, request });
+    const client = await createRequestScopedSoClient({
+      getStartServices,
+      request,
+      readonly: true,
+    });
     const getOptions = { namespace: 'space-a' };
     const findOptions = { type: 'fleet-package-policies' };
 

@@ -121,7 +121,8 @@ const floatTopRight = css`
   position: absolute;
   top: -8px;
   left: -8px;
-  z-index: 1;
+  /* keep above toast decor */
+  z-index: 2;
 `;
 
 /**
