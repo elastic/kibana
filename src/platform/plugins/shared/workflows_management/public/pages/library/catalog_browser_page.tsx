@@ -66,15 +66,6 @@ export const LibraryCatalogBrowserPage = React.memo(() => {
 
   const headerMenu = useMemo<AppHeaderMenu>(
     () => ({
-      primaryActionItem: {
-        id: 'contributeTemplate',
-        order: 1,
-        label: contributeLinkLabel,
-        iconType: 'logoGithub',
-        href: 'https://github.com/elastic/workflows/issues/new?template=template_contribution.yml',
-        target: '_blank',
-        testId: 'workflowLibraryContributeLink',
-      },
       items: [
         {
           id: 'requestTemplate',
@@ -85,6 +76,14 @@ export const LibraryCatalogBrowserPage = React.memo(() => {
           href: 'https://github.com/elastic/workflows/issues/new?template=template_request.yml',
           target: '_blank',
           testId: 'workflowLibraryRequestLink',
+        },
+        {
+          id: 'contributeTemplate',
+          label: contributeLinkLabel,
+          iconType: 'logoGithub',
+          href: 'https://github.com/elastic/workflows/issues/new?template=template_contribution.yml',
+          target: '_blank',
+          testId: 'workflowLibraryContributeLink',
         },
         {
           id: 'createFromFile',

@@ -55,11 +55,11 @@ describe('LibraryCatalogBrowserPage', () => {
 
     render(<LibraryCatalogBrowserPage />, { wrapper: getTestProvider({ services }) });
 
-    expect(screen.getByRole('link', { name: 'Contribute a template' })).toHaveAttribute(
+    fireEvent.click(screen.getByRole('button', { name: 'More' }));
+    expect(screen.getByTestId('workflowLibraryContributeLink')).toHaveAttribute(
       'href',
       'https://github.com/elastic/workflows/issues/new?template=template_contribution.yml'
     );
-    fireEvent.click(screen.getByRole('button', { name: 'More' }));
     expect(screen.getByTestId('workflowLibraryRequestLink')).toHaveAttribute(
       'href',
       'https://github.com/elastic/workflows/issues/new?template=template_request.yml'
