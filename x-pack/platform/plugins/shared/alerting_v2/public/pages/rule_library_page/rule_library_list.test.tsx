@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { CreateRuleData, RuleTemplateResponse } from '@kbn/alerting-v2-schemas';
 import { CONTENT_LIST_TEST_SUBJECTS } from '@kbn/content-list-common';
@@ -49,6 +49,10 @@ jest.mock('./rule_templates_data_source', () => ({
     findItems: mockFindItems,
     debounceMs: 0,
   }),
+}));
+
+jest.mock('../../hooks/use_fetch_rule_template_tags', () => ({
+  useFetchRuleTemplateTags: () => ({ data: ['nginx'], isLoading: false }),
 }));
 
 jest.mock('../../hooks/use_install_rule_template', () => ({
@@ -121,6 +125,21 @@ describe('RuleLibraryList', () => {
     expect(screen.getByText('prod')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Install' })).toBeInTheDocument();
     expect(screen.getByTestId(CONTENT_LIST_TEST_SUBJECTS.table)).toBeInTheDocument();
+  });
+
+  it('offers tags from the aggregation even when absent from the listed templates', async () => {
+    const template = createTemplate();
+    mockFindItems.mockResolvedValue({
+      items: [{ id: template.id, title: template.rule.metadata.name, template }],
+      total: 1,
+    });
+    renderList();
+    await screen.findByText('CPU usage');
+
+    fireEvent.click(screen.getByTestId('ruleLibraryTagsFilter'));
+    const options = await screen.findByTestId('ruleLibraryTagsFilter-list');
+    expect(within(options).getByText('nginx')).toBeInTheDocument();
+    expect(within(options).queryByText('prod')).not.toBeInTheDocument();
   });
 
   it('installs a template from the row action', async () => {
