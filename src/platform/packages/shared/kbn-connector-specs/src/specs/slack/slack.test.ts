@@ -1469,6 +1469,29 @@ describe('Slack', () => {
       );
     });
 
+    it('edits the message in place when messageTs is set', async () => {
+      mockClient.post.mockResolvedValue({
+        data: { ok: true, channel: 'C123', ts: '1234567890.123457' },
+      });
+
+      await Slack.actions.sendMessage.handler(mockContext, {
+        channel: 'C123',
+        text: 'Updated message',
+        threadTs: '1234567890.123456',
+        messageTs: '1234567890.123457',
+      });
+
+      expect(mockClient.post).toHaveBeenCalledWith(
+        'https://slack.com/api/chat.update',
+        {
+          channel: 'C123',
+          text: 'Updated message',
+          ts: '1234567890.123457',
+        },
+        expect.any(Object)
+      );
+    });
+
     it('should include unfurl options', async () => {
       const mockResponse = {
         data: {

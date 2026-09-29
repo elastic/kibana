@@ -139,6 +139,18 @@ describe('relaySendMessage', () => {
     expect(trigger).toHaveBeenCalledWith(expect.objectContaining({ threadTs: '1700.0001' }));
   });
 
+  it('forwards messageTs when editing a posted message', async () => {
+    const trigger = jest.fn().mockResolvedValue({
+      ref: '1700.0002',
+      tenantKey: 'team-A',
+      channel: CHANNEL_ID,
+    });
+
+    await send({ channel: CHANNEL_ID, text: 'edited', messageTs: '1700.0002' }, { trigger });
+
+    expect(trigger).toHaveBeenCalledWith(expect.objectContaining({ messageTs: '1700.0002' }));
+  });
+
   it('rejects a blank channel before calling Relay', async () => {
     const trigger = jest.fn();
 
