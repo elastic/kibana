@@ -317,7 +317,7 @@ export const createAttackDiscoveryChainFixture = (): AttackDiscoveryChainFixture
   });
 
   installKibanaRequestFake({
-    getProposal: (id, spaceId) => proposalsService.get(id, spaceId),
+    getProposal: (id, spaceId) => proposalsService.get(id, spaceId, engine.fakeKibanaRequest),
   });
 
   // The chain seam: `workflow.execute`'s sync strategy calls

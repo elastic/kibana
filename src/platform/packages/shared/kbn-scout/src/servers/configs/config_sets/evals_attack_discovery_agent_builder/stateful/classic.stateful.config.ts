@@ -22,16 +22,6 @@ export const servers: ScoutServerConfig = {
       // Requires BOTH the feature flag above and this per-space uiSetting (defaults false),
       // or `security.attack-discovery.run` errors and the pipeline never executes.
       '--uiSettings.overrides.securitySolution:enableAttackDiscoveryWorkflows=true',
-      // The managed FP/TP analysis workflow is installed by the alertzero plugin, which
-      // defaults to `enabled: false` — without this the plugin (and every managed workflow
-      // it registers, incl. system-security-attack-discovery-fp-tp-analysis) is cascade-
-      // disabled and its routes 404. Same pattern as evals_detection_watch_rule_creation.
-      '--xpack.alertzero.enabled=true',
-      '--xpack.agenticInvestigations.enabled=true',
-      // alertzero lists proposals in requiredPlugins; without it the plugin is
-      // cascade-disabled ("missing ... dependencies: [proposals]"), managed
-      // workflows never install, and the analysis run route 404s.
-      '--xpack.proposals.enabled=true',
     ],
   },
 };
