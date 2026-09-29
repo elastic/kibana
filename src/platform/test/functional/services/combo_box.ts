@@ -67,16 +67,70 @@ export class ComboBoxService extends FtrService {
   }
 
   /**
-   * Clicks option in combobox dropdown
+   * Clicks the option matching `trimmedValue` in the combobox dropdown
    *
    * @param isMouseClick if 'true', click will be done with mouse
-   * @param element element that wraps up option
+   * @param trimmedValue normalized option text to match; when undefined, the first option is clicked
    */
-  private async clickOption(isMouseClick: boolean, element: WebElementWrapper): Promise<void> {
-    // element.click causes scrollIntoView which causes combobox to close, using _webElement.click instead
+  private async clickOption(isMouseClick: boolean, trimmedValue?: string): Promise<void> {
+    // Re-resolve the option inside the retry: the list re-renders and stales a captured handle, so re-clicking a fixed reference can never recover.
     await this.retry.try(async () => {
+      const element = await this.findOption(trimmedValue);
+      // element.click causes scrollIntoView which causes combobox to close, using _webElement.click instead
       return isMouseClick ? await element.clickMouseButton() : await element._webElement.click();
     });
+  }
+
+  /**
+   * Finds the option element matching `trimmedValue` in the currently open combobox dropdown
+   *
+   * @param trimmedValue normalized option text to match; when undefined, the first option is returned
+   */
+  private async findOption(trimmedValue?: string): Promise<WebElementWrapper> {
+    if (trimmedValue === undefined) {
+      return await this.find.byCssSelector('.euiFilterSelectItem');
+    }
+
+    const selectOptions = await this.find.allByCssSelector(
+      `.euiFilterSelectItem[title="${trimmedValue}"]`,
+      this.WAIT_FOR_EXISTS_TIME
+    );
+
+    if (selectOptions.length > 0) {
+      return selectOptions[0];
+    }
+
+    // Try to find alternate title casing
+    const alternateTitle = (
+      await Promise.all(
+        (
+          await this.find.allByCssSelector(`.euiFilterSelectItem`, this.WAIT_FOR_EXISTS_TIME)
+        ).map(async (e) => {
+          const title = (await e.getAttribute('title')) ?? '';
+          return { title, formattedTitle: title.toLowerCase().trim() };
+        })
+      )
+    ).find(({ formattedTitle }) => {
+      return formattedTitle === trimmedValue;
+    })?.title;
+
+    const [alternate] = alternateTitle
+      ? await this.find.allByCssSelector(
+          `.euiFilterSelectItem[title="${alternateTitle}" i]`,
+          this.WAIT_FOR_EXISTS_TIME
+        )
+      : [];
+
+    if (alternate) {
+      this.log.warning(
+        `comboBox.setElement - Found similar option [${alternateTitle}] not [${trimmedValue}]`
+      );
+      return alternate;
+    }
+
+    // if it doesn't find the item which text starts with value, it will choose the first option
+    this.log.warning(`comboBox.setElement - Could not find option [${trimmedValue}], using first`);
+    return await this.find.byCssSelector('.euiFilterSelectItem', 5000);
   }
 
   /**
@@ -114,54 +168,7 @@ export class ComboBoxService extends FtrService {
     await this.setFilterValue(comboBoxElement, value);
     await this.openOptionsList(comboBoxElement);
 
-    if (trimmedValue !== undefined) {
-      const selectOptions = await this.find.allByCssSelector(
-        `.euiFilterSelectItem[title="${trimmedValue}"]`,
-        this.WAIT_FOR_EXISTS_TIME
-      );
-
-      if (selectOptions.length > 0) {
-        await this.clickOption(options.clickWithMouse, selectOptions[0]);
-      } else {
-        // Try to find alternate title casing
-        const alternateTitle = (
-          await Promise.all(
-            (
-              await this.find.allByCssSelector(`.euiFilterSelectItem`, this.WAIT_FOR_EXISTS_TIME)
-            ).map(async (e) => {
-              const title = (await e.getAttribute('title')) ?? '';
-              return { title, formattedTitle: title.toLowerCase().trim() };
-            })
-          )
-        ).find(({ formattedTitle }) => {
-          return formattedTitle === trimmedValue;
-        })?.title;
-
-        const [alternate] = alternateTitle
-          ? await this.find.allByCssSelector(
-              `.euiFilterSelectItem[title="${alternateTitle}" i]`,
-              this.WAIT_FOR_EXISTS_TIME
-            )
-          : [];
-
-        if (alternate) {
-          this.log.warning(
-            `comboBox.setElement - Found similar option [${alternateTitle}] not [${trimmedValue}]`
-          );
-          await this.clickOption(options.clickWithMouse, alternate);
-        } else {
-          // if it doesn't find the item which text starts with value, it will choose the first option
-          this.log.warning(
-            `comboBox.setElement - Could not find option [${trimmedValue}], using first`
-          );
-          const firstOption = await this.find.byCssSelector('.euiFilterSelectItem', 5000);
-          await this.clickOption(options.clickWithMouse, firstOption);
-        }
-      }
-    } else {
-      const firstOption = await this.find.byCssSelector('.euiFilterSelectItem');
-      await this.clickOption(options.clickWithMouse, firstOption);
-    }
+    await this.clickOption(options.clickWithMouse, trimmedValue);
     await this.closeOptionsList(comboBoxElement);
   }
 
