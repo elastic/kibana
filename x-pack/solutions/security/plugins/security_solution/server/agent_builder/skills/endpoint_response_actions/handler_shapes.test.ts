@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable require-atomic-updates */
-
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 import {
   isToolHandlerStandardReturn,
@@ -35,9 +33,11 @@ describe('Handler return shapes are distinguishable (FR-020, FR-021)', () => {
     mockEndpointAppContextService = createMockEndpointAppContext().service;
     // Hostname resolution also reads the Defend metadata index on origin, so
     // tests that only stub Fleet get an empty metadata index by default.
-    mockEndpointAppContextService.getEndpointMetadataService = jest.fn(() => ({
-      getHostMetadataList: jest.fn().mockResolvedValue({ data: [], total: 0 }),
-    })) as unknown as EndpointAppContextService['getEndpointMetadataService'];
+    jest
+      .spyOn(mockEndpointAppContextService, 'getEndpointMetadataService')
+      .mockImplementation((() => ({
+        getHostMetadataList: jest.fn().mockResolvedValue({ data: [], total: 0 }),
+      })) as unknown as EndpointAppContextService['getEndpointMetadataService']);
     mockAgentService = {
       listAgents: jest.fn().mockResolvedValue({ agents: [] }),
     };
@@ -95,8 +95,6 @@ describe('Handler return shapes are distinguishable (FR-020, FR-021)', () => {
         }),
       };
 
-      const originalGetInternalFleetServices =
-        mockEndpointAppContextService.getInternalFleetServices;
       mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
         agent: innerMockAgentService,
         ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
@@ -107,8 +105,6 @@ describe('Handler return shapes are distinguishable (FR-020, FR-021)', () => {
         getHostMetadataList: jest.fn().mockResolvedValue({ data: [], total: 0 }),
       };
 
-      const originalGetEndpointMetadataService =
-        mockEndpointAppContextService.getEndpointMetadataService;
       mockEndpointAppContextService.getEndpointMetadataService = jest.fn(
         () =>
           mockMetadataService as unknown as ReturnType<
@@ -116,20 +112,14 @@ describe('Handler return shapes are distinguishable (FR-020, FR-021)', () => {
           >
       );
 
-      try {
-        const result = await handler({ hostName: 'found-host' }, mockLogger);
+      const result = await handler({ hostName: 'found-host' }, mockLogger);
 
-        expect(assertStandardReturn(result)).toHaveLength(1);
-        const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
-        expect(data.found).toBe(false);
-        expect(data.reason).toBe('endpoint_not_found');
-        expect(data.hostName).toBe('found-host');
-        expect(assertStandardReturn(result)[0].type).toBe('other');
-      } finally {
-        mockEndpointAppContextService.getInternalFleetServices = originalGetInternalFleetServices;
-        mockEndpointAppContextService.getEndpointMetadataService =
-          originalGetEndpointMetadataService;
-      }
+      expect(assertStandardReturn(result)).toHaveLength(1);
+      const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
+      expect(data.found).toBe(false);
+      expect(data.reason).toBe('endpoint_not_found');
+      expect(data.hostName).toBe('found-host');
+      expect(assertStandardReturn(result)[0].type).toBe('other');
     });
 
     it('get_endpoint_status returns found: true when all lookups succeed', async () => {
@@ -156,8 +146,6 @@ describe('Handler return shapes are distinguishable (FR-020, FR-021)', () => {
         }),
       };
 
-      const originalGetInternalFleetServices =
-        mockEndpointAppContextService.getInternalFleetServices;
       mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
         agent: mockAgentServiceInner,
         ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
@@ -177,8 +165,6 @@ describe('Handler return shapes are distinguishable (FR-020, FR-021)', () => {
         }),
       };
 
-      const originalGetEndpointMetadataService =
-        mockEndpointAppContextService.getEndpointMetadataService;
       mockEndpointAppContextService.getEndpointMetadataService = jest.fn(
         () =>
           mockMetadataService as unknown as ReturnType<
@@ -186,25 +172,19 @@ describe('Handler return shapes are distinguishable (FR-020, FR-021)', () => {
           >
       );
 
-      try {
-        const result = await handler({ hostName: 'found-host' }, mockLogger);
+      const result = await handler({ hostName: 'found-host' }, mockLogger);
 
-        expect(assertStandardReturn(result)).toHaveLength(1);
-        const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
-        expect(data.found).toBe(true);
-        expect(data.hostName).toBe('found-host');
-        expect(data.agentId).toBe('agent-123');
-        expect(data.status).toBe('healthy');
-        expect(data.isolated).toBe(false);
-        expect(data.lastSeen).toBe('2024-01-01T00:00:00Z');
+      expect(assertStandardReturn(result)).toHaveLength(1);
+      const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
+      expect(data.found).toBe(true);
+      expect(data.hostName).toBe('found-host');
+      expect(data.agentId).toBe('agent-123');
+      expect(data.status).toBe('healthy');
+      expect(data.isolated).toBe(false);
+      expect(data.lastSeen).toBe('2024-01-01T00:00:00Z');
 
-        // Verify metadata service was called
-        expect(mockMetadataService.getHostMetadataList).toHaveBeenCalled();
-      } finally {
-        mockEndpointAppContextService.getInternalFleetServices = originalGetInternalFleetServices;
-        mockEndpointAppContextService.getEndpointMetadataService =
-          originalGetEndpointMetadataService;
-      }
+      // Verify metadata service was called
+      expect(mockMetadataService.getHostMetadataList).toHaveBeenCalled();
     });
   });
 
@@ -225,8 +205,6 @@ describe('Handler return shapes are distinguishable (FR-020, FR-021)', () => {
       // A failing lookup is NOT the same thing: if it collapsed into the
       // not-found shape, the agent would tell the analyst "no such host"
       // when the truth is "we could not tell" — the two must stay distinct.
-      const originalGetInternalFleetServices =
-        mockEndpointAppContextService.getInternalFleetServices;
       mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
         agent: {
           listAgents: jest.fn().mockRejectedValue(new Error('fleet unavailable')),
@@ -234,20 +212,16 @@ describe('Handler return shapes are distinguishable (FR-020, FR-021)', () => {
         ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
       })) as unknown as typeof mockEndpointAppContextService.getInternalFleetServices;
 
-      try {
-        const errorResult = await handler(
-          { hostName: 'any-host' },
-          { logger: { error: jest.fn(), warn: jest.fn() } }
-        );
+      const errorResult = await handler(
+        { hostName: 'any-host' },
+        { logger: { error: jest.fn(), warn: jest.fn() } }
+      );
 
-        const errorEntry = assertStandardReturn(errorResult)[0];
-        expect(errorEntry.type).toBe('error');
-        const data = errorEntry.data as Record<string, unknown>;
-        expect(data.error).toBe('unknown_error');
-        expect(data.found).toBeUndefined();
-      } finally {
-        mockEndpointAppContextService.getInternalFleetServices = originalGetInternalFleetServices;
-      }
+      const errorEntry = assertStandardReturn(errorResult)[0];
+      expect(errorEntry.type).toBe('error');
+      const data = errorEntry.data as Record<string, unknown>;
+      expect(data.error).toBe('unknown_error');
+      expect(data.found).toBeUndefined();
     });
 
     it('list_endpoints reports an empty list rather than a not-found shape when nothing is enrolled', async () => {
@@ -256,7 +230,7 @@ describe('Handler return shapes are distinguishable (FR-020, FR-021)', () => {
       const listTool = (inlineTools ?? []).find((t) => t.id === LIST_ENDPOINTS_TOOL_ID);
       const handler = (listTool as unknown as { handler: Function }).handler;
 
-      mockEndpointAppContextService.getEndpointMetadataService = jest.fn(
+      jest.spyOn(mockEndpointAppContextService, 'getEndpointMetadataService').mockImplementation(
         () =>
           ({
             getHostMetadataList: jest.fn().mockResolvedValue({ data: [], total: 0 }),

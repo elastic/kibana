@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable require-atomic-updates */
-
 import {
   isToolHandlerStandardReturn,
   type ToolHandlerContext,
@@ -39,9 +37,11 @@ describe('getEndpointStatusTool', () => {
     mockEndpointAppContextService = createMockEndpointAppContext().service;
     // Hostname resolution also reads the Defend metadata index on origin, so
     // tests that only stub Fleet get an empty metadata index by default.
-    mockEndpointAppContextService.getEndpointMetadataService = jest.fn(() => ({
-      getHostMetadataList: jest.fn().mockResolvedValue({ data: [], total: 0 }),
-    })) as unknown as EndpointAppContextService['getEndpointMetadataService'];
+    jest
+      .spyOn(mockEndpointAppContextService, 'getEndpointMetadataService')
+      .mockImplementation((() => ({
+        getHostMetadataList: jest.fn().mockResolvedValue({ data: [], total: 0 }),
+      })) as unknown as EndpointAppContextService['getEndpointMetadataService']);
   });
 
   describe('tool definition', () => {
@@ -81,58 +81,50 @@ describe('getEndpointStatusTool', () => {
         }),
       };
 
-      const originalGetEndpointMetadataService =
-        mockEndpointAppContextService.getEndpointMetadataService;
-      mockEndpointAppContextService.getEndpointMetadataService = jest.fn(
-        () => mockMetadataService
-      ) as unknown as EndpointAppContextService['getEndpointMetadataService'];
-
-      try {
-        const result = await tool.handler({ agentId: 'agent-123' }, mockContext);
-
-        const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
-        expect(data.found).toBe(true);
-        expect(data.hostName).toBe('WIN-123');
-        expect(data.agentId).toBe('agent-123');
-        expect(data.isolated).toBe(true);
-        expect(mockMetadataService.getHostMetadataList).toHaveBeenCalledWith(
-          {
-            page: 0,
-            pageSize: 1,
-            // No hostname constraint when only the ID is supplied.
-            kuery: '(united.agent.agent.id: agent-123 OR agent.id: agent-123)',
-          },
-          expect.objectContaining({ isCpsRead: expect.any(Function) })
+      jest
+        .spyOn(mockEndpointAppContextService, 'getEndpointMetadataService')
+        .mockImplementation(
+          (() =>
+            mockMetadataService) as unknown as EndpointAppContextService['getEndpointMetadataService']
         );
-      } finally {
-        mockEndpointAppContextService.getEndpointMetadataService =
-          originalGetEndpointMetadataService;
-      }
+
+      const result = await tool.handler({ agentId: 'agent-123' }, mockContext);
+
+      const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
+      expect(data.found).toBe(true);
+      expect(data.hostName).toBe('WIN-123');
+      expect(data.agentId).toBe('agent-123');
+      expect(data.isolated).toBe(true);
+      expect(mockMetadataService.getHostMetadataList).toHaveBeenCalledWith(
+        {
+          page: 0,
+          pageSize: 1,
+          // No hostname constraint when only the ID is supplied.
+          kuery: '(united.agent.agent.id: agent-123 OR agent.id: agent-123)',
+        },
+        expect.objectContaining({ isCpsRead: expect.any(Function) })
+      );
     });
 
     it('reports an unknown agent ID as agentId, not as a hostname', async () => {
       const mockMetadataService = {
         getHostMetadataList: jest.fn().mockResolvedValue({ data: [], total: 0 }),
       };
-      const originalGetEndpointMetadataService =
-        mockEndpointAppContextService.getEndpointMetadataService;
-      mockEndpointAppContextService.getEndpointMetadataService = jest.fn(
-        () => mockMetadataService
-      ) as unknown as EndpointAppContextService['getEndpointMetadataService'];
+      jest
+        .spyOn(mockEndpointAppContextService, 'getEndpointMetadataService')
+        .mockImplementation(
+          (() =>
+            mockMetadataService) as unknown as EndpointAppContextService['getEndpointMetadataService']
+        );
 
-      try {
-        const result = await tool.handler({ agentId: 'agent-404' }, mockContext);
+      const result = await tool.handler({ agentId: 'agent-404' }, mockContext);
 
-        const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
-        expect(data.found).toBe(false);
-        expect(data.reason).toBe('endpoint_not_found');
-        expect(data.agentId).toBe('agent-404');
-        expect(data).not.toHaveProperty('hostName');
-        expect(data).not.toHaveProperty('isolated');
-      } finally {
-        mockEndpointAppContextService.getEndpointMetadataService =
-          originalGetEndpointMetadataService;
-      }
+      const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
+      expect(data.found).toBe(false);
+      expect(data.reason).toBe('endpoint_not_found');
+      expect(data.agentId).toBe('agent-404');
+      expect(data).not.toHaveProperty('hostName');
+      expect(data).not.toHaveProperty('isolated');
     });
 
     it('reports the Fleet agent id when looked up by Endpoint ID and the two ids differ', async () => {
@@ -152,26 +144,22 @@ describe('getEndpointStatusTool', () => {
         }),
       };
 
-      const originalGetEndpointMetadataService =
-        mockEndpointAppContextService.getEndpointMetadataService;
-      mockEndpointAppContextService.getEndpointMetadataService = jest.fn(
-        () => mockMetadataService
-      ) as unknown as EndpointAppContextService['getEndpointMetadataService'];
+      jest
+        .spyOn(mockEndpointAppContextService, 'getEndpointMetadataService')
+        .mockImplementation(
+          (() =>
+            mockMetadataService) as unknown as EndpointAppContextService['getEndpointMetadataService']
+        );
 
-      try {
-        // Looked up by the Endpoint ID (agent.id), which differs from the
-        // host's Fleet id (elastic.agent.id) in this fixture.
-        const result = await tool.handler({ agentId: 'endpoint-id-123' }, mockContext);
+      // Looked up by the Endpoint ID (agent.id), which differs from the
+      // host's Fleet id (elastic.agent.id) in this fixture.
+      const result = await tool.handler({ agentId: 'endpoint-id-123' }, mockContext);
 
-        const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
-        expect(data.found).toBe(true);
-        // The response must report the Fleet agent id, not the raw supplied
-        // id, so it matches list_endpoints and response-action host keys.
-        expect(data.agentId).toBe('fleet-999');
-      } finally {
-        mockEndpointAppContextService.getEndpointMetadataService =
-          originalGetEndpointMetadataService;
-      }
+      const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
+      expect(data.found).toBe(true);
+      // The response must report the Fleet agent id, not the raw supplied
+      // id, so it matches list_endpoints and response-action host keys.
+      expect(data.agentId).toBe('fleet-999');
     });
 
     it('requires hostName, agentId, or both', () => {
@@ -185,30 +173,26 @@ describe('getEndpointStatusTool', () => {
         listAgents: jest.fn().mockResolvedValue({ agents: [] }),
       };
 
-      const originalGetInternalFleetServices =
-        mockEndpointAppContextService.getInternalFleetServices;
-      mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
-        agent: mockAgentService,
-        ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
-      })) as unknown as EndpointAppContextService['getInternalFleetServices'];
+      jest
+        .spyOn(mockEndpointAppContextService, 'getInternalFleetServices')
+        .mockImplementation((() => ({
+          agent: mockAgentService,
+          ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
+        })) as unknown as EndpointAppContextService['getInternalFleetServices']);
 
-      try {
-        const result = await tool.handler({ hostName: 'nonexistent-host' }, mockContext);
+      const result = await tool.handler({ hostName: 'nonexistent-host' }, mockContext);
 
-        expect(assertStandardReturn(result)).toHaveLength(1);
-        expect(assertStandardReturn(result)[0].type).toBe(ToolResultType.other);
-        const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
-        expect(data.found).toBe(false);
-        expect(data.reason).toBe('endpoint_not_found');
-        expect(data.hostName).toBe('nonexistent-host');
-        // No host was observed, so no host state may be reported.
-        expect(data).not.toHaveProperty('isolated');
-        expect(data).not.toHaveProperty('lastSeen');
-        expect(data).not.toHaveProperty('status');
-        expect(mockLogger.error).not.toHaveBeenCalled();
-      } finally {
-        mockEndpointAppContextService.getInternalFleetServices = originalGetInternalFleetServices;
-      }
+      expect(assertStandardReturn(result)).toHaveLength(1);
+      expect(assertStandardReturn(result)[0].type).toBe(ToolResultType.other);
+      const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
+      expect(data.found).toBe(false);
+      expect(data.reason).toBe('endpoint_not_found');
+      expect(data.hostName).toBe('nonexistent-host');
+      // No host was observed, so no host state may be reported.
+      expect(data).not.toHaveProperty('isolated');
+      expect(data).not.toHaveProperty('lastSeen');
+      expect(data).not.toHaveProperty('status');
+      expect(mockLogger.error).not.toHaveBeenCalled();
     });
 
     it('calls agentService.list with the correct kuery filter', async () => {
@@ -216,25 +200,21 @@ describe('getEndpointStatusTool', () => {
         listAgents: jest.fn().mockResolvedValue({ agents: [] }),
       };
 
-      const originalGetInternalFleetServices =
-        mockEndpointAppContextService.getInternalFleetServices;
-      mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
-        agent: mockAgentService,
-        ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
-      })) as unknown as EndpointAppContextService['getInternalFleetServices'];
+      jest
+        .spyOn(mockEndpointAppContextService, 'getInternalFleetServices')
+        .mockImplementation((() => ({
+          agent: mockAgentService,
+          ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
+        })) as unknown as EndpointAppContextService['getInternalFleetServices']);
 
-      try {
-        await tool.handler({ hostName: 'my-host' }, mockContext);
+      await tool.handler({ hostName: 'my-host' }, mockContext);
 
-        expect(mockAgentService.listAgents).toHaveBeenCalledWith({
-          showInactive: true,
-          kuery: 'local_metadata.host.name.keyword: "my-host"',
-          page: 1,
-          perPage: LOOKUP_PAGE_SIZE,
-        });
-      } finally {
-        mockEndpointAppContextService.getInternalFleetServices = originalGetInternalFleetServices;
-      }
+      expect(mockAgentService.listAgents).toHaveBeenCalledWith({
+        showInactive: true,
+        kuery: 'local_metadata.host.name.keyword: "my-host"',
+        page: 1,
+        perPage: LOOKUP_PAGE_SIZE,
+      });
     });
 
     it('returns found: true with correct data when agent and metadata lookups succeed', async () => {
@@ -257,52 +237,46 @@ describe('getEndpointStatusTool', () => {
         }),
       };
 
-      const originalGetInternalFleetServices =
-        mockEndpointAppContextService.getInternalFleetServices;
-      const originalGetEndpointMetadataService =
-        mockEndpointAppContextService.getEndpointMetadataService;
-
-      mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
-        agent: mockAgentService,
-        ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
-      })) as unknown as EndpointAppContextService['getInternalFleetServices'];
-      mockEndpointAppContextService.getEndpointMetadataService = jest.fn(
-        () => mockMetadataService
-      ) as unknown as EndpointAppContextService['getEndpointMetadataService'];
-
-      try {
-        const result = await tool.handler({ hostName: 'my-host' }, mockContext);
-
-        expect(assertStandardReturn(result)).toHaveLength(1);
-        expect(assertStandardReturn(result)[0].type).toBe(ToolResultType.other);
-        const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
-        expect(data.found).toBe(true);
-        expect(data.hostName).toBe('my-host');
-        expect(data.agentId).toBe('agent-123');
-        expect(data.status).toBe('healthy');
-        expect(data.isolated).toBe(true);
-        expect(data.lastSeen).toBe('2024-01-01T00:00:00Z');
-
-        expect(mockMetadataService.getHostMetadataList).toHaveBeenCalledWith(
-          {
-            page: 0,
-            pageSize: 1,
-            // Constrained by the hostname as well as the ID, so a mismatched
-            // pair cannot return another host's status. The id matches both
-            // identities: the Fleet agent id (`united.agent.agent.id`) and the
-            // endpoint's own id (top-level `agent.id`), which diverge on
-            // current agents.
-            kuery:
-              '(united.agent.agent.id: agent-123 OR agent.id: agent-123) AND united.endpoint.host.hostname: "my-host"',
-          },
-          // Scoped services are required for this read to fan out under CPS.
-          expect.objectContaining({ isCpsRead: expect.any(Function) })
+      jest
+        .spyOn(mockEndpointAppContextService, 'getInternalFleetServices')
+        .mockImplementation((() => ({
+          agent: mockAgentService,
+          ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
+        })) as unknown as EndpointAppContextService['getInternalFleetServices']);
+      jest
+        .spyOn(mockEndpointAppContextService, 'getEndpointMetadataService')
+        .mockImplementation(
+          (() =>
+            mockMetadataService) as unknown as EndpointAppContextService['getEndpointMetadataService']
         );
-      } finally {
-        mockEndpointAppContextService.getInternalFleetServices = originalGetInternalFleetServices;
-        mockEndpointAppContextService.getEndpointMetadataService =
-          originalGetEndpointMetadataService;
-      }
+
+      const result = await tool.handler({ hostName: 'my-host' }, mockContext);
+
+      expect(assertStandardReturn(result)).toHaveLength(1);
+      expect(assertStandardReturn(result)[0].type).toBe(ToolResultType.other);
+      const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
+      expect(data.found).toBe(true);
+      expect(data.hostName).toBe('my-host');
+      expect(data.agentId).toBe('agent-123');
+      expect(data.status).toBe('healthy');
+      expect(data.isolated).toBe(true);
+      expect(data.lastSeen).toBe('2024-01-01T00:00:00Z');
+
+      expect(mockMetadataService.getHostMetadataList).toHaveBeenCalledWith(
+        {
+          page: 0,
+          pageSize: 1,
+          // Constrained by the hostname as well as the ID, so a mismatched
+          // pair cannot return another host's status. The id matches both
+          // identities: the Fleet agent id (`united.agent.agent.id`) and the
+          // endpoint's own id (top-level `agent.id`), which diverge on
+          // current agents.
+          kuery:
+            '(united.agent.agent.id: agent-123 OR agent.id: agent-123) AND united.endpoint.host.hostname: "my-host"',
+        },
+        // Scoped services are required for this read to fan out under CPS.
+        expect.objectContaining({ isCpsRead: expect.any(Function) })
+      );
     });
 
     it('returns found: true with non-isolated status when metadata shows isolation is false', async () => {
@@ -325,33 +299,27 @@ describe('getEndpointStatusTool', () => {
         }),
       };
 
-      const originalGetInternalFleetServices =
-        mockEndpointAppContextService.getInternalFleetServices;
-      const originalGetEndpointMetadataService =
-        mockEndpointAppContextService.getEndpointMetadataService;
+      jest
+        .spyOn(mockEndpointAppContextService, 'getInternalFleetServices')
+        .mockImplementation((() => ({
+          agent: mockAgentService,
+          ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
+        })) as unknown as EndpointAppContextService['getInternalFleetServices']);
+      jest
+        .spyOn(mockEndpointAppContextService, 'getEndpointMetadataService')
+        .mockImplementation(
+          (() =>
+            mockMetadataService) as unknown as EndpointAppContextService['getEndpointMetadataService']
+        );
 
-      mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
-        agent: mockAgentService,
-        ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
-      })) as unknown as EndpointAppContextService['getInternalFleetServices'];
-      mockEndpointAppContextService.getEndpointMetadataService = jest.fn(
-        () => mockMetadataService
-      ) as unknown as EndpointAppContextService['getEndpointMetadataService'];
+      const result = await tool.handler({ hostName: 'safe-host' }, mockContext);
 
-      try {
-        const result = await tool.handler({ hostName: 'safe-host' }, mockContext);
-
-        expect(assertStandardReturn(result)).toHaveLength(1);
-        const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
-        expect(data.found).toBe(true);
-        expect(data.isolated).toBe(false);
-        expect(data.status).toBe('healthy');
-        expect(data.lastSeen).toBe('2024-06-01T12:00:00Z');
-      } finally {
-        mockEndpointAppContextService.getInternalFleetServices = originalGetInternalFleetServices;
-        mockEndpointAppContextService.getEndpointMetadataService =
-          originalGetEndpointMetadataService;
-      }
+      expect(assertStandardReturn(result)).toHaveLength(1);
+      const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
+      expect(data.found).toBe(true);
+      expect(data.isolated).toBe(false);
+      expect(data.status).toBe('healthy');
+      expect(data.lastSeen).toBe('2024-06-01T12:00:00Z');
     });
 
     it('returns endpoint_not_found when agent exists but metadata service returns empty', async () => {
@@ -373,32 +341,26 @@ describe('getEndpointStatusTool', () => {
         getHostMetadataList: jest.fn().mockResolvedValue({ data: [], total: 0 }),
       };
 
-      const originalGetInternalFleetServices =
-        mockEndpointAppContextService.getInternalFleetServices;
-      const originalGetEndpointMetadataService =
-        mockEndpointAppContextService.getEndpointMetadataService;
+      jest
+        .spyOn(mockEndpointAppContextService, 'getInternalFleetServices')
+        .mockImplementation((() => ({
+          agent: mockAgentService,
+          ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
+        })) as unknown as EndpointAppContextService['getInternalFleetServices']);
+      jest
+        .spyOn(mockEndpointAppContextService, 'getEndpointMetadataService')
+        .mockImplementation(
+          (() =>
+            mockMetadataService) as unknown as EndpointAppContextService['getEndpointMetadataService']
+        );
 
-      mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
-        agent: mockAgentService,
-        ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
-      })) as unknown as EndpointAppContextService['getInternalFleetServices'];
-      mockEndpointAppContextService.getEndpointMetadataService = jest.fn(
-        () => mockMetadataService
-      ) as unknown as EndpointAppContextService['getEndpointMetadataService'];
+      const result = await tool.handler({ hostName: 'found-host' }, mockContext);
 
-      try {
-        const result = await tool.handler({ hostName: 'found-host' }, mockContext);
-
-        expect(assertStandardReturn(result)).toHaveLength(1);
-        const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
-        expect(data.found).toBe(false);
-        expect(data.reason).toBe('endpoint_not_found');
-        expect(data.hostName).toBe('found-host');
-      } finally {
-        mockEndpointAppContextService.getInternalFleetServices = originalGetInternalFleetServices;
-        mockEndpointAppContextService.getEndpointMetadataService =
-          originalGetEndpointMetadataService;
-      }
+      expect(assertStandardReturn(result)).toHaveLength(1);
+      const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
+      expect(data.found).toBe(false);
+      expect(data.reason).toBe('endpoint_not_found');
+      expect(data.hostName).toBe('found-host');
     });
 
     it('returns an ambiguous result when two online agents share the hostname', async () => {
@@ -411,32 +373,28 @@ describe('getEndpointStatusTool', () => {
         }),
       };
 
-      const originalGetInternalFleetServices =
-        mockEndpointAppContextService.getInternalFleetServices;
-      mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
-        agent: mockAgentService,
-        ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
-      })) as unknown as EndpointAppContextService['getInternalFleetServices'];
+      jest
+        .spyOn(mockEndpointAppContextService, 'getInternalFleetServices')
+        .mockImplementation((() => ({
+          agent: mockAgentService,
+          ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
+        })) as unknown as EndpointAppContextService['getInternalFleetServices']);
 
-      try {
-        const result = await tool.handler({ hostName: 'duplicated-host' }, mockContext);
+      const result = await tool.handler({ hostName: 'duplicated-host' }, mockContext);
 
-        const results = assertStandardReturn(result);
-        expect(results).toHaveLength(1);
-        expect(results[0].type).toBe(ToolResultType.other);
-        const data = results[0].data as Record<string, unknown>;
-        // Must NOT report a status for an arbitrary one of the two hosts.
-        expect(data.found).toBe(false);
-        expect(data.reason).toBe('ambiguous_hostname');
-        expect(data.candidates).toEqual([
-          { agentId: 'live-a', status: 'online' },
-          { agentId: 'live-b', status: 'online' },
-        ]);
-        expect(data.message).toContain('duplicated-host');
-        expect(mockLogger.error).not.toHaveBeenCalled();
-      } finally {
-        mockEndpointAppContextService.getInternalFleetServices = originalGetInternalFleetServices;
-      }
+      const results = assertStandardReturn(result);
+      expect(results).toHaveLength(1);
+      expect(results[0].type).toBe(ToolResultType.other);
+      const data = results[0].data as Record<string, unknown>;
+      // Must NOT report a status for an arbitrary one of the two hosts.
+      expect(data.found).toBe(false);
+      expect(data.reason).toBe('ambiguous_hostname');
+      expect(data.candidates).toEqual([
+        { agentId: 'live-a', status: 'online' },
+        { agentId: 'live-b', status: 'online' },
+      ]);
+      expect(data.message).toContain('duplicated-host');
+      expect(mockLogger.error).not.toHaveBeenCalled();
     });
 
     it('returns an ambiguous result when more records match than the lookup examined', async () => {
@@ -454,31 +412,27 @@ describe('getEndpointStatusTool', () => {
         }),
       };
 
-      const originalGetInternalFleetServices =
-        mockEndpointAppContextService.getInternalFleetServices;
-      mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
-        agent: mockAgentService,
-        ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
-      })) as unknown as EndpointAppContextService['getInternalFleetServices'];
+      jest
+        .spyOn(mockEndpointAppContextService, 'getInternalFleetServices')
+        .mockImplementation((() => ({
+          agent: mockAgentService,
+          ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
+        })) as unknown as EndpointAppContextService['getInternalFleetServices']);
 
-      try {
-        const result = await tool.handler({ hostName: 'huge-history-host' }, mockContext);
+      const result = await tool.handler({ hostName: 'huge-history-host' }, mockContext);
 
-        const results = assertStandardReturn(result);
-        const data = results[0].data as Record<string, unknown>;
-        expect(data.found).toBe(false);
-        expect(data.reason).toBe('ambiguous_hostname');
-        expect(data.truncated).toBe(true);
-        // Fleet's `total` is deliberately NOT surfaced: it counts agents
-        // before space filtering, so exposing it would report how many matching
-        // records exist in other Spaces. `truncated` alone carries the signal
-        // the agent needs — "there were more than I examined".
-        expect(data.totalCandidates).toBeUndefined();
-        // The message must name the way out: re-calling with the agent ID.
-        expect(data.message).toContain('agentId');
-      } finally {
-        mockEndpointAppContextService.getInternalFleetServices = originalGetInternalFleetServices;
-      }
+      const results = assertStandardReturn(result);
+      const data = results[0].data as Record<string, unknown>;
+      expect(data.found).toBe(false);
+      expect(data.reason).toBe('ambiguous_hostname');
+      expect(data.truncated).toBe(true);
+      // Fleet's `total` is deliberately NOT surfaced: it counts agents
+      // before space filtering, so exposing it would report how many matching
+      // records exist in other Spaces. `truncated` alone carries the signal
+      // the agent needs — "there were more than I examined".
+      expect(data.totalCandidates).toBeUndefined();
+      // The message must name the way out: re-calling with the agent ID.
+      expect(data.message).toContain('agentId');
     });
 
     it('reads status by agent ID when the hostname resolves to several endpoints', async () => {
@@ -506,47 +460,41 @@ describe('getEndpointStatusTool', () => {
         }),
       };
 
-      const originalGetInternalFleetServices =
-        mockEndpointAppContextService.getInternalFleetServices;
-      const originalGetEndpointMetadataService =
-        mockEndpointAppContextService.getEndpointMetadataService;
-
-      mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
-        agent: mockAgentService,
-        ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
-      })) as unknown as EndpointAppContextService['getInternalFleetServices'];
-      mockEndpointAppContextService.getEndpointMetadataService = jest.fn(
-        () => mockMetadataService
-      ) as unknown as EndpointAppContextService['getEndpointMetadataService'];
-
-      try {
-        const result = await tool.handler(
-          { hostName: 'duplicated-host', agentId: 'live-b' },
-          mockContext
+      jest
+        .spyOn(mockEndpointAppContextService, 'getInternalFleetServices')
+        .mockImplementation((() => ({
+          agent: mockAgentService,
+          ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
+        })) as unknown as EndpointAppContextService['getInternalFleetServices']);
+      jest
+        .spyOn(mockEndpointAppContextService, 'getEndpointMetadataService')
+        .mockImplementation(
+          (() =>
+            mockMetadataService) as unknown as EndpointAppContextService['getEndpointMetadataService']
         );
 
-        const results = assertStandardReturn(result);
-        const data = results[0].data as Record<string, unknown>;
-        expect(data.found).toBe(true);
-        expect(data.agentId).toBe('live-b');
-        // The ID read stays constrained by the hostname it was requested for:
-        // querying `agent.id` alone would return whatever host owns that ID and
-        // then label the result with the caller's hostname, reporting (or
-        // isolating) the wrong machine when the pair does not match.
-        expect(mockMetadataService.getHostMetadataList).toHaveBeenCalledWith(
-          {
-            page: 0,
-            pageSize: 1,
-            kuery:
-              '(united.agent.agent.id: live-b OR agent.id: live-b) AND united.endpoint.host.hostname: "duplicated-host"',
-          },
-          expect.objectContaining({ isCpsRead: expect.any(Function) })
-        );
-      } finally {
-        mockEndpointAppContextService.getInternalFleetServices = originalGetInternalFleetServices;
-        mockEndpointAppContextService.getEndpointMetadataService =
-          originalGetEndpointMetadataService;
-      }
+      const result = await tool.handler(
+        { hostName: 'duplicated-host', agentId: 'live-b' },
+        mockContext
+      );
+
+      const results = assertStandardReturn(result);
+      const data = results[0].data as Record<string, unknown>;
+      expect(data.found).toBe(true);
+      expect(data.agentId).toBe('live-b');
+      // The ID read stays constrained by the hostname it was requested for:
+      // querying `agent.id` alone would return whatever host owns that ID and
+      // then label the result with the caller's hostname, reporting (or
+      // isolating) the wrong machine when the pair does not match.
+      expect(mockMetadataService.getHostMetadataList).toHaveBeenCalledWith(
+        {
+          page: 0,
+          pageSize: 1,
+          kuery:
+            '(united.agent.agent.id: live-b OR agent.id: live-b) AND united.endpoint.host.hostname: "duplicated-host"',
+        },
+        expect.objectContaining({ isCpsRead: expect.any(Function) })
+      );
     });
 
     it('does not report status for an agent ID that belongs to a different hostname', async () => {
@@ -566,34 +514,25 @@ describe('getEndpointStatusTool', () => {
         getHostMetadataList: jest.fn().mockResolvedValue({ data: [], total: 0 }),
       };
 
-      const originalGetInternalFleetServices =
-        mockEndpointAppContextService.getInternalFleetServices;
-      const originalGetEndpointMetadataService =
-        mockEndpointAppContextService.getEndpointMetadataService;
-
-      mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
-        agent: mockAgentService,
-        ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
-      })) as unknown as EndpointAppContextService['getInternalFleetServices'];
-      mockEndpointAppContextService.getEndpointMetadataService = jest.fn(
-        () => mockMetadataService
-      ) as unknown as EndpointAppContextService['getEndpointMetadataService'];
-
-      try {
-        const result = await tool.handler(
-          { hostName: 'other-host', agentId: 'live-b' },
-          mockContext
+      jest
+        .spyOn(mockEndpointAppContextService, 'getInternalFleetServices')
+        .mockImplementation((() => ({
+          agent: mockAgentService,
+          ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
+        })) as unknown as EndpointAppContextService['getInternalFleetServices']);
+      jest
+        .spyOn(mockEndpointAppContextService, 'getEndpointMetadataService')
+        .mockImplementation(
+          (() =>
+            mockMetadataService) as unknown as EndpointAppContextService['getEndpointMetadataService']
         );
 
-        const results = assertStandardReturn(result);
-        const data = results[0].data as Record<string, unknown>;
-        expect(data.found).toBe(false);
-        expect(data.reason).toBe('endpoint_not_found');
-      } finally {
-        mockEndpointAppContextService.getInternalFleetServices = originalGetInternalFleetServices;
-        mockEndpointAppContextService.getEndpointMetadataService =
-          originalGetEndpointMetadataService;
-      }
+      const result = await tool.handler({ hostName: 'other-host', agentId: 'live-b' }, mockContext);
+
+      const results = assertStandardReturn(result);
+      const data = results[0].data as Record<string, unknown>;
+      expect(data.found).toBe(false);
+      expect(data.reason).toBe('endpoint_not_found');
     });
 
     it('returns insufficient_privileges when caller lacks canReadSecuritySolution and canAccessFleet', async () => {
@@ -658,33 +597,27 @@ describe('getEndpointStatusTool', () => {
         getHostMetadataList: jest.fn().mockRejectedValue(new Error('metadata service timeout')),
       };
 
-      const originalGetInternalFleetServices =
-        mockEndpointAppContextService.getInternalFleetServices;
-      const originalGetEndpointMetadataService =
-        mockEndpointAppContextService.getEndpointMetadataService;
+      jest
+        .spyOn(mockEndpointAppContextService, 'getInternalFleetServices')
+        .mockImplementation((() => ({
+          agent: mockAgentService,
+          ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
+        })) as unknown as EndpointAppContextService['getInternalFleetServices']);
+      jest
+        .spyOn(mockEndpointAppContextService, 'getEndpointMetadataService')
+        .mockImplementation(
+          (() =>
+            mockMetadataService) as unknown as EndpointAppContextService['getEndpointMetadataService']
+        );
 
-      mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
-        agent: mockAgentService,
-        ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
-      })) as unknown as EndpointAppContextService['getInternalFleetServices'];
-      mockEndpointAppContextService.getEndpointMetadataService = jest.fn(
-        () => mockMetadataService
-      ) as unknown as EndpointAppContextService['getEndpointMetadataService'];
+      const result = await tool.handler({ hostName: 'fallback-host' }, mockContext);
 
-      try {
-        const result = await tool.handler({ hostName: 'fallback-host' }, mockContext);
-
-        expect(assertStandardReturn(result)).toHaveLength(1);
-        expect(assertStandardReturn(result)[0].type).toBe(ToolResultType.error);
-        const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
-        expect(data.error).toBe('unknown_error');
-        expect(data.message).toContain('metadata service timeout');
-        expect(mockLogger.error).toHaveBeenCalled();
-      } finally {
-        mockEndpointAppContextService.getInternalFleetServices = originalGetInternalFleetServices;
-        mockEndpointAppContextService.getEndpointMetadataService =
-          originalGetEndpointMetadataService;
-      }
+      expect(assertStandardReturn(result)).toHaveLength(1);
+      expect(assertStandardReturn(result)[0].type).toBe(ToolResultType.error);
+      const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
+      expect(data.error).toBe('unknown_error');
+      expect(data.message).toContain('metadata service timeout');
+      expect(mockLogger.error).toHaveBeenCalled();
     });
 
     it('returns an error result when the agent service throws', async () => {
@@ -692,25 +625,21 @@ describe('getEndpointStatusTool', () => {
         listAgents: jest.fn().mockRejectedValue(new Error('fleet service unavailable')),
       };
 
-      const originalGetInternalFleetServices =
-        mockEndpointAppContextService.getInternalFleetServices;
-      mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
-        agent: mockAgentService,
-        ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
-      })) as unknown as EndpointAppContextService['getInternalFleetServices'];
+      jest
+        .spyOn(mockEndpointAppContextService, 'getInternalFleetServices')
+        .mockImplementation((() => ({
+          agent: mockAgentService,
+          ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
+        })) as unknown as EndpointAppContextService['getInternalFleetServices']);
 
-      try {
-        const result = await tool.handler({ hostName: 'my-host' }, mockContext);
+      const result = await tool.handler({ hostName: 'my-host' }, mockContext);
 
-        expect(assertStandardReturn(result)).toHaveLength(1);
-        expect(assertStandardReturn(result)[0].type).toBe(ToolResultType.error);
-        const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
-        expect(data.error).toBe('unknown_error');
-        expect(data.message).toContain('fleet service unavailable');
-        expect(mockLogger.error).toHaveBeenCalled();
-      } finally {
-        mockEndpointAppContextService.getInternalFleetServices = originalGetInternalFleetServices;
-      }
+      expect(assertStandardReturn(result)).toHaveLength(1);
+      expect(assertStandardReturn(result)[0].type).toBe(ToolResultType.error);
+      const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
+      expect(data.error).toBe('unknown_error');
+      expect(data.message).toContain('fleet service unavailable');
+      expect(mockLogger.error).toHaveBeenCalled();
     });
 
     it('reports endpoint_not_found for a SentinelOne-only hostname instead of a phantom miss', async () => {
@@ -727,30 +656,24 @@ describe('getEndpointStatusTool', () => {
         getHostMetadataList: jest.fn().mockResolvedValue({ data: [], total: 0 }),
       };
 
-      const originalGetInternalFleetServices =
-        mockEndpointAppContextService.getInternalFleetServices;
-      const originalGetEndpointMetadataService =
-        mockEndpointAppContextService.getEndpointMetadataService;
+      jest
+        .spyOn(mockEndpointAppContextService, 'getInternalFleetServices')
+        .mockImplementation((() => ({
+          agent: mockAgentService,
+          ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
+        })) as unknown as EndpointAppContextService['getInternalFleetServices']);
+      jest
+        .spyOn(mockEndpointAppContextService, 'getEndpointMetadataService')
+        .mockImplementation(
+          (() =>
+            mockMetadataService) as unknown as EndpointAppContextService['getEndpointMetadataService']
+        );
 
-      mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
-        agent: mockAgentService,
-        ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
-      })) as unknown as EndpointAppContextService['getInternalFleetServices'];
-      mockEndpointAppContextService.getEndpointMetadataService = jest.fn(
-        () => mockMetadataService
-      ) as unknown as EndpointAppContextService['getEndpointMetadataService'];
+      const result = await tool.handler({ hostName: 's1-host' }, mockContext);
 
-      try {
-        const result = await tool.handler({ hostName: 's1-host' }, mockContext);
-
-        const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
-        expect(data.found).toBe(false);
-        expect(data.reason).toBe('endpoint_not_found');
-      } finally {
-        mockEndpointAppContextService.getInternalFleetServices = originalGetInternalFleetServices;
-        mockEndpointAppContextService.getEndpointMetadataService =
-          originalGetEndpointMetadataService;
-      }
+      const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
+      expect(data.found).toBe(false);
+      expect(data.reason).toBe('endpoint_not_found');
     });
   });
 });
