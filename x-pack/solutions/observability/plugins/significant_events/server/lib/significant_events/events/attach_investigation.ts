@@ -99,6 +99,9 @@ export const attachInvestigationToEvent = async ({
     investigations = [...existing, investigation];
   } else {
     // At the schema-enforced 100-entry cap, do not exceed investigations.max(100).
+    logger?.warn(
+      `attach_investigation: investigation cap (100) reached for event_id "${eventId}"; new investigation entry dropped`
+    );
     investigations = existing;
   }
 

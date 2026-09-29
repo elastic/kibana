@@ -99,11 +99,11 @@ export const createSignificantEventAttachmentType = ({
 
       try {
         const latestEvent = await fetchByEventId(attachment.origin, context);
-        return (
-          !latestEvent ||
-          latestVersion.data.event_uuid !== latestEvent.event_uuid ||
-          latestVersion.data['@timestamp'] !== latestEvent['@timestamp']
-        );
+        // Avoid comparing event_uuid: when SIGNIFICANT_EVENTS_USE_RULE_EVENTS_READ is ON,
+        // the search client returns group_hash as event_uuid (synthetic, not a real UUID),
+        // which never matches the real UUID stored in the attachment — causing isStale to
+        // always return true. @timestamp is sufficient to detect any write since attachment.
+        return !latestEvent || latestVersion.data['@timestamp'] !== latestEvent['@timestamp'];
       } catch (error) {
         logger.warn(
           `Failed to check staleness for significant event attachment "${attachment.origin}": ${error}`

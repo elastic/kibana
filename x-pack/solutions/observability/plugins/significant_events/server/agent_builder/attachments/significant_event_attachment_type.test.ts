@@ -91,7 +91,14 @@ describe('createSignificantEventAttachmentType', () => {
   });
 
   it('reports stale when the latest event differs from the stored snapshot', async () => {
-    const updatedEvent = { ...event, event_uuid: 'event-2', status: 'closed' as const };
+    // Every events_write sets a new @timestamp; changing event_uuid alone (same timestamp)
+    // cannot happen in production. Use a realistic update that bumps @timestamp.
+    const updatedEvent = {
+      ...event,
+      event_uuid: 'event-2',
+      status: 'closed' as const,
+      '@timestamp': '2026-01-01T00:01:00.000Z',
+    };
     const type = createSignificantEventAttachmentType({
       logger: loggingSystemMock.createLogger(),
       getScopedClients: createGetScopedClients([updatedEvent]),
