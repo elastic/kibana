@@ -6,7 +6,7 @@
  */
 
 import type { TimelineEqlRequestOptions } from '../../../../common/api/search_strategy';
-import { Direction } from '../../../../common/search_strategy';
+import { Direction } from '@kbn/securitysolution-timeline-common';
 import { buildEqlDsl, parseEqlResponse } from './helpers';
 import { eventsResponse, sequenceResponse } from './__mocks__';
 const defaultArgs = {

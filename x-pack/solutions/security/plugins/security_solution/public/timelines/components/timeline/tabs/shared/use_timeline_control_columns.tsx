@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import type { TimelineItem } from '@kbn/timelines-plugin/common';
+import type { TimelineItem } from '@kbn/securitysolution-timeline-common';
 import type { DataTableRecord, EsHitRecord, RowControlColumn } from '@kbn/discover-utils';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { useLicense } from '../../../../../common/hooks/use_license';

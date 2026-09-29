@@ -6,7 +6,7 @@
  */
 
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
-import type { BrowserFields } from '../../common/search_strategy/index_fields';
+import type { BrowserFields } from '@kbn/securitysolution-timeline-common';
 
 const DEFAULT_INDEX_PATTERN = [
   'apm-*-transaction*',

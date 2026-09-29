@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
+import type { TimelineNonEcsData } from '@kbn/securitysolution-timeline-common';
 import { getMappedNonEcsValue, useGetMappedNonEcsValue } from './get_mapped_non_ecs_value';
 import { renderHook } from '@testing-library/react';
 

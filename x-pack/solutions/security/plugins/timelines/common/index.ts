@@ -26,22 +26,12 @@ export {
 
 export { DELETED_SECURITY_SOLUTION_DATA_VIEW } from './constants';
 
-export type {
-  DeprecatedCellValueElementProps,
-  DataProvidersAnd,
-  DataProvider,
-  QueryOperator,
-  QueryMatch,
-  DeprecatedRowRenderer,
-  ColumnHeaderOptions,
-} from './types';
+export type { DataProvidersAnd, DataProvider, QueryOperator, QueryMatch } from './types';
 
 export { IS_OPERATOR, EXISTS_OPERATOR } from './types';
 
 export type {
   BeatFields,
-  BrowserFields,
-  CursorType,
   EqlFieldsComboBoxOptions,
   EqlOptions,
   FieldsEqlOptions,
@@ -50,12 +40,9 @@ export type {
   IndexFieldsStrategyRequest,
   IndexFieldsStrategyResponse,
   LastTimeDetails,
-  TimelineNonEcsData,
   Inspect,
   SortField,
   TimerangeInput,
-  TimelineEdges,
-  TimelineItem,
   TimelineEventsAllStrategyResponse,
   TimelineEventsDetailsItem,
   TimelineEventsDetailsStrategyResponse,
@@ -66,7 +53,7 @@ export type {
   PaginationInputPaginated,
 } from './search_strategy';
 
-export { Direction, EntityType, EMPTY_BROWSER_FIELDS } from './search_strategy';
+export { EntityType } from './search_strategy';
 
 export {
   getDataFromFieldsHits,
