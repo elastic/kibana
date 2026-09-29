@@ -237,13 +237,19 @@ steps:
           { timeout: 60000 }
         )
         .toBe('completed');
-      const history = await apiClient.get(`${workflowPath}/executions`, { headers: adminHeaders });
-      expect(history).toHaveStatusCode(200);
-      expect(history.body.results).toStrictEqual(
-        expect.arrayContaining([
-          expect.objectContaining({ id: run.body.workflowExecutionId, status: 'completed' }),
-        ])
-      );
+      await expect
+        .poll(async () => {
+          const history = await apiClient.get(`${workflowPath}/executions`, {
+            headers: adminHeaders,
+          });
+          expect(history).toHaveStatusCode(200);
+          return history.body.results;
+        })
+        .toStrictEqual(
+          expect.arrayContaining([
+            expect.objectContaining({ id: run.body.workflowExecutionId, status: 'completed' }),
+          ])
+        );
       const revoked = await apiClient.put(accessPath, {
         headers: adminHeaders,
         body: { access_mode: 'private', entries: [] },
