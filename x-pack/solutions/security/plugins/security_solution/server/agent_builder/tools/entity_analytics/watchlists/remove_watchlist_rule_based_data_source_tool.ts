@@ -184,7 +184,7 @@ Resolve the watchlist id via \`security.get_watchlist_id\` first when the user n
         if (status === ConfirmationStatus.unprompted) {
           telemetryTracker.recordAwaitingConfirmation();
           stateManager.setState<ConfirmedDataSourceState>({
-            approvedFingerprint: fingerprintDataSource(existingSource),
+            existingSourceFingerprint: fingerprintDataSource(existingSource),
           });
           const ruleType =
             params.type === RuleBasedSourceType.store ? 'Entity Store' : 'Index Pattern';
@@ -225,7 +225,7 @@ Resolve the watchlist id via \`security.get_watchlist_id\` first when the user n
         const approvedState = stateManager.getState<ConfirmedDataSourceState>();
         if (
           !approvedState ||
-          approvedState.approvedFingerprint !== fingerprintDataSource(existingSource)
+          approvedState.existingSourceFingerprint !== fingerprintDataSource(existingSource)
         ) {
           return errorResult(DATA_SOURCE_CHANGED_MESSAGE);
         }

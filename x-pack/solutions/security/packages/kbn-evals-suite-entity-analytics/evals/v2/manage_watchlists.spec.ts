@@ -9,6 +9,7 @@ import { tags } from '@kbn/scout-security';
 import { evaluate } from '../../src/evaluate';
 import {
   bulkIndexEntities,
+  createWatchlistEntitySource,
   createSourceIndex,
   createWatchlist,
   deleteEntityEngines,
@@ -44,6 +45,7 @@ const MANAGED_WATCHLIST_NAMES = [
   // so cleanup removes them; not re-seeded by beforeAll.
   'Suspicious Logins',
   'High Risk Hosts',
+  'Server Fleet',
 ];
 
 evaluate.describe(
@@ -110,6 +112,19 @@ evaluate.describe(
           description: 'Hosts kept in continuous scope for review',
           riskModifier: 1,
         },
+      });
+      const serverFleet = await createWatchlist({
+        supertest,
+        watchlist: {
+          name: 'Server Fleet',
+          description: 'Server hosts kept in continuous scope',
+          riskModifier: 1,
+        },
+      });
+      await createWatchlistEntitySource({
+        supertest,
+        watchlistId: serverFleet.id,
+        source: { name: 'server-fleet-store', queryRule: 'host.os.name: Ubuntu*' },
       });
     });
 
@@ -412,7 +427,7 @@ evaluate.describe(
                 },
                 output: {
                   criteria: [
-                    'Resolve "High Risk Hosts" to its id via security.get_watchlist_id, then call security.set_watchlist_rule_based_data_source with type "store" and a KQL queryRule matching Ubuntu hosts (e.g. host.os.name: "Ubuntu*" — a wildcard, since exact match on the full OS string would silently match nothing).',
+                    'Resolve "High Risk Hosts" to its id via security.get_watchlist_id, then call security.set_watchlist_rule_based_data_source with type "store" and a KQL queryRule matching Ubuntu hosts (e.g. host.os.name: Ubuntu* — a wildcard, since exact match on the full OS string would silently match nothing).',
                     'Surface the confirmation step, including the preview of how many hosts currently match.',
                     'Mention that membership will be kept in sync automatically (roughly every 10 minutes) rather than treating this as a one-time add.',
                     'Do not claim the standing query was created without the user confirming.',
@@ -427,12 +442,55 @@ evaluate.describe(
                     {
                       id: 'security.set_watchlist_rule_based_data_source',
                       criteria: [
-                        'The tool is called with the watchlistId resolved from get_watchlist_id, type "store", and a queryRule that targets host.os.name with a wildcard (e.g. "Ubuntu*"), not an exact-match string.',
+                        'The tool is called with the watchlistId resolved from get_watchlist_id, type "store", and a queryRule that targets host.os.name with a wildcard (e.g. Ubuntu*), not an exact-match string.',
                       ],
                     },
                   ],
                 },
                 metadata: { query_intent: 'Watchlist Standing Query' },
+              },
+            ],
+          },
+        });
+      }
+    );
+
+    evaluate(
+      'manage watchlists: stop a standing query (remove rule-based source)',
+      async ({ evaluateDataset }) => {
+        await evaluateDataset({
+          dataset: {
+            name: 'entity-analytics-v2: manage watchlists (remove rule-based source)',
+            description:
+              'Asking to stop an automatic/standing membership rule must route to security.remove_watchlist_rule_based_data_source, not to the manual entity-removal tool or a suggestion to use the UI.',
+            examples: [
+              {
+                input: {
+                  question: 'Stop automatically adding Ubuntu hosts to the Server Fleet watchlist.',
+                },
+                output: {
+                  criteria: [
+                    'Resolve "Server Fleet" to its id via security.get_watchlist_id, then call security.remove_watchlist_rule_based_data_source with type "store" to remove the standing query.',
+                    'Surface the confirmation step rather than claiming the source was removed outright.',
+                    'Do not call security.remove_entities_from_watchlist or suggest using the UI — the request is to stop the standing rule itself, not to remove specific entities.',
+                    'In prose, it is fine (but not required) to note that hosts already added by this rule are cleaned up on the next sync rather than immediately.',
+                  ],
+                  toolCalls: [
+                    {
+                      id: 'security.get_watchlist_id',
+                      criteria: [
+                        'The tool is called with an identifier of "Server Fleet" to resolve the watchlist id.',
+                      ],
+                    },
+                    {
+                      id: 'security.remove_watchlist_rule_based_data_source',
+                      criteria: [
+                        'The tool is called with the watchlistId resolved from get_watchlist_id and type "store".',
+                      ],
+                    },
+                  ],
+                },
+                metadata: { query_intent: 'Watchlist Standing Query Remove' },
               },
             ],
           },

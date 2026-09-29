@@ -188,11 +188,13 @@ export const fingerprintDataSource = (source: MonitoringEntitySource | undefined
     source.identifierField ?? null,
     source.range?.start ?? null,
     source.range?.end ?? null,
+    source.enabled ?? true,
   ]);
 };
 
 export interface ConfirmedDataSourceState {
-  approvedFingerprint: string;
+  existingSourceFingerprint: string;
+  conflictingSourceId?: string | null;
 }
 
 export const DATA_SOURCE_CHANGED_MESSAGE =

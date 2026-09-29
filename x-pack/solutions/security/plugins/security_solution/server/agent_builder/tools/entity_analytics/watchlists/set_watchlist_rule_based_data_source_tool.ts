@@ -164,7 +164,7 @@ export const setWatchlistRuleBasedDataSourceTool = (
 
 Use when the user wants ongoing/continuous membership (e.g. "keep adding Ubuntu hosts to this watchlist as they appear", "make sure new okta admins always land on this watchlist") — NOT for a one-time add, which is \`security.add_entities_to_watchlist\`.
 
-Each watchlist supports one \`store\` source and, separately, one \`index\` source (a managed watchlist may hold both alongside its locked integration sources; a non-managed watchlist effectively has room for one). Calling this again with the same \`type\` on a watchlist that already has one **replaces** it — this is an upsert, not an add. Call \`security.list_watchlist_data_sources\` first if you need to know whether a source of that type already exists before describing the change to the user.
+Each watchlist supports one \`store\` source and, separately, one \`index\` source (a managed watchlist may hold both alongside its locked integration sources; a non-managed watchlist only has room for one — creating the *other* type there **removes** the existing one, it does not add a second). Calling this again with the same \`type\` on a watchlist that already has one **replaces** it — this is an upsert, not an add. Call \`security.list_watchlist_data_sources\` first if you need to know whether a source of that type already exists before describing the change to the user.
 
 Resolve the watchlist id via \`security.get_watchlist_id\` first when the user named the watchlist. A managed source of the same type cannot be replaced from chat — the tool returns an error naming what owns it (e.g. an integration).`,
     schema,
@@ -277,6 +277,30 @@ Resolve the watchlist id via \`security.get_watchlist_id\` first when the user n
           );
         }
 
+        // A non-managed watchlist has room for exactly one rule-based source; the UI editor
+        // only ever reads the first linked source for one, so a second one linked here would
+        // sync members the user has no way to see or manage from the UI. Managed watchlists
+        // can hold another rule-based source type alongside locked integration sources
+        const conflictingType =
+          source.type === RuleBasedSourceType.store
+            ? RuleBasedSourceType.index
+            : RuleBasedSourceType.store;
+        const conflictingSource =
+          !watchlist.managed && !toUpdate
+            ? linkedSources.find((linked) => linked.type === conflictingType)
+            : undefined;
+        const willReplaceConflictingSource = !!conflictingSource;
+
+        if (conflictingSource?.managed) {
+          return errorResult(
+            `Watchlist "${
+              watchlist.name
+            }" is non-managed and already has a managed **${getRuleTypeNames(
+              conflictingType
+            )}** source ("${conflictingSource.name}"). Managed sources cannot be replaced.`
+          );
+        }
+
         const promptId = `watchlists.set_watchlist_rule_based_data_source.${callContext.toolCallId}`;
         const { status } = prompts.checkConfirmationStatus(promptId);
         telemetryTracker.recordConfirmationStatus(status);
@@ -314,19 +338,35 @@ Resolve the watchlist id via \`security.get_watchlist_id\` first when the user n
           }
 
           const action = toUpdate ? 'Update' : 'Create';
-          const ruleType =
-            source.type === RuleBasedSourceType.store ? 'Entity Store' : 'Index Pattern';
+          const willReEnable = existingSource?.enabled === false;
 
           const lines = [
-            `${action} the **${ruleType}** rule-based data source for watchlist **"${watchlist.name}"**?`,
+            `${action} the **${getRuleTypeNames(
+              source.type
+            )}** rule-based data source for watchlist **"${watchlist.name}"**?`,
             '',
             ...formatRuleBasedSourceParamLines(source.type, source, existingSource),
+            ...(willReEnable
+              ? [
+                  '',
+                  'This source is currently **disabled** — saving this change will re-enable it.',
+                ]
+              : []),
+            ...(willReplaceConflictingSource
+              ? [
+                  '',
+                  `This watchlist can only have one rule-based source — saving this will remove its existing **${getRuleTypeNames(
+                    conflictingType
+                  )}** source ("${conflictingSource?.name}").`,
+                ]
+              : []),
             '',
             previewMessage,
           ];
           telemetryTracker.recordAwaitingConfirmation();
           stateManager.setState<ConfirmedDataSourceState>({
-            approvedFingerprint: fingerprintDataSource(existingSource),
+            existingSourceFingerprint: fingerprintDataSource(existingSource),
+            conflictingSourceId: conflictingSource?.id ?? null,
           });
           return prompts.askForConfirmation({
             id: promptId,
@@ -350,12 +390,14 @@ Resolve the watchlist id via \`security.get_watchlist_id\` first when the user n
           };
         }
 
-        // The prompt showed the user a specific current → new change. Refuse to apply it if the
-        // source moved underneath us while the confirmation was open.
+        // The prompt showed the user a specific current → new change (and, when applicable, a
+        // specific conflicting source it would remove). Refuse to apply it if either moved
+        // underneath us while the confirmation was open.
         const approvedState = stateManager.getState<ConfirmedDataSourceState>();
         if (
           !approvedState ||
-          approvedState.approvedFingerprint !== fingerprintDataSource(existingSource)
+          approvedState.existingSourceFingerprint !== fingerprintDataSource(existingSource) ||
+          (approvedState.conflictingSourceId ?? null) !== (conflictingSource?.id ?? null)
         ) {
           return errorResult(DATA_SOURCE_CHANGED_MESSAGE);
         }
@@ -383,12 +425,33 @@ Resolve the watchlist id via \`security.get_watchlist_id\` first when the user n
                 enabled: true,
               };
 
+        // Enforce the one-rule-based-source invariant for non-managed watchlists before creating the replacement
+        if (willReplaceConflictingSource && conflictingSource) {
+          await watchlistClient.removeEntitySourceReference(source.watchlistId, conflictingSource);
+          await entitySourceClient.delete(conflictingSource.id);
+        }
+
         const savedSource = toUpdate
           ? await entitySourceClient.update({ ...attributes, id: existingSource.id }, request)
           : await entitySourceClient.create(attributes, request);
 
         if (!toUpdate) {
-          await watchlistClient.addEntitySourceReference(source.watchlistId, savedSource.id);
+          try {
+            await watchlistClient.addEntitySourceReference(source.watchlistId, savedSource.id);
+          } catch (linkError) {
+            // The source (and its API key, for `index` type) was already persisted by `create`.
+            // Roll it back so a failed link doesn't leave an orphaned, unlinked source/credential behind
+            await entitySourceClient.delete(savedSource.id).catch((cleanupError) => {
+              logger.error(
+                `Failed to roll back orphaned entity source "${
+                  savedSource.id
+                }" after a link failure: ${
+                  cleanupError instanceof Error ? cleanupError.message : 'Unknown error'
+                }`
+              );
+            });
+            throw linkError;
+          }
         }
 
         void syncWatchlistInBackground({
@@ -435,3 +498,7 @@ Resolve the watchlist id via \`security.get_watchlist_id\` first when the user n
     },
   };
 };
+
+function getRuleTypeNames(type: RuleBasedSourceType): string {
+  return type === RuleBasedSourceType.store ? 'Entity Store' : 'Index Pattern';
+}

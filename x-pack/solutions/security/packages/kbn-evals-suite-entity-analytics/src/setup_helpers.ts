@@ -154,6 +154,37 @@ export async function createWatchlist({
   return { id };
 }
 
+export async function createWatchlistEntitySource({
+  supertest,
+  watchlistId,
+  source,
+}: {
+  supertest: SuperTest.Agent;
+  watchlistId: string;
+  source: { name: string; queryRule: string };
+}): Promise<{ id: string }> {
+  const res = await supertest
+    .post(`/api/entity_analytics/watchlists/${watchlistId}/entity_source`)
+    .set(MUTATING_HEADERS)
+    .send({ type: 'store', enabled: true, ...source });
+  if (res.status !== 200 && res.status !== 201) {
+    throw new Error(
+      `Failed to create entity source "${source.name}" on watchlist ${watchlistId} (${
+        res.status
+      }): ${JSON.stringify(res.body)}`
+    );
+  }
+  const id = (res.body as { id?: string }).id;
+  if (!id) {
+    throw new Error(
+      `Create entity source response for "${source.name}" did not include an id: ${JSON.stringify(
+        res.body
+      )}`
+    );
+  }
+  return { id };
+}
+
 export async function assignEntitiesToWatchlist({
   supertest,
   watchlistId,

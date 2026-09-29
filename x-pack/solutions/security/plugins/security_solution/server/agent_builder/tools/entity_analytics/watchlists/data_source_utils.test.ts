@@ -163,4 +163,12 @@ describe('fingerprintDataSource', () => {
       fingerprintDataSource(buildSource({ apiKeyId: 'rotated' } as Partial<MonitoringEntitySource>))
     ).toBe(fingerprintDataSource(buildSource()));
   });
+
+  it('changes when the source is disabled while the confirmation was open', () => {
+    expect(
+      fingerprintDataSource(buildSource({ enabled: true } as Partial<MonitoringEntitySource>))
+    ).not.toBe(
+      fingerprintDataSource(buildSource({ enabled: false } as Partial<MonitoringEntitySource>))
+    );
+  });
 });

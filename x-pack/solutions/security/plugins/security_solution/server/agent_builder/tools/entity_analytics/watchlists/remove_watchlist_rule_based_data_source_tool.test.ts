@@ -250,7 +250,7 @@ describe('removeWatchlistRuleBasedDataSourceTool', () => {
         });
         ctx.stateManager.getState = jest
           .fn()
-          .mockReturnValue({ approvedFingerprint: 'stale-fingerprint' });
+          .mockReturnValue({ existingSourceFingerprint: 'stale-fingerprint' });
 
         const result = (await tool.handler(
           { watchlistId: 'wl-1', type: 'store' },
@@ -331,7 +331,7 @@ describe('removeWatchlistRuleBasedDataSourceTool', () => {
         });
         ctx.stateManager.getState = jest
           .fn()
-          .mockReturnValue({ approvedFingerprint: fingerprintDataSource(source) });
+          .mockReturnValue({ existingSourceFingerprint: fingerprintDataSource(source) });
 
         const result = (await tool.handler(
           { watchlistId: 'wl-1', type: 'store' },
@@ -377,7 +377,7 @@ describe('removeWatchlistRuleBasedDataSourceTool', () => {
         });
         ctx.stateManager.getState = jest
           .fn()
-          .mockReturnValue({ approvedFingerprint: fingerprintDataSource(source) });
+          .mockReturnValue({ existingSourceFingerprint: fingerprintDataSource(source) });
 
         await tool.handler({ watchlistId: 'wl-1', type: 'store' }, ctx);
 
