@@ -280,6 +280,15 @@ function makeService(params?: {
       count: streamDocuments.get(index) ?? 0,
     })),
   };
+  // Streams are recreated as `kibana_system`, so the internal client gets its own mock.
+  const internalEsClient = {
+    indices: {
+      createDataStream: jest.fn(async ({ name }: { name: string }) => {
+        streamDocuments.set(name, 0);
+        return { acknowledged: true };
+      }),
+    },
+  };
   const initializeClient = jest.fn(async (_name: string) => ({}));
   const asScoped = jest.fn(() => ({ asCurrentUser: esClient }));
   const investigations =
@@ -350,6 +359,7 @@ function makeService(params?: {
       elasticsearch: {
         client: {
           asScoped,
+          asInternalUser: internalEsClient,
         },
       },
       uiSettings: {
@@ -408,6 +418,7 @@ function makeService(params?: {
     getStreamToQueryLinksMap,
     findOwnedRuleIds,
     initializeClient,
+    internalEsClient,
     streamDocuments,
     esClient,
     asScoped,
@@ -798,6 +809,7 @@ describe('SignificantEventsMaintenanceService', () => {
         soClient,
         v2RulesClient,
         esClient,
+        internalEsClient,
         streamDocuments,
         deleteAllInvestigations,
         asScoped,
@@ -856,19 +868,20 @@ describe('SignificantEventsMaintenanceService', () => {
       expect(esClient.indices.deleteDataStream).not.toHaveBeenCalledWith({
         name: EVENTS_DATA_STREAM,
       });
-      expect(esClient.indices.createDataStream).toHaveBeenCalledWith({
+      expect(internalEsClient.indices.createDataStream).toHaveBeenCalledWith({
         name: DETECTIONS_DATA_STREAM,
       });
-      expect(esClient.indices.createDataStream).toHaveBeenCalledWith({
+      expect(internalEsClient.indices.createDataStream).toHaveBeenCalledWith({
         name: KNOWLEDGE_INDICATORS_DATA_STREAM,
       });
-      expect(esClient.indices.createDataStream).not.toHaveBeenCalledWith({
+      expect(internalEsClient.indices.createDataStream).not.toHaveBeenCalledWith({
         name: DISCOVERIES_DATA_STREAM,
       });
       expect(streamDocuments.get(DETECTIONS_DATA_STREAM)).toBe(0);
       expect(streamDocuments.get(EVENTS_DATA_STREAM)).toBe(0);
       expect(streamDocuments.get(KNOWLEDGE_INDICATORS_DATA_STREAM)).toBe(0);
       expect(streamDocuments.has(DISCOVERIES_DATA_STREAM)).toBe(false);
+      expect(esClient.indices.createDataStream).not.toHaveBeenCalled();
       expect(asScoped).toHaveBeenCalledWith(REQUEST);
       expect(cancelAllActiveWorkflowExecutions.mock.invocationCallOrder[0]).toBeLessThan(
         deleteAllInvestigations!.mock.invocationCallOrder[0]
@@ -893,7 +906,7 @@ describe('SignificantEventsMaintenanceService', () => {
 
     it('initializes missing registered streams and reports a clean zero-count reset', async () => {
       const { api } = makeManagementApi();
-      const { service, initializeClient, esClient, streamDocuments } = makeService({
+      const { service, initializeClient, internalEsClient, streamDocuments } = makeService({
         management: api,
         dataStreams: {},
       });
@@ -905,11 +918,9 @@ describe('SignificantEventsMaintenanceService', () => {
         EVENTS_DATA_STREAM,
         KNOWLEDGE_INDICATORS_DATA_STREAM,
       ]);
-      expect(esClient.indices.createDataStream.mock.calls.map(([{ name }]) => name)).toEqual([
-        DETECTIONS_DATA_STREAM,
-        EVENTS_DATA_STREAM,
-        KNOWLEDGE_INDICATORS_DATA_STREAM,
-      ]);
+      expect(
+        internalEsClient.indices.createDataStream.mock.calls.map(([{ name }]) => name)
+      ).toEqual([DETECTIONS_DATA_STREAM, EVENTS_DATA_STREAM, KNOWLEDGE_INDICATORS_DATA_STREAM]);
       expect(summary.deleted?.dataStreams).toBe(0);
       expect(summary.partialFailures).toEqual([]);
       expect([...streamDocuments.keys()]).toEqual([
@@ -921,7 +932,10 @@ describe('SignificantEventsMaintenanceService', () => {
 
     it('skips a registered stream after its existence check fails and continues cleanup', async () => {
       const { api } = makeManagementApi();
-      const { service, esClient } = makeService({ management: api, dataStreams: {} });
+      const { service, esClient, internalEsClient } = makeService({
+        management: api,
+        dataStreams: {},
+      });
       esClient.indices.exists.mockRejectedValueOnce(new Error('existence check failed'));
 
       const summary = await service.reset({ request: REQUEST });
@@ -930,11 +944,13 @@ describe('SignificantEventsMaintenanceService', () => {
         target: `data-stream:${DETECTIONS_DATA_STREAM}`,
         error: 'existence check failed',
       });
-      expect(esClient.indices.createDataStream).not.toHaveBeenCalledWith({
+      expect(internalEsClient.indices.createDataStream).not.toHaveBeenCalledWith({
         name: DETECTIONS_DATA_STREAM,
       });
-      expect(esClient.indices.createDataStream).toHaveBeenCalledWith({ name: EVENTS_DATA_STREAM });
-      expect(esClient.indices.createDataStream).toHaveBeenCalledWith({
+      expect(internalEsClient.indices.createDataStream).toHaveBeenCalledWith({
+        name: EVENTS_DATA_STREAM,
+      });
+      expect(internalEsClient.indices.createDataStream).toHaveBeenCalledWith({
         name: KNOWLEDGE_INDICATORS_DATA_STREAM,
       });
     });

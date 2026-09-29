@@ -24,6 +24,8 @@ export const RESET_REGISTERED_DATA_STREAMS = [
 interface ResetDataStreamsParams {
   /** Current-user client: `kibana_system` can initialize these streams but cannot delete them. */
   esClient: ElasticsearchClient;
+  /** `kibana_system` client: recreates streams so a delete-capable caller cannot strand one. */
+  internalEsClient: ElasticsearchClient;
   dataStreams: DataStreamsStart;
   failures: SignificantEventsMaintenanceFailure[];
 }
@@ -35,7 +37,7 @@ interface ResetDataStreamsParams {
  */
 const resetRegisteredDataStream = async (
   name: string,
-  { esClient, dataStreams, failures }: ResetDataStreamsParams
+  { esClient, internalEsClient, dataStreams, failures }: ResetDataStreamsParams
 ): Promise<boolean> => {
   try {
     await dataStreams.initializeClient(name);
@@ -54,7 +56,7 @@ const resetRegisteredDataStream = async (
 
   const createDataStream = async (): Promise<void> => {
     try {
-      await esClient.indices.createDataStream({ name });
+      await internalEsClient.indices.createDataStream({ name });
     } catch (error) {
       failures.push({ target: `data-stream:${name}:create`, error: toMessage(error) });
     }

@@ -1162,6 +1162,7 @@ export const createSignificantEventsMaintenanceService = ({
         const investigations = await deleteInvestigations(failures);
         const wipedDataStreams = await resetDataStreams({
           esClient: server.core.elasticsearch.client.asScoped(request).asCurrentUser,
+          internalEsClient: server.core.elasticsearch.client.asInternalUser,
           dataStreams: server.core.dataStreams,
           failures,
         });
