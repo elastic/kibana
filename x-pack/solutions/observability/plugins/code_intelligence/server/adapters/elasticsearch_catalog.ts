@@ -18,7 +18,11 @@ import {
   type CatalogWriteResult,
 } from '../domain/models/catalog_document_codec';
 import type { OperationResult } from '../domain/models/operation_result';
-import type { CatalogWriter } from '../domain/ports/catalog_writer';
+import type {
+  CatalogPruneRequest,
+  CatalogPruneResult,
+  CatalogWriter,
+} from '../domain/ports/catalog_writer';
 
 const catalogMappings: estypes.MappingTypeMapping = {
   properties: {
@@ -155,6 +159,63 @@ export class ElasticsearchCatalogWriter implements CatalogWriter {
     } catch (_error: unknown) {
       this.indexReady = undefined;
       return failure('catalog_transport_failure', 'Elasticsearch catalog write failed.');
+    }
+  }
+
+  public async prune({
+    repository,
+    keepIds,
+  }: CatalogPruneRequest): Promise<OperationResult<CatalogPruneResult>> {
+    if (repository.length === 0 || keepIds.length === 0) {
+      return {
+        error: {
+          code: 'invalid_catalog_prune_request',
+          message: 'Catalog prune requires a repository and at least one document ID to keep.',
+          retryable: false,
+        },
+        status: 'failure',
+      };
+    }
+    try {
+      await this.ensureIndex();
+      // Writes use `refresh: false`; refresh first so reused IDs are searched at their new version.
+      await this.client.indices.refresh({ index: this.index });
+      const response = await this.client.deleteByQuery({
+        index: this.index,
+        conflicts: 'proceed',
+        refresh: true,
+        query: {
+          bool: {
+            filter: [{ term: { repository } }],
+            must_not: [{ ids: { values: [...keepIds] } }],
+          },
+        },
+      });
+      if (
+        response.timed_out === true ||
+        (response.failures?.length ?? 0) > 0 ||
+        (response.version_conflicts ?? 0) > 0
+      ) {
+        return {
+          error: {
+            code: 'catalog_prune_incomplete',
+            message: 'Elasticsearch did not delete every stale catalog document.',
+            retryable: true,
+          },
+          status: 'failure',
+        };
+      }
+      return { status: 'success', value: { deleted: response.deleted ?? 0 } };
+    } catch (_error: unknown) {
+      this.indexReady = undefined;
+      return {
+        error: {
+          code: 'catalog_prune_transport_failure',
+          message: 'Elasticsearch catalog prune failed.',
+          retryable: true,
+        },
+        status: 'failure',
+      };
     }
   }
 }
