@@ -18,13 +18,12 @@ export interface PanelFailure {
 }
 
 /**
- * Controls the server left out because their field cannot back a control.
+ * Part of an operation the server intentionally left out, mirroring `PanelFailure`.
  */
-export interface SkippedControl {
-  field_names: string[];
-  index: string;
+export interface OperationSkip {
+  type: DashboardOperationFailureType;
+  identifier: string;
   reason: string;
-  available_fields: string[];
 }
 
 /**

@@ -48,7 +48,7 @@ interface PrepareOperationExecutionParams {
   operations: DashboardOperation[];
   logger: OperationExecutionContext['logger'];
   failures: OperationExecutionContext['failures'];
-  skippedControls: OperationExecutionContext['skippedControls'];
+  skipped: OperationExecutionContext['skipped'];
   panelAuthoringNotes: OperationExecutionContext['panelAuthoringNotes'];
   resolvePanelContent?: OperationExecutionContext['resolvePanelContent'];
   resolveCustomContentTemplate?: OperationExecutionContext['resolveCustomContentTemplate'];
@@ -60,7 +60,7 @@ export const prepareOperationExecution = async ({
   operations,
   logger,
   failures,
-  skippedControls,
+  skipped,
   panelAuthoringNotes,
   resolvePanelContent,
   resolveCustomContentTemplate,
@@ -75,7 +75,7 @@ export const prepareOperationExecution = async ({
   return {
     logger,
     failures,
-    skippedControls,
+    skipped,
     panelAuthoringNotes,
     resolvedPanelCreationRequests,
     sectionIdsByKey: new Map(),

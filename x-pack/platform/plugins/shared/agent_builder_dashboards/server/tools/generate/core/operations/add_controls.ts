@@ -21,7 +21,7 @@ import { formatEsqlIdentifier } from '@kbn/esql-utils';
 import { castEsToKbnFieldTypeName, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { z } from '@kbn/zod/v4';
 import { DASHBOARD_OPERATION_FAILURE_TYPES } from '../failure_types';
-import { getErrorMessage, type PanelFailure, type SkippedControl } from '../utils';
+import { getErrorMessage, type PanelFailure, type OperationSkip } from '../utils';
 import { defineOperation } from './types';
 
 const controlWidthSchema = z
@@ -145,58 +145,53 @@ const fetchAggregatableFieldTypes = async (
 const hasKbnFieldType = (types: string[], kbnFieldType: KBN_FIELD_TYPES): boolean =>
   types.every((type) => castEsToKbnFieldTypeName(type) === kbnFieldType);
 
-const getAvailableFields = (
+const describeAvailableFields = (
   fieldTypes: Map<string, string[]>,
   controlType: DataControlInput['type']
-): string[] => {
-  const kbnFieldType =
-    controlType === RANGE_SLIDER_CONTROL ? KBN_FIELD_TYPES.NUMBER : KBN_FIELD_TYPES.STRING;
-  return [...fieldTypes]
+): string => {
+  const isRangeSlider = controlType === RANGE_SLIDER_CONTROL;
+  const kbnFieldType = isRangeSlider ? KBN_FIELD_TYPES.NUMBER : KBN_FIELD_TYPES.STRING;
+  const availableFields = [...fieldTypes]
     .filter(([, types]) => hasKbnFieldType(types, kbnFieldType))
     .map(([fieldName]) => fieldName)
     .sort()
     .slice(0, MAX_AVAILABLE_FIELDS);
+  return availableFields.length > 0
+    ? ` Mapped ${isRangeSlider ? 'numeric' : 'keyword'} fields: ${availableFields.join(', ')}.`
+    : '';
 };
 
-const recordSkippedControl = (
-  skippedControls: SkippedControl[],
-  skip: Omit<SkippedControl, 'field_names'> & { fieldName: string }
-) => {
-  const { fieldName, index, reason, available_fields: availableFields } = skip;
-  const group = skippedControls.find(
-    (candidate) =>
-      candidate.index === index &&
-      candidate.reason === reason &&
-      candidate.available_fields.join() === availableFields.join()
+const recordSkippedControl = (skipped: OperationSkip[], fieldName: string, reason: string) => {
+  const sameReason = skipped.find(
+    (skip) => skip.type === DASHBOARD_OPERATION_FAILURE_TYPES.addControls && skip.reason === reason
   );
-  if (group) {
-    group.field_names.push(fieldName);
+  if (sameReason) {
+    sameReason.identifier = `${sameReason.identifier}, ${fieldName}`;
     return;
   }
-  skippedControls.push({
-    field_names: [fieldName],
-    index,
+  skipped.push({
+    type: DASHBOARD_OPERATION_FAILURE_TYPES.addControls,
+    identifier: fieldName,
     reason,
-    available_fields: availableFields,
   });
 };
 
 /**
  * Keep controls whose field Elasticsearch can `STATS BY`, rewriting options list
  * text fields to their `.keyword` sibling. Range sliders additionally require a
- * numeric field. Other data controls are reported as skipped, together with the
- * mapped fields that could back them instead.
+ * numeric field. Other data controls are reported as skipped, grouped by reason,
+ * together with the mapped fields that could back them instead.
  */
 const resolveControlFields = async ({
   controls,
   esClient,
   failures,
-  skippedControls,
+  skipped,
 }: {
   controls: ControlInput[];
   esClient?: ElasticsearchClient;
   failures: PanelFailure[];
-  skippedControls: SkippedControl[];
+  skipped: OperationSkip[];
 }): Promise<ControlInput[]> => {
   if (!esClient) {
     return controls;
@@ -236,12 +231,11 @@ const resolveControlFields = async ({
     }
 
     const skip = (reason: string): ControlInput[] => {
-      recordSkippedControl(skippedControls, {
+      recordSkippedControl(
+        skipped,
         fieldName,
-        index,
-        reason,
-        available_fields: getAvailableFields(fieldTypes, control.type),
-      });
+        `${reason}${describeAvailableFields(fieldTypes, control.type)}`
+      );
       return [];
     };
 
@@ -249,14 +243,14 @@ const resolveControlFields = async ({
       fieldTypes.has(candidate)
     );
     if (resolvedFieldName === undefined) {
-      return skip('Not mapped on the index.');
+      return skip(`Not mapped on index "${index}".`);
     }
 
     if (
       control.type === RANGE_SLIDER_CONTROL &&
       !hasKbnFieldType(fieldTypes.get(resolvedFieldName) ?? [], KBN_FIELD_TYPES.NUMBER)
     ) {
-      return skip('range_slider_control needs a numeric field.');
+      return skip(`range_slider_control needs a numeric field on index "${index}".`);
     }
 
     return [{ ...control, field_name: resolvedFieldName }];
@@ -336,7 +330,7 @@ export const addControlsOperation = defineOperation({
       }),
       esClient: context.esClient,
       failures: context.failures,
-      skippedControls: context.skippedControls,
+      skipped: context.skipped,
     });
 
     const newControls = controlsToAdd.map(buildStoredControl);

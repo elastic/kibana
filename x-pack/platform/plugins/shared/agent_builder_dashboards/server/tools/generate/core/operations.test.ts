@@ -2895,7 +2895,7 @@ describe('add_controls / remove_controls operations', () => {
   it('add_controls skips a field that is not aggregatable and reports it as skipped', async () => {
     const esClient = createFieldCapsEsClient({ host: 'keyword', 'host.keyword': 'keyword' });
 
-    const { dashboardData, failures, skippedControls } = await executeDashboardOperations({
+    const { dashboardData, failures, skipped } = await executeDashboardOperations({
       dashboardData: emptyDashboard,
       operations: [
         {
@@ -2920,12 +2920,12 @@ describe('add_controls / remove_controls operations', () => {
       'FROM kibana_sample_data_logs | STATS BY host'
     );
     expect(failures).toEqual([]);
-    expect(skippedControls).toEqual([
+    expect(skipped).toEqual([
       {
-        field_names: ['method'],
-        index: 'kibana_sample_data_logs',
-        reason: 'Not mapped on the index.',
-        available_fields: ['host', 'host.keyword'],
+        type: 'add_controls',
+        identifier: 'method',
+        reason:
+          'Not mapped on index "kibana_sample_data_logs". Mapped keyword fields: host, host.keyword.',
       },
     ]);
   });

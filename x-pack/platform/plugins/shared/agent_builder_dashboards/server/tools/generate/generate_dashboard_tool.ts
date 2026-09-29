@@ -136,7 +136,7 @@ Use operations[] to:
 
         const dashboardAttachmentId = previousAttachmentId ?? uuidv4();
 
-        const { dashboardData, failures, skippedControls, panelAuthoringNotes } =
+        const { dashboardData, failures, skipped, panelAuthoringNotes } =
           await executeDashboardOperations({
             dashboardData: latestVersion?.data,
             operations,
@@ -200,7 +200,7 @@ Use operations[] to:
                   )
                 ),
                 failures: failures.length > 0 ? failures : undefined,
-                skipped_controls: skippedControls.length > 0 ? skippedControls : undefined,
+                skipped: skipped.length > 0 ? skipped : undefined,
               },
             },
           ],
