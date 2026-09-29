@@ -15,8 +15,14 @@ apiTest.describe('Workflow administrator recovery', { tag: tags.stateful.classic
   const spaceId = `workflow-admin-${randomUUID()}`;
   const adminUsername = `workflow-superuser-${randomUUID()}`;
   const adminPassword = randomUUID();
-  let workflowId: string;
+  let workflowId: string | undefined;
+  let workflowPath: string;
+  let accessPath: string;
   let ownerProfileId: string;
+  const role = {
+    elasticsearch: { cluster: [] },
+    kibana: [{ base: [], feature: { workflowsManagement: ['all'] }, spaces: [spaceId] }],
+  };
   let adminHeaders: Record<string, string>;
   const headers = {
     'kbn-xsrf': 'scout',
@@ -41,39 +47,19 @@ apiTest.describe('Workflow administrator recovery', { tag: tags.stateful.classic
     };
   });
 
-  apiTest.afterAll(async ({ apiClient, kbnClient, esClient }) => {
-    if (ownerProfileId) await esClient.security.enableUserProfile({ uid: ownerProfileId });
-    if (workflowId) {
-      expect(
-        await apiClient.delete(
-          `s/${spaceId}/api/workflows/workflow/${workflowId}?force=true&acknowledgeAclLoss=true`,
-          { headers: adminHeaders }
-        )
-      ).toHaveStatusCode(200);
-    }
-    await kbnClient.request({ method: 'DELETE', path: `/api/spaces/space/${spaceId}` });
-    await esClient.security.deleteUser({ username: adminUsername });
-  });
-
-  apiTest(
-    'recovers access after owner offboarding without granting an override to Workflows All',
-    async ({ apiClient, samlAuth, requestAuth, esClient }) => {
-      apiTest.setTimeout(120_000);
-      const role = {
-        elasticsearch: { cluster: [] },
-        kibana: [{ base: [], feature: { workflowsManagement: ['all'] }, spaces: [spaceId] }],
-      };
-      const owner = await samlAuth.asInteractiveUser(role);
-      const ownerHeaders = { ...headers, ...owner.cookieHeader };
-      const profile = await apiClient.get('internal/security/user_profile', {
-        headers: ownerHeaders,
-      });
-      expect(profile).toHaveStatusCode(200);
-      ownerProfileId = profile.body.uid;
-      const created = await apiClient.post(`s/${spaceId}/api/workflows/workflow`, {
-        headers: ownerHeaders,
-        body: {
-          yaml: `name: Admin recovery
+  apiTest.beforeEach(async ({ apiClient, samlAuth, esClient }) => {
+    workflowId = undefined;
+    const owner = await samlAuth.asInteractiveUser(role);
+    const ownerHeaders = { ...headers, ...owner.cookieHeader };
+    const profile = await apiClient.get('internal/security/user_profile', {
+      headers: ownerHeaders,
+    });
+    expect(profile).toHaveStatusCode(200);
+    ownerProfileId = profile.body.uid;
+    const created = await apiClient.post(`s/${spaceId}/api/workflows/workflow`, {
+      headers: ownerHeaders,
+      body: {
+        yaml: `name: Admin recovery
 enabled: false
 triggers:
   - type: manual
@@ -83,20 +69,47 @@ steps:
     with:
       message: recovered
 `,
-        },
-      });
-      expect(created).toHaveStatusCode(200);
-      workflowId = created.body.id;
-      const accessPath = `s/${spaceId}/internal/workflows/${workflowId}/access_control`;
-      const workflowPath = `s/${spaceId}/api/workflows/workflow/${workflowId}`;
-      expect(
-        await apiClient.put(accessPath, {
-          headers: ownerHeaders,
-          body: { access_mode: 'private', entries: [] },
-        })
-      ).toHaveStatusCode(200);
-      await esClient.security.disableUserProfile({ uid: ownerProfileId });
+      },
+    });
+    expect(created).toHaveStatusCode(200);
+    workflowId = created.body.id;
+    accessPath = `s/${spaceId}/internal/workflows/${workflowId}/access_control`;
+    workflowPath = `s/${spaceId}/api/workflows/workflow/${workflowId}`;
+    expect(
+      await apiClient.put(accessPath, {
+        headers: ownerHeaders,
+        body: { access_mode: 'private', entries: [] },
+      })
+    ).toHaveStatusCode(200);
+    await esClient.security.disableUserProfile({ uid: ownerProfileId });
+  });
 
+  apiTest.afterEach(async ({ apiClient, esClient }) => {
+    try {
+      if (ownerProfileId) await esClient.security.enableUserProfile({ uid: ownerProfileId });
+    } finally {
+      if (workflowId) {
+        expect(
+          await apiClient.delete(
+            `s/${spaceId}/api/workflows/workflow/${workflowId}?force=true&acknowledgeAclLoss=true`,
+            { headers: adminHeaders }
+          )
+        ).toHaveStatusCode(200);
+      }
+    }
+  });
+
+  apiTest.afterAll(async ({ kbnClient, esClient }) => {
+    try {
+      await kbnClient.request({ method: 'DELETE', path: `/api/spaces/space/${spaceId}` });
+    } finally {
+      await esClient.security.deleteUser({ username: adminUsername });
+    }
+  });
+
+  apiTest(
+    "Workflows All cannot read or change another owner's private access",
+    async ({ apiClient, samlAuth }) => {
       const reader = await samlAuth.asInteractiveUser('editor');
       const readerHeaders = { ...headers, ...reader.cookieHeader };
       expect(await apiClient.get(workflowPath, { headers: readerHeaders })).toHaveStatusCode(404);
@@ -106,55 +119,96 @@ steps:
           body: { access_mode: 'public' },
         })
       ).toHaveStatusCode(403);
-      const equivalentAdmin = await samlAuth.asInteractiveUser('admin');
-      expect(
-        await apiClient.get(workflowPath, {
-          headers: { ...headers, ...equivalentAdmin.cookieHeader },
-        })
-      ).toHaveStatusCode(404);
-      const adminKey = await requestAuth.getApiKey('admin');
-      expect(
-        await apiClient.get(workflowPath, {
-          headers: { ...headers, ...adminKey.apiKeyHeader },
-        })
-      ).toHaveStatusCode(404);
-      const limitedKey = await requestAuth.getApiKeyForCustomRole(role);
-      expect(
-        await apiClient.get(workflowPath, {
-          headers: { ...headers, ...limitedKey.apiKeyHeader },
-        })
-      ).toHaveStatusCode(404);
+    }
+  );
 
+  apiTest('an equivalent admin role does not get an override', async ({ apiClient, samlAuth }) => {
+    const equivalentAdmin = await samlAuth.asInteractiveUser('admin');
+    expect(
+      await apiClient.get(workflowPath, {
+        headers: { ...headers, ...equivalentAdmin.cookieHeader },
+      })
+    ).toHaveStatusCode(404);
+  });
+
+  apiTest('a superuser API key does not get an override', async ({ apiClient, requestAuth }) => {
+    const adminKey = await requestAuth.getApiKeyForBuiltInRole('superuser');
+    expect(
+      await apiClient.get(workflowPath, {
+        headers: { ...headers, ...adminKey.apiKeyHeader },
+      })
+    ).toHaveStatusCode(404);
+  });
+
+  apiTest('a Workflows API key does not get an override', async ({ apiClient, requestAuth }) => {
+    const limitedKey = await requestAuth.getApiKeyForCustomRole(role);
+    expect(
+      await apiClient.get(workflowPath, {
+        headers: { ...headers, ...limitedKey.apiKeyHeader },
+      })
+    ).toHaveStatusCode(404);
+  });
+
+  apiTest(
+    'a superuser can recover an offboarded owner without an execution grant',
+    async ({ apiClient }) => {
       const recovered = await apiClient.get(workflowPath, { headers: adminHeaders });
       expect(recovered).toHaveStatusCode(200);
       expect(recovered.body).toMatchObject({
         owner_id: ownerProfileId,
         permissions: { read: true, execute: false, edit: true, manage: true },
       });
+    }
+  );
+
+  apiTest(
+    'a superuser cannot test a saved workflow without an ACL grant',
+    async ({ apiClient }) => {
+      expect(
+        await apiClient.post(`s/${spaceId}/api/workflows/test`, {
+          headers: adminHeaders,
+          body: { workflowId, inputs: {} },
+        })
+      ).toHaveStatusCode(403);
+    }
+  );
+
+  apiTest('a superuser cannot test a draft without an ACL grant', async ({ apiClient }) => {
+    const recovered = await apiClient.get(workflowPath, { headers: adminHeaders });
+    expect(recovered).toHaveStatusCode(200);
+    expect(
+      await apiClient.post(`s/${spaceId}/api/workflows/test`, {
+        headers: adminHeaders,
+        body: { workflowId, workflowYaml: recovered.body.yaml, inputs: {} },
+      })
+    ).toHaveStatusCode(403);
+  });
+
+  apiTest('a superuser cannot test a step without an ACL grant', async ({ apiClient }) => {
+    const recovered = await apiClient.get(workflowPath, { headers: adminHeaders });
+    expect(recovered).toHaveStatusCode(200);
+    expect(
+      await apiClient.post(`s/${spaceId}/api/workflows/step/test`, {
+        headers: adminHeaders,
+        body: {
+          workflowId,
+          workflowYaml: recovered.body.yaml,
+          stepId: 'message',
+          contextOverride: {},
+        },
+      })
+    ).toHaveStatusCode(403);
+  });
+
+  apiTest(
+    'a superuser can grant and revoke execution access without changing the owner',
+    async ({ apiClient }) => {
+      apiTest.setTimeout(90_000);
       const profileResponse = await apiClient.get('internal/security/user_profile', {
         headers: adminHeaders,
       });
       expect(profileResponse).toHaveStatusCode(200);
       const adminProfileId = profileResponse.body.uid;
-      for (const body of [
-        { workflowId, inputs: {} },
-        { workflowId, workflowYaml: recovered.body.yaml, inputs: {} },
-      ]) {
-        expect(
-          await apiClient.post(`s/${spaceId}/api/workflows/test`, { headers: adminHeaders, body })
-        ).toHaveStatusCode(403);
-      }
-      expect(
-        await apiClient.post(`s/${spaceId}/api/workflows/step/test`, {
-          headers: adminHeaders,
-          body: {
-            workflowId,
-            workflowYaml: recovered.body.yaml,
-            stepId: 'message',
-            contextOverride: {},
-          },
-        })
-      ).toHaveStatusCode(403);
       const grant = await apiClient.put(accessPath, {
         headers: adminHeaders,
         body: {
@@ -202,6 +256,14 @@ steps:
           body: { workflowId, inputs: {} },
         })
       ).toHaveStatusCode(403);
+    }
+  );
+
+  apiTest(
+    'a superuser can restore public access without changing the owner',
+    async ({ apiClient, samlAuth }) => {
+      const reader = await samlAuth.asInteractiveUser('editor');
+      const readerHeaders = { ...headers, ...reader.cookieHeader };
       const updated = await apiClient.put(accessPath, {
         headers: adminHeaders,
         body: { access_mode: 'public', entries: [] },
@@ -211,12 +273,6 @@ steps:
       const visible = await apiClient.get(workflowPath, { headers: readerHeaders });
       expect(visible).toHaveStatusCode(200);
       expect(visible.body.permissions.manage).toBe(false);
-      expect(
-        await apiClient.put(accessPath, {
-          headers: adminHeaders,
-          body: { access_mode: 'private', entries: [] },
-        })
-      ).toHaveStatusCode(200);
     }
   );
 });

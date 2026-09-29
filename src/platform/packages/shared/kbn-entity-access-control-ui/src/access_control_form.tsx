@@ -178,6 +178,7 @@ export const AccessControlForm = <Role extends string>({
       {isManagingAnotherOwner && (
         <>
           <KbnWarningCallout
+            announceOnMount
             size="s"
             title={i18n.translate('entityAccessControl.adminOverrideTitle', {
               defaultMessage: "You are editing another user's access settings",
